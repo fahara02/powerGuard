@@ -1,0 +1,28 @@
+[project]
+name = "powerguard"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "fahara02", email = "idea3d.faruk@gmail.com" }
+]
+requires-python = "==3.10"
+dependencies = [
+    "pydantic>=2.9.2",
+    "pyside6>=6.8.0.2",
+    "requests>=2.32.3",
+]
+
+[dependency-groups]
+dev = [
+    "black>=24.10.0",
+    "pylint>=3.3.1",
+    "pytest>=8.3.3",
+]
+
+[project.scripts]
+powerguard = "powerguard.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
