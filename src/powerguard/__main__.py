@@ -1,11 +1,11 @@
 from powerguard.gui import setGui
-from server import serve
+from server import start_server
 
 
 def main():
-     print("Hello from powerguard!")
-     serve()   
+     print("Hello from powerguard!")   
      setGui()
+     start_server()
 
 
 if __name__ == "__main__":
