@@ -213,7 +213,6 @@ dependencies = [
     { name = "pydantic" },
     { name = "pyside6" },
     { name = "requests" },
-    { name = "ruff" },
 ]
 
 [package.dev-dependencies]
@@ -221,6 +220,7 @@ dev = [
     { name = "black" },
     { name = "pylint" },
     { name = "pytest" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -230,7 +230,6 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.9.2" },
     { name = "pyside6", specifier = ">=6.8.0.2" },
     { name = "requests", specifier = ">=2.32.3" },
-    { name = "ruff", specifier = ">=0.7.4" },
 ]
 
 [package.metadata.requires-dev]
@@ -238,6 +237,7 @@ dev = [
     { name = "black", specifier = ">=24.10.0" },
     { name = "pylint", specifier = ">=3.3.1" },
     { name = "pytest", specifier = ">=8.3.3" },
+    { name = "ruff", specifier = ">=0.7.4" },
 ]
 
 [[package]]
