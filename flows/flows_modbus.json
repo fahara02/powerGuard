@@ -1,0 +1,202 @@
+[
+    {
+        "id": "d039c09468129985",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "73718bbd4cae47c5",
+        "type": "debug",
+        "z": "d039c09468129985",
+        "name": "parsed",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 530,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "f907236010e5b55f",
+        "type": "function",
+        "z": "d039c09468129985",
+        "name": "parse_modbus_message",
+        "func": "// Input data (replace with msg.payload or modify accordingly)\nconst inputArray = msg.payload; // Assume payload is the array you provided.\n\n// Initialize parsing index\nlet index = 0;\n\n// Helper function to convert two 16-bit registers into a float\nfunction parseFloat16(high, low) {\n    const intBits = (high << 16) | low;\n    return new Float32Array(new Uint32Array([intBits]).buffer)[0];\n}\n\n// Helper function to parse 64-bit integers from four 16-bit registers\nfunction parseInt64(highHigh, highLow, lowHigh, lowLow) {\n    const high = (highHigh << 16) | highLow;\n    const low = (lowHigh << 16) | lowLow;\n    return (BigInt(high) << 32n) | BigInt(low);  // Convert to BigInt to handle 64-bit values\n}\n\n// Parse NamePlate information\nconst parsedData = {};\nparsedData.model = inputArray[index++];\nparsedData.id = inputArray[index++];\nparsedData.slaveAddress = inputArray[index++];\nparsedData.lineNo = inputArray[index++];\nparsedData.phase = inputArray[index++];\n\n// Parse meterName (9 characters packed as 16-bit registers)\nlet meterName = '';\nfor (let i = 0; i < 9 && index < inputArray.length; i += 2) {\n    const char1 = String.fromCharCode(inputArray[index] >> 8);\n    const char2 = String.fromCharCode(inputArray[index] & 0xFF);\n    meterName += char1 + (char2 !== '\\u0000' ? char2 : '');\n    index++;\n}\nparsedData.meterName = meterName.trim();\n\n// Parse Voltage, Current, Power, Energy, Frequency, Power Factor, Alarm Status\nparsedData.voltage = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.current = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.power = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.energy = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.frequency = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.powerFactor = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.alarmStatus = parseFloat16(inputArray[index++], inputArray[index++]);\n\n// Parse additional fields (poll_us, lastUpdate_us, dataAge_ms, dataStale, deviceState)\n// Each 64-bit field is now represented by 4 16-bit registers\nparsedData.poll_us = parseInt64(inputArray[index++], inputArray[index++], inputArray[index++], inputArray[index++]);\nparsedData.lastUpdate_us = parseInt64(inputArray[index++], inputArray[index++], inputArray[index++], inputArray[index++]);\nparsedData.dataAge_ms = parseInt64(inputArray[index++], inputArray[index++], inputArray[index++], inputArray[index++]);\n\n// Parse other fields (dataStale, deviceState)\nparsedData.dataStale = inputArray[index++] === 1;\nparsedData.deviceState = inputArray[index++];\n\n// Output parsed data\nmsg.payload = parsedData;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 160,
+        "wires": [
+            [
+                "73718bbd4cae47c5"
+            ]
+        ]
+    },
+    {
+        "id": "b5a0086cad28a2c6",
+        "type": "function",
+        "z": "d039c09468129985",
+        "name": "read power",
+        "func": "var id =1;\nvar fc = 3;\nvar sa = 0;\nvar addresses = 40;\nvar slave_ip = msg.payload.slave_ip;\nmsg.slave_ip = \"192.168.0.160\";\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': sa, 'quantity': addresses };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 60,
+        "wires": [
+            [
+                "633d64463bcb0fb3"
+            ]
+        ]
+    },
+    {
+        "id": "cc4eb08b8b4d2239",
+        "type": "inject",
+        "z": "d039c09468129985",
+        "name": "Read 32bit Integer",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "b5a0086cad28a2c6"
+            ]
+        ]
+    },
+    {
+        "id": "1d0d511073c95641",
+        "type": "function",
+        "z": "d039c09468129985",
+        "name": "convert_to_JSON",
+        "func": "// Input: msg.payload should contain the parsed object from the previous step\n\n// Helper function to convert an object to JSON\nfunction convertToJson(parsedObject) {\n    try {\n        // Convert the object to a JSON string\n        return JSON.stringify(parsedObject, null, 2); // Pretty print with 2 spaces\n    } catch (error) {\n        // If there's an error, return an error object instead\n        return JSON.stringify({\n            error: \"Failed to convert object to JSON\",\n            details: error.message\n        });\n    }\n}\n\n// Assuming msg.payload contains the parsed object\nconst parsedObject = msg.payload;\n\n// Convert the parsed object to JSON\nmsg.payload = convertToJson(parsedObject);\n\n// Return the JSON string in msg.payload\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "633d64463bcb0fb3",
+        "type": "modbus-flex-getter",
+        "z": "d039c09468129985",
+        "name": "",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "logIOActivities": false,
+        "server": "792676a0a1ebf316",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": true,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 580,
+        "y": 80,
+        "wires": [
+            [
+                "f907236010e5b55f"
+            ],
+            [
+                "f4984438146c3bfc"
+            ]
+        ]
+    },
+    {
+        "id": "dd03fcec8e870fe5",
+        "type": "function",
+        "z": "d039c09468129985",
+        "name": "read power",
+        "func": "var id =2;\nvar fc = 3;\nvar sa = 0;\nvar addresses = 38;\nvar slave_ip = msg.payload.slave_ip;\nmsg.slave_ip = \"192.168.0.160\";\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': sa, 'quantity': addresses };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 120,
+        "wires": [
+            [
+                "633d64463bcb0fb3"
+            ]
+        ]
+    },
+    {
+        "id": "f4984438146c3bfc",
+        "type": "modbus-response",
+        "z": "d039c09468129985",
+        "name": "",
+        "registerShowMax": "38",
+        "x": 830,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "792676a0a1ebf316",
+        "type": "modbus-client",
+        "name": "PZEM_39",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": true,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "192.168.0.160",
+        "tcpPort": "502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "3000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "showLogs": true
+    }
+]
