@@ -1,4 +1,3 @@
-
 import json
 import os
 import platform
@@ -12,7 +11,13 @@ from proto import message_pb2
 
 
 class Server:
-    def __init__(self, host="0.0.0.0", port=12345, node_red_dir="node-red", flows_file="flows/flows_modbus.json"):
+    def __init__(
+        self,
+        host="0.0.0.0",
+        port=12345,
+        node_red_dir="node-red",
+        flows_file="flows/flows_modbus.json",
+    ):
         self.host = host
         self.port = port
         self.node_red_dir = node_red_dir
@@ -33,9 +38,10 @@ class Server:
     def is_node_red_installed(self):
         """Check if Node-RED is installed by looking for the executable."""
         node_red_exec = os.path.join(
-            self.node_red_dir, "node_modules", ".bin", "node-red.cmd"
-            if platform.system().lower() == "windows"
-            else "node-red"
+            self.node_red_dir,
+            "node_modules",
+            ".bin",
+            "node-red.cmd" if platform.system().lower() == "windows" else "node-red",
         )
         return os.path.exists(node_red_exec)
 
@@ -81,7 +87,7 @@ class Server:
                     check=True,
                 )
                 print("Node-RED installed locally.")
-                
+
                 # Install additional palette (e.g., node-red-dashboard)
                 self.install_node_red_palette()
             except subprocess.CalledProcessError as e:
@@ -92,23 +98,23 @@ class Server:
         """Install the Node-RED palette after Node-RED is installed."""
         print("Installing Node-RED palettes")
         packages = [
-                    "@flowfuse/node-red-dashboard",
-                    "node-red-contrib-modbus",
-                    "node-red-contrib-modbus-flex-server",
-                ]
+            "@flowfuse/node-red-dashboard",
+            "node-red-contrib-modbus",
+            "node-red-contrib-modbus-flex-server",
+        ]
         try:
             is_windows = platform.system().lower() == "windows"
             for package in packages:
-                    print(f"Installing {package}...")
-                    subprocess.run(
-                        ["npm", "install", package],
-                        cwd=self.node_red_dir,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        shell=is_windows,
-                        check=True,
-                    )
-                    print(f"Installed {package} successfully.")
+                print(f"Installing {package}...")
+                subprocess.run(
+                    ["npm", "install", package],
+                    cwd=self.node_red_dir,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=is_windows,
+                    check=True,
+                )
+                print(f"Installed {package} successfully.")
             print("Node-RED palette {package} installed successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Failed to install Node-RED palette {package} : {e}")
@@ -116,8 +122,8 @@ class Server:
 
     def import_flow(self):
         """Import flow from flows_modbus.json into Node-RED via its REST API."""
-        flow_file_path =  self.flows_file
-        
+        flow_file_path = self.flows_file
+
         # Read the flow from the file
         with open(flow_file_path, "r") as file:
             flow_data = json.load(file)
@@ -133,16 +139,19 @@ class Server:
             if response.status_code == 204:
                 print("Flow imported and deployed successfully.")
             else:
-                print(f"Failed to import flow: {response.status_code} - {response.text}")
+                print(
+                    f"Failed to import flow: {response.status_code} - {response.text}"
+                )
         except requests.RequestException as e:
-            print(f"Error importing flow: {e}")        
+            print(f"Error importing flow: {e}")
 
     def start_node_red(self):
         """Start the Node-RED server."""
         node_red_exec = os.path.join(
-            self.node_red_dir, "node_modules", ".bin", "node-red.cmd"
-            if platform.system().lower() == "windows"
-            else "node-red"
+            self.node_red_dir,
+            "node_modules",
+            ".bin",
+            "node-red.cmd" if platform.system().lower() == "windows" else "node-red",
         )
 
         if os.path.exists(node_red_exec):
