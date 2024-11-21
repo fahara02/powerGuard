@@ -1,7 +1,7 @@
 [project]
 name = "powerguard"
 version = "0.1.0"
-description = "Add your description here"
+description = "Automated UPS testing System"
 readme = "README.md"
 authors = [
     { name = "fahara02", email = "idea3d.faruk@gmail.com" }
