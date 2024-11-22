@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+enum PowerMeasureType{
+    UPS_INPUT=0;
+    UPS_OUTPUT=1;
+    MAINS=2;
+}
+message PowerMeasure{
+    PowerMeasureType type=1;
+    float voltage = 2;
+    float current = 3;
+    float power = 4;
+    float pf = 5;
+
+}

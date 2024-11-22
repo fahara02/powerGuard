@@ -1,9 +1,8 @@
 syntax = "proto3";
-package pg;
-enum PowerMeasureType{
-    UPS_INPUT=0;
-    UPS_OUTPUT=1;
-    MAINS=2;
+import "pData.proto";
+
+message report{
+    PowerMeasure power = 1;;
 }
 
 
@@ -17,14 +16,7 @@ enum TestType
 	
 };
 
-message PowerMeasure{
-    PowerMeasureType type=1;
-    float voltage = 2;
-    float current = 3;
-    float power = 4;
-    float pf = 5;
 
-}
 
 
 message UPS_SPEC{
