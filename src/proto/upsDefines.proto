@@ -4,6 +4,10 @@ enum Phase {
     SINGLE_PHASE=0;
     THREE_PHASE=1;
 }
+enum Load{
+	LINEAR=0;
+	NON_LINEAR=1;
+}
 message OverLoad{
     uint32 load_percentage=1;
     uint32 overload_time_min=2;
