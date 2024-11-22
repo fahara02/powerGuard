@@ -3,6 +3,7 @@ import os
 import platform
 import socket
 import subprocess
+import time
 
 import netifaces
 import requests
@@ -170,11 +171,24 @@ class Server:
         else:
             print("Node-RED executable not found. Ensure it is installed correctly.")
             exit(1)
-
+    def wait_for_node_red(self, timeout=30):
+        node_red_url = f"http://{self.get_ip_address()}:1880"
+        for _ in range(timeout):
+            try:
+                response = requests.get(node_red_url)
+                if response.status_code == 200:
+                    print("Node-RED is ready.")
+                    return
+            except requests.ConnectionError:
+                pass
+            time.sleep(1)
+        print("Node-RED server did not respond in time.")
+        exit(1)
     def start_server(self):
         """Start the TCP server to handle protobuf messages."""
         try:
             self.start_node_red()
+            self.wait_for_node_red()
             self.import_flow()
 
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
