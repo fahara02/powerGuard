@@ -1,6 +1,6 @@
 
 syntax = "proto3";
-package pg;
+package Test;
 
 
 enum TestResult
@@ -17,7 +17,16 @@ enum TestType{
     AC_INPUT_FAILURE=3;
     AC_INPUT_RETURN=4;
     INPUT_POWER_FACTOR=5;
-    EFFICIENCY_NORMAL_MODE=6;
-    EFFICIENCY_STORAGE_MODE=7;
+    CHANGE_OPERATION_MODE=6;
+    STORED_ENERGY_TIME=7;
+    SwitchTest = 8;
+	BackupTest = 9 ;
+	EfficiencyTest = 10;
+	SteadyState_InputVoltage_Test = 11;
+	WaveformTest = 12;
+    EFFICIENCY_NORMAL_MODE=14;
+    EFFICIENCY_STORAGE_MODE=15;
+    OVERLOAD_NORMAL_MODE=16;
+    OVERLOAD_STORAGE_MODE=17;
     
     };

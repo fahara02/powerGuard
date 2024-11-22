@@ -1,24 +1,35 @@
 syntax = "proto3";
 import "pData.proto";
+import "ups_test.proto";
+import "upsDefines.proto";
 
-message report{
-    PowerMeasure power = 1;;
+enum TestStandard{
+     IEC_62040_1=0;
+	 IEC_62040_2=1;
+	 IEC_62040_3=2;
+	 IEC_62040_4=3;
+	 IEC_62040_5=4;
+
+}
+
+message ReportDetails{
+	uint32 report_no=1;
+	TestStandard standard=2;
+	string client_name=3;
+	string brand_name=4;
+	uint32 ups_model=5;
+	ups.spec spec =6;
+}
+
+message TestReport{
+    ReportDetails details=1;
+	Test.TestType testName=2; 
+    measure.PowerMeasure power = 3;
 }
 
 
-enum TestType
-{
-	SwitchTest = 0;
-	BackupTest = 1 ;
-	EfficiencyTest = 2;
-	InputVoltageTest = 3;
-	WaveformTest = 4;
-	
-};
 
 
 
 
-message UPS_SPEC{
 
-}

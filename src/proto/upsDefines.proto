@@ -1,0 +1,26 @@
+syntax = "proto3";
+package ups;
+enum Phase {
+    SINGLE_PHASE=0;
+    THREE_PHASE=1;
+}
+message OverLoad{
+    uint32 load_percentage=1;
+    uint32 overload_time_min=2;
+}
+message spec{
+	Phase phase=1;
+	uint32 Rating_va = 2;
+	uint32 RatedVoltage_volt = 3;
+	uint32 RatedCurrent_amp =4;
+	uint32  MinInputVoltage_volt = 5;
+	uint32  MaxInputVoltage_volt = 6;
+	uint32 pf_rated_current=7;
+	uint32 Max_Continous_Amp=8;
+	uint32 overload_Amp=9;
+    OverLoad overload_long=10;
+    OverLoad overload_medium=11;
+    OverLoad overload_short=12;
+	uint64 AvgSwitchTime_ms = 20;
+	uint64 AvgBackupTime_ms = 21;
+}

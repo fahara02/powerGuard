@@ -1,5 +1,5 @@
 syntax = "proto3";
-
+package measure;
 enum PowerMeasureType{
     UPS_INPUT=0;
     UPS_OUTPUT=1;
