@@ -14,20 +14,19 @@ for name, path in paths.items():
     print(f"{name}: {path}")
 
 data_manager = DataManager()
-
-    # Create a ServerConfig instance with the desired configuration
-server_config = ServerConfig(host="0.0.0.0", port=12345, node_red_dir="node-red", flows_file="flows/flows_modbus.json")
-
-    # Now create and start the server, passing in the ServerConfig and DataManager instances
+server_config = ServerConfig(
+    host="0.0.0.0",
+    port=12345,
+    node_red_dir="node-red",
+    flows_file="flows/flows_modbus.json",
+)
 server = Server(server_config, data_manager)
-report_generator = ReportGenerator(
-        data_manager=data_manager
-    )
+report_generator = ReportGenerator(data_manager=data_manager)
+
 
 def main():
     print("Hello from powerguard!")
     print("Setting up database")
-  
 
     setGui()
     server.start_server()

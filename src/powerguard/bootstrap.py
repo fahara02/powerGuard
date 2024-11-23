@@ -5,4 +5,3 @@ paths = set_project_paths()
 
 # Expose paths for use in other scripts
 __all__ = ["paths"]
-

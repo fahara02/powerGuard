@@ -20,9 +20,10 @@ class ReportGenerator(BaseModel):
     """
     ReportGenerator class for generating formatted Word reports using Pydantic.
     """
+
     data_manager: DataManager
     template_path: Path = Field(default="test_report_template.docx")
-    output_path:Path =Field(default= paths.get("output_dir")   )
+    output_path: Path = Field(default=paths.get("output_dir"))
 
     @field_validator("template_path")
     def validate_template_path(cls, value: Path) -> Path:
@@ -30,7 +31,7 @@ class ReportGenerator(BaseModel):
         Ensure the template path exists and is a file.
         """
         # Get the template directory from paths
-        template_folder = paths.get("template_dir")        
+        template_folder = paths.get("template_dir")
         # Make sure the folder exists, create it if it doesn't
         template_folder.mkdir(parents=True, exist_ok=True)
 
@@ -46,28 +47,25 @@ class ReportGenerator(BaseModel):
             raise ValueError(f"Template file not found: {full_template_path}")
 
         return full_template_path
+
     @field_validator("output_path")
     def validate_output_path(cls, value: Path) -> Path:
         """
         Ensure the template path exists and is a file.
         """
-        
-        output_folder = paths.get("output_dir")       
-        
+
+        output_folder = paths.get("output_dir")
+
         output_folder.mkdir(parents=True, exist_ok=True)
 
-       
-
         # Full path to the template file
-        full_output_folder= output_folder 
+        full_output_folder = output_folder
 
         # Validate if the template file exists and is a file
         if not full_output_folder.exists() or not full_output_folder.is_dir():
             raise ValueError(f"Output Folder not found: {full_output_folder}")
 
         return full_output_folder
-
-
 
     # def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
     #     """
@@ -153,7 +151,8 @@ class ReportGenerator(BaseModel):
         Returns:
             Path: The path to the saved XML file.
         """
-        def flatten_dict(data, parent_key='', sep='_'):
+
+        def flatten_dict(data, parent_key="", sep="_"):
             """
             Recursively flatten a nested dictionary.
             """
@@ -168,7 +167,9 @@ class ReportGenerator(BaseModel):
                     for i, item in enumerate(v):
                         indexed_key = f"{new_key}{sep}{i}"
                         if isinstance(item, dict):
-                            items.extend(flatten_dict(item, indexed_key, sep=sep).items())
+                            items.extend(
+                                flatten_dict(item, indexed_key, sep=sep).items()
+                            )
                         else:
                             items.append((indexed_key, item))
                 else:
@@ -202,7 +203,9 @@ class ReportGenerator(BaseModel):
         # Parse the XML to get data
         tree = ET.parse(xml_path)
         root = tree.getroot()
-        data_map = {child.tag: child.text for child in root}  # Create a dictionary of XML data
+        data_map = {
+            child.tag: child.text for child in root
+        }  # Create a dictionary of XML data
 
         # Open the Word document as a zip file
         with ZipFile(self.template_path, "r") as docx:
@@ -221,7 +224,9 @@ class ReportGenerator(BaseModel):
         for control in content_controls:
             tag_element = control.find(".//w:tag", namespaces=namespace)
             if tag_element is not None:
-                tag = tag_element.attrib.get(f"{{{namespace['w']}}}val")  # Get the tag value
+                tag = tag_element.attrib.get(
+                    f"{{{namespace['w']}}}val"
+                )  # Get the tag value
                 if tag in data_map:  # If there's data for this tag
                     content = control.find(".//w:sdtContent", namespaces=namespace)
                     if content is not None:
@@ -235,11 +240,15 @@ class ReportGenerator(BaseModel):
                 for file in docx.filelist:
                     if file.filename != "word/document.xml":
                         new_docx.writestr(file.filename, docx.read(file.filename))
-                new_docx.writestr("word/document.xml", etree.tostring(doc_tree, pretty_print=True))
+                new_docx.writestr(
+                    "word/document.xml", etree.tostring(doc_tree, pretty_print=True)
+                )
 
         print(f"Word document updated and saved to {output_path}")
 
-    def call_cpp_for_processing(self, xml_path: Path, cpp_executable: Path = Path("process_report")):
+    def call_cpp_for_processing(
+        self, xml_path: Path, cpp_executable: Path = Path("process_report")
+    ):
         """
         Call a C++ executable to process the XML data.
         """
@@ -260,7 +269,9 @@ class ReportGenerator(BaseModel):
         Returns:
             str: The generated file name.
         """
-        client_name = report_data.get("settings", {}).get("client_name", "UnknownClient")
+        client_name = report_data.get("settings", {}).get(
+            "client_name", "UnknownClient"
+        )
         ups_model = report_data.get("settings", {}).get("ups_model", "UnknownModel")
         report_id = report_data.get("report_id", "0")
         date_str = datetime.now().strftime("%Y%m%d")
@@ -302,6 +313,7 @@ class ReportGenerator(BaseModel):
                 print(f"Report generated: {xml_file_path}")
         except sqlite3.Error as e:
             raise Exception(f"Error generating reports: {e}")
+
     def generate_report(self, report_id: int, use_cpp: bool = False):
         """
         Generate a formatted report using a template and optionally call a C++ executable.
@@ -329,20 +341,17 @@ class ReportGenerator(BaseModel):
         self.edit_word_document(output_file_path, xml_path)
 
 
-
 if __name__ == "__main__":
     # Initialize DataManager
     data_manager = DataManager()
-   
+
     # Initialize ReportGenerator with Pydantic
     report_generator = ReportGenerator(
-        data_manager=data_manager,
-        template_path=Path("test_report_template.docx")
+        data_manager=data_manager, template_path=Path("test_report_template.docx")
     )
 
     # Generate a report
-    report=data_manager.generate_mock_data(112,"ABB","maxgreen2","FHR")
+    report = data_manager.generate_mock_data(112, "ABB", "maxgreen2", "FHR")
     data_manager.insert_test_report(report)
     report_id = report.settings.report_id
     report_generator.generate_report(report_id, use_cpp=False)
-

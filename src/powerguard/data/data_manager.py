@@ -281,7 +281,6 @@ class DataManager(BaseModel):
         except sqlite3.Error as e:
             raise Exception(f"Error inserting OverLoad: {e}")
 
-
     def insert_power_measure(self, power: PowerMeasure):
         """Insert a PowerMeasure message into the database."""
         self._validate_power_measure(power)
@@ -387,7 +386,6 @@ class DataManager(BaseModel):
         except sqlite3.Error as e:
             raise Exception(f"Error inserting spec: {e}")
 
-
     def insert_report_settings(self, settings: ReportSettings):
         """Insert ReportSettings into the database."""
         try:
@@ -440,7 +438,6 @@ class DataManager(BaseModel):
         except Exception as e:
             # Catch any other unexpected exceptions
             raise Exception(f"Unexpected error inserting ReportSettings: {e}")
-
 
     def insert_test_report(self, report: TestReport):
         """Insert a TestReport message into the database."""

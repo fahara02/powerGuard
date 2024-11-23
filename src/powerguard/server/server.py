@@ -17,7 +17,9 @@ class ServerConfig(BaseModel):
     host: str = Field(default="0.0.0.0", description="Host address")
     port: int = Field(default=12345, description="Port number")
     node_red_dir: str = Field(default="node-red", description="Node-RED directory path")
-    flows_file: str = Field(default="flows/flows_modbus.json", description="Flows file path")
+    flows_file: str = Field(
+        default="flows/flows_modbus.json", description="Flows file path"
+    )
 
     @field_validator("host")
     def validate_host(cls, v):
@@ -135,7 +137,12 @@ if __name__ == "__main__":
     data_manager = DataManager()
 
     # Create a ServerConfig instance with the desired configuration
-    server_config = ServerConfig(host="0.0.0.0", port=12345, node_red_dir="node-red", flows_file="flows/flows_modbus.json")
+    server_config = ServerConfig(
+        host="0.0.0.0",
+        port=12345,
+        node_red_dir="node-red",
+        flows_file="flows/flows_modbus.json",
+    )
 
     # Now create and start the server, passing in the ServerConfig and DataManager instances
     server = Server(config=server_config, data_manager=data_manager)
