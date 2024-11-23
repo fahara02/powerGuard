@@ -306,7 +306,7 @@ class DataManager(BaseModel):
             raise Exception(f"Error inserting PowerMeasure: {e}")
 
     def insert_spec(self, ups_spec: spec):
-        """Insert a spec message into the database."""
+        """Insert a spec message into the database or return the existing entry if it already exists."""
         self._validate_spec(ups_spec)
 
         try:
@@ -316,18 +316,17 @@ class DataManager(BaseModel):
             overload_medium_id = self.insert_overload(ups_spec.overload_medium)
             overload_short_id = self.insert_overload(ups_spec.overload_short)
 
-            # Insert spec data
+            # Check if the same spec already exists
             self._cursor.execute(
                 """
-                INSERT INTO spec (
-                    phase, rating_va, rated_voltage, rated_current,
-                    min_input_voltage, max_input_voltage, pf_rated_current,
-                    max_continous_amp, overload_amp,
-                    overload_long_id, overload_medium_id, overload_short_id,
-                    avg_switch_time_ms, avg_backup_time_ms
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
+                SELECT id
+                FROM spec
+                WHERE phase = ? AND rating_va = ? AND rated_voltage = ? AND rated_current = ?
+                AND min_input_voltage = ? AND max_input_voltage = ? AND pf_rated_current = ?
+                AND max_continous_amp = ? AND overload_amp = ?
+                AND overload_long_id = ? AND overload_medium_id = ? AND overload_short_id = ?
+                AND avg_switch_time_ms = ? AND avg_backup_time_ms = ?
+                """,
                 (
                     phase_name,  # Enum converted to string
                     ups_spec.Rating_va,
@@ -345,10 +344,49 @@ class DataManager(BaseModel):
                     ups_spec.AvgBackupTime_ms,
                 ),
             )
+            existing_id = self._cursor.fetchone()
+
+            if existing_id:
+                # Return the existing ID if a match is found
+                return existing_id[0]
+
+            # Insert a new spec entry if no match exists
+            self._cursor.execute(
+                """
+                INSERT INTO spec (
+                    phase, rating_va, rated_voltage, rated_current,
+                    min_input_voltage, max_input_voltage, pf_rated_current,
+                    max_continous_amp, overload_amp,
+                    overload_long_id, overload_medium_id, overload_short_id,
+                    avg_switch_time_ms, avg_backup_time_ms
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    phase_name,
+                    ups_spec.Rating_va,
+                    ups_spec.RatedVoltage_volt,
+                    ups_spec.RatedCurrent_amp,
+                    ups_spec.MinInputVoltage_volt,
+                    ups_spec.MaxInputVoltage_volt,
+                    ups_spec.pf_rated_current,
+                    ups_spec.Max_Continous_Amp,
+                    ups_spec.overload_Amp,
+                    overload_long_id,
+                    overload_medium_id,
+                    overload_short_id,
+                    ups_spec.AvgSwitchTime_ms,
+                    ups_spec.AvgBackupTime_ms,
+                ),
+            )
             self._conn.commit()
+
+            # Return the newly inserted row ID
             return self._cursor.lastrowid
+
         except sqlite3.Error as e:
             raise Exception(f"Error inserting spec: {e}")
+
 
     def insert_report_settings(self, settings: ReportSettings):
         """Insert ReportSettings into the database."""
@@ -403,165 +441,7 @@ class DataManager(BaseModel):
             # Catch any other unexpected exceptions
             raise Exception(f"Unexpected error inserting ReportSettings: {e}")
 
-    # def insert_test_report(self, report: TestReport):
-    #     """Insert a TestReport message into the database."""
-    #     logging.debug("Inserting TestReport: %s with report_id %d", report, report.settings.report_id)
-    #     self._validate_test_report(report)
 
-    #     try:
-    #         # Insert PowerMeasure objects
-    #         input_power_id = self.insert_power_measure(report.inputPower)
-    #         output_power_id = self.insert_power_measure(report.outputpower)
-
-    #         # Convert the TestType enum to its string name
-    #         test_name = TestType.Name(report.testName)
-
-    #         # Check if report_id exists and handle accordingly
-    #         if self._check_value_exists("ReportSettings", "report_id", report.settings.report_id):
-    #             # If the report_id already exists, fetch its settings_id
-    #             logging.debug("ReportSettings with report_id %d already exists.", report.settings.report_id)
-    #             self._cursor.execute(
-    #                 "SELECT id FROM ReportSettings WHERE report_id = ?", (report.settings.report_id,)
-    #             )
-    #             settings_id = self._cursor.fetchone()[0]
-    #         else:
-    #             # Insert new ReportSettings and get its ID
-    #             logging.debug("Creating new ReportSettings for report_id %d.", report.settings.report_id)
-    #             settings_id = self.insert_report_settings(report.settings)
-
-    #         # Check if a TestReport with this settings_id already exists
-    #         if self._check_id_exists("TestReport", settings_id):
-    #             # Optionally handle overwrite: Update instead of inserting a new TestReport
-    #             logging.debug("Updating existing TestReport for settings_id %d.", settings_id)
-    #             self._cursor.execute(
-    #                 """
-    #                 UPDATE TestReport
-    #                 SET test_name = ?, test_description = ?, input_power_id = ?, output_power_id = ?
-    #                 WHERE settings_id = ?
-    #                 """,
-    #                 (
-    #                     test_name,
-    #                     report.testDescription,
-    #                     input_power_id,
-    #                     output_power_id,
-    #                     settings_id,
-    #                 ),
-    #             )
-    #         else:
-    #             # Insert a new TestReport
-    #             logging.debug("Inserting new TestReport for settings_id %d.", settings_id)
-    #             self._cursor.execute(
-    #                 """
-    #                 INSERT INTO TestReport (
-    #                     settings_id, test_name, test_description, input_power_id, output_power_id
-    #                 )
-    #                 VALUES (?, ?, ?, ?, ?)
-    #                 """,
-    #                 (
-    #                     settings_id,
-    #                     test_name,
-    #                     report.testDescription,
-    #                     input_power_id,
-    #                     output_power_id,
-    #                 ),
-    #             )
-
-    #         # Commit the transaction to save changes
-    #         self._conn.commit()
-
-    #         # Return the last inserted or updated row ID
-    #         return self._cursor.lastrowid
-
-    #     except sqlite3.Error as e:
-    #         # Catch and handle SQLite-specific errors
-    #         raise Exception(f"Error inserting/updating TestReport into database: {e}")
-
-    #     except Exception as e:
-    #         # Catch and handle any other exceptions
-    #         raise Exception(f"Unexpected error inserting/updating TestReport: {e}")
-    # def insert_test_report(self, report: TestReport):
-    #     """Insert a TestReport message into the database."""
-    #     logging.debug("Inserting TestReport: %s with report_id %d", report, report.settings.report_id)
-    #     self._validate_test_report(report)
-
-    #     try:
-    #         # Insert PowerMeasure objects
-    #         input_power_id = self.insert_power_measure(report.inputPower)
-    #         output_power_id = self.insert_power_measure(report.outputpower)
-
-    #         # Convert the TestType enum to its string name
-    #         test_name = TestType.Name(report.testName)
-
-    #         # Check if report_id exists and handle accordingly
-    #         if self._check_value_exists("ReportSettings", "report_id", report.settings.report_id):
-    #             # If the report_id already exists, fetch its settings_id
-    #             logging.debug("ReportSettings with report_id %d already exists.", report.settings.report_id)
-    #             self._cursor.execute(
-    #                 "SELECT id FROM ReportSettings WHERE report_id = ?", (report.settings.report_id,)
-    #             )
-    #             settings_id = self._cursor.fetchone()[0]
-    #         else:
-    #             # Insert new ReportSettings and get its ID
-    #             logging.debug("Creating new ReportSettings for report_id %d.", report.settings.report_id)
-    #             settings_id = self.insert_report_settings(report.settings)
-
-    #         # Check if a TestReport with this settings_id already exists
-    #         self._cursor.execute(
-    #             "SELECT id FROM TestReport WHERE settings_id = ?", (settings_id,)
-    #         )
-    #         test_report_row = self._cursor.fetchone()
-
-    #         if test_report_row:
-    #             # Update existing TestReport
-    #             test_report_id = test_report_row[0]
-    #             logging.debug("Updating existing TestReport with id %d for settings_id %d.", test_report_id, settings_id)
-    #             self._cursor.execute(
-    #                 """
-    #                 UPDATE TestReport
-    #                 SET test_name = ?, test_description = ?, input_power_id = ?, output_power_id = ?
-    #                 WHERE id = ?
-    #                 """,
-    #                 (
-    #                     test_name,
-    #                     report.testDescription,
-    #                     input_power_id,
-    #                     output_power_id,
-    #                     test_report_id,
-    #                 ),
-    #             )
-    #         else:
-    #             # Insert a new TestReport
-    #             logging.debug("Inserting new TestReport for settings_id %d.", settings_id)
-    #             self._cursor.execute(
-    #                 """
-    #                 INSERT INTO TestReport (
-    #                     settings_id, test_name, test_description, input_power_id, output_power_id
-    #                 )
-    #                 VALUES (?, ?, ?, ?, ?)
-    #                 """,
-    #                 (
-    #                     settings_id,
-    #                     test_name,
-    #                     report.testDescription,
-    #                     input_power_id,
-    #                     output_power_id,
-    #                 ),
-    #             )
-    #             test_report_id = self._cursor.lastrowid
-
-    #         # Commit the transaction to save changes
-    #         self._conn.commit()
-
-    #         # Return the ID of the TestReport
-    #         return test_report_id
-
-    #     except sqlite3.Error as e:
-    #         # Catch and handle SQLite-specific errors
-    #         raise Exception(f"Error inserting/updating TestReport into database: {e}")
-
-    #     except Exception as e:
-    #         # Catch and handle any other exceptions
-    #         raise Exception(f"Unexpected error inserting/updating TestReport: {e}")
     def insert_test_report(self, report: TestReport):
         """Insert a TestReport message into the database."""
         logging.debug(
