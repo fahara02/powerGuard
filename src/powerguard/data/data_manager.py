@@ -132,7 +132,6 @@ class DataManager(BaseModel):
             for query in schema_queries:
                 self._cursor.execute(query)
 
-         
             self._conn.commit()
         except sqlite3.Error as e:
             raise Exception(f"Error creating tables: {e}")
@@ -227,7 +226,7 @@ class DataManager(BaseModel):
             return self._cursor.fetchone() is not None
         except sqlite3.Error as e:
             raise Exception(f"Error checking ID existence in {table_name}: {e}")
-        
+
     def _check_value_exists(self, table_name: str, column_name: str, value: any):
         """
         Check if a specific value exists in a given column of a table.
@@ -248,20 +247,40 @@ class DataManager(BaseModel):
             raise Exception(f"Error checking value in {table_name}.{column_name}: {e}")
 
     def insert_overload(self, overload: OverLoad):
-        """Insert an OverLoad message into the database."""
+        """Insert an OverLoad message into the database or return the existing entry if it already exists."""
         self._validate_overload(overload)
         try:
+            # Check if the same OverLoad already exists
+            self._cursor.execute(
+                """
+                SELECT id
+                FROM OverLoad
+                WHERE load_percentage = ? AND overload_time_min = ?
+                """,
+                (overload.load_percentage, overload.overload_time_min),
+            )
+            existing_id = self._cursor.fetchone()
+
+            if existing_id:
+                # Return the existing ID if a match is found
+                return existing_id[0]
+
+            # Insert a new OverLoad entry if no match exists
             self._cursor.execute(
                 """
                 INSERT INTO OverLoad (load_percentage, overload_time_min)
                 VALUES (?, ?)
-            """,
+                """,
                 (overload.load_percentage, overload.overload_time_min),
             )
             self._conn.commit()
+
+            # Return the newly inserted row ID
             return self._cursor.lastrowid
+
         except sqlite3.Error as e:
             raise Exception(f"Error inserting OverLoad: {e}")
+
 
     def insert_power_measure(self, power: PowerMeasure):
         """Insert a PowerMeasure message into the database."""
@@ -335,11 +354,17 @@ class DataManager(BaseModel):
         """Insert ReportSettings into the database."""
         try:
             # Check if report_id already exists
-            if self._check_value_exists("ReportSettings", "report_id", settings.report_id):
-                logging.debug("ReportSettings with report_id %s already exists.", settings.report_id)
+            if self._check_value_exists(
+                "ReportSettings", "report_id", settings.report_id
+            ):
+                logging.debug(
+                    "ReportSettings with report_id %s already exists.",
+                    settings.report_id,
+                )
                 # Optionally, return the existing ID
                 self._cursor.execute(
-                    "SELECT id FROM ReportSettings WHERE report_id = ?", (settings.report_id,)
+                    "SELECT id FROM ReportSettings WHERE report_id = ?",
+                    (settings.report_id,),
                 )
                 return self._cursor.fetchone()[0]
 
@@ -373,7 +398,6 @@ class DataManager(BaseModel):
 
         except sqlite3.Error as e:
             raise Exception(f"Error inserting ReportSettings: {e}")
-
 
         except Exception as e:
             # Catch any other unexpected exceptions
@@ -540,7 +564,11 @@ class DataManager(BaseModel):
     #         raise Exception(f"Unexpected error inserting/updating TestReport: {e}")
     def insert_test_report(self, report: TestReport):
         """Insert a TestReport message into the database."""
-        logging.debug("Inserting TestReport: %s with report_id %d", report, report.settings.report_id)
+        logging.debug(
+            "Inserting TestReport: %s with report_id %d",
+            report,
+            report.settings.report_id,
+        )
         self._validate_test_report(report)
 
         try:
@@ -548,21 +576,31 @@ class DataManager(BaseModel):
             test_name = TestType.Name(report.testName)
 
             # Check if report_id exists and handle accordingly
-            if self._check_value_exists("ReportSettings", "report_id", report.settings.report_id):
+            if self._check_value_exists(
+                "ReportSettings", "report_id", report.settings.report_id
+            ):
                 # If the report_id already exists, fetch its settings_id
-                logging.debug("ReportSettings with report_id %d already exists.", report.settings.report_id)
+                logging.debug(
+                    "ReportSettings with report_id %d already exists.",
+                    report.settings.report_id,
+                )
                 self._cursor.execute(
-                    "SELECT id FROM ReportSettings WHERE report_id = ?", (report.settings.report_id,)
+                    "SELECT id FROM ReportSettings WHERE report_id = ?",
+                    (report.settings.report_id,),
                 )
                 settings_id = self._cursor.fetchone()[0]
             else:
                 # Insert new ReportSettings and get its ID
-                logging.debug("Creating new ReportSettings for report_id %d.", report.settings.report_id)
+                logging.debug(
+                    "Creating new ReportSettings for report_id %d.",
+                    report.settings.report_id,
+                )
                 settings_id = self.insert_report_settings(report.settings)
 
             # Check if a TestReport with this settings_id already exists
             self._cursor.execute(
-                "SELECT id, input_power_id, output_power_id FROM TestReport WHERE settings_id = ?", (settings_id,)
+                "SELECT id, input_power_id, output_power_id FROM TestReport WHERE settings_id = ?",
+                (settings_id,),
             )
             test_report_row = self._cursor.fetchone()
 
@@ -571,7 +609,11 @@ class DataManager(BaseModel):
                 test_report_id = test_report_row[0]
                 input_power_id = test_report_row[1]
                 output_power_id = test_report_row[2]
-                logging.debug("Updating existing TestReport with id %d for settings_id %d.", test_report_id, settings_id)
+                logging.debug(
+                    "Updating existing TestReport with id %d for settings_id %d.",
+                    test_report_id,
+                    settings_id,
+                )
                 # Update the existing TestReport
                 self._cursor.execute(
                     """
@@ -592,7 +634,9 @@ class DataManager(BaseModel):
                 output_power_id = self.insert_power_measure(report.outputpower)
 
                 # Insert a new TestReport
-                logging.debug("Inserting new TestReport for settings_id %d.", settings_id)
+                logging.debug(
+                    "Inserting new TestReport for settings_id %d.", settings_id
+                )
                 self._cursor.execute(
                     """
                     INSERT INTO TestReport (
@@ -623,7 +667,6 @@ class DataManager(BaseModel):
         except Exception as e:
             # Catch and handle any other exceptions
             raise Exception(f"Unexpected error inserting/updating TestReport: {e}")
-
 
     def get_test_report(self, report_id: int):
         """Retrieve a TestReport and related data from the database by report ID."""
@@ -954,7 +997,87 @@ class DataManager(BaseModel):
         except ValueError as ve:
             return str(ve)
 
-    def generate_mock_data(self,reportId, clientname, brandname, engineername):
+    def clean_database(self):
+        """Clean up the database by removing duplicate and orphaned entries."""
+        try:
+            # Step 1: Remove duplicate PowerMeasure entries
+            logging.debug("Removing duplicate PowerMeasure entries.")
+            self._cursor.execute(
+                """
+                DELETE FROM PowerMeasure
+                WHERE id NOT IN (
+                    SELECT MIN(id)
+                    FROM PowerMeasure
+                    GROUP BY type, voltage, current, power, pf
+                )
+                """
+            )
+
+            # Step 2: Remove unused PowerMeasure entries
+            logging.debug("Removing unused PowerMeasure entries.")
+            self._cursor.execute(
+                """
+                DELETE FROM PowerMeasure
+                WHERE id NOT IN (
+                    SELECT input_power_id FROM TestReport
+                    UNION
+                    SELECT output_power_id FROM TestReport
+                )
+                """
+            )
+
+            # Step 3: Remove unused OverLoad entries
+            logging.debug("Removing unused OverLoad entries.")
+            self._cursor.execute(
+                """
+                DELETE FROM OverLoad
+                WHERE id NOT IN (
+                    SELECT overload_long_id FROM spec
+                    UNION
+                    SELECT overload_medium_id FROM spec
+                    UNION
+                    SELECT overload_short_id FROM spec
+                )
+                """
+            )
+
+            # Step 4: Remove orphaned ReportSettings
+            logging.debug("Removing orphaned ReportSettings entries.")
+            self._cursor.execute(
+                """
+                DELETE FROM ReportSettings
+                WHERE id NOT IN (
+                    SELECT settings_id FROM TestReport
+                )
+            """
+            )
+
+            # Step 5: Remove orphaned spec entries
+            logging.debug("Removing orphaned spec entries.")
+            self._cursor.execute(
+                """
+                DELETE FROM spec
+                WHERE id NOT IN (
+                    SELECT spec_id FROM ReportSettings
+                )
+                """
+            )
+
+            # Commit the changes
+            self._conn.commit()
+            logging.info("Database cleanup completed successfully.")
+
+        except sqlite3.Error as e:
+            # Handle SQLite errors
+            logging.error(f"Error during database cleanup: {e}")
+            raise Exception(f"Error during database cleanup: {e}")
+
+        except Exception as e:
+            # Handle unexpected errors
+            logging.error(f"Unexpected error during database cleanup: {e}")
+            raise Exception(f"Unexpected error during database cleanup: {e}")
+
+    def generate_mock_data(self, reportId, clientname, brandname, engineername):
         # Example PowerMeasure objects
         input_power = PowerMeasure(
             type=PowerMeasureType.UPS_INPUT,
@@ -985,8 +1108,8 @@ class DataManager(BaseModel):
             pf_rated_current=1,
             Max_Continous_Amp=25,
             overload_Amp=30,
-            overload_long=overload_long ,
-            overload_medium=overload_medium ,
+            overload_long=overload_long,
+            overload_medium=overload_medium,
             overload_short=overload_short,
             AvgSwitchTime_ms=500,
             AvgBackupTime_ms=120000,
@@ -1022,16 +1145,20 @@ class DataManager(BaseModel):
 # Example Usage
 if __name__ == "__main__":
     data_manager = DataManager()
-    report = data_manager.generate_mock_data(2,"walton", "maxgreen", "fhr")
+    report = data_manager.generate_mock_data(2, "walton", "maxgreen", "fhr")
 
-    report_id= data_manager.insert_test_report(report)
-    unique_id=report.settings.report_id
-    print(f"check newly inserted test report with id {report_id} for unique id {unique_id} ")
-    report = data_manager.generate_mock_data(3,"walton", "maxgreen", "fhr")
+    report_id = data_manager.insert_test_report(report)
+    unique_id = report.settings.report_id
+    print(
+        f"check newly inserted test report with id {report_id} for unique id {unique_id} "
+    )
+    report = data_manager.generate_mock_data(3, "walton", "maxgreen", "fhr")
 
-    report_id= data_manager.insert_test_report(report)
-    unique_id=report.settings.report_id
-    print(f"check newly inserted test report with id {report_id} for unique id {unique_id} ")
+    report_id = data_manager.insert_test_report(report)
+    unique_id = report.settings.report_id
+    print(
+        f"check newly inserted test report with id {report_id} for unique id {unique_id} "
+    )
     # print(f"Deleting TestReport with ID {report_id}")
     # print(data_manager.delete_test_report(report_id))
 
