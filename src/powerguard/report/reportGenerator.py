@@ -5,8 +5,10 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from zipfile import ZipFile
 
 from docx import Document
+from lxml import etree
 from pydantic import BaseModel, Field, field_validator
 
 from powerguard.bootstrap import paths
@@ -66,18 +68,77 @@ class ReportGenerator(BaseModel):
 
 
 
+    # def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
+    #     """
+    #     Generate an XML file from the report data, flattening nested dictionaries.
+    #     """
+    #     def flatten_dict(data, parent_key='', sep='_'):
+    #         """
+    #         Recursively flatten a nested dictionary.
+    #         """
+    #         items = []
+    #         for k, v in data.items():
+    #             new_key = f"{parent_key}{sep}{k}" if parent_key else k
+    #             if isinstance(v, dict):
+    #                 items.extend(flatten_dict(v, new_key, sep=sep).items())
+    #             else:
+    #                 items.append((new_key, v))
+    #         return dict(items)
+
+    #     # Flatten the report data, including nested dictionaries like `settings`
+    #     flattened_data = flatten_dict(report_data)
+
+    #     # Create XML structure
+    #     root = ET.Element("TestReport")
+    #     for key, value in flattened_data.items():
+    #         child = ET.SubElement(root, key)
+    #         child.text = str(value)
+
+    #     # Write XML to file
+    #     tree = ET.ElementTree(root)
+    #     tree.write(xml_path)
+    #     print(f"XML generated and saved to {xml_path}")
+    #     return xml_path
     def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
         """
-        Generate an XML file from the report data.
+        Generate an XML file from the report data, flattening nested dictionaries.
         """
+        def flatten_dict(data, parent_key='', sep='_'):
+            """
+            Recursively flatten a nested dictionary.
+            """
+            items = []
+            for k, v in data.items():
+                new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                if isinstance(v, dict):
+                    # Recursively flatten dictionaries
+                    items.extend(flatten_dict(v, new_key, sep=sep).items())
+                elif isinstance(v, list):
+                    # Handle lists by indexing items
+                    for i, item in enumerate(v):
+                        indexed_key = f"{new_key}{sep}{i}"
+                        if isinstance(item, dict):
+                            items.extend(flatten_dict(item, indexed_key, sep=sep).items())
+                        else:
+                            items.append((indexed_key, item))
+                else:
+                    # Add simple key-value pairs
+                    items.append((new_key, v))
+            return dict(items)
+
+        # Flatten the report data, including nested dictionaries and lists
+        flattened_data = flatten_dict(report_data)
+
+        # Create XML structure
         root = ET.Element("TestReport")
-
-        for key, value in report_data.items():
+        for key, value in flattened_data.items():
             child = ET.SubElement(root, key)
-            child.text = str(value)
+            # Convert non-string values to strings
+            child.text = str(value) if value is not None else ""
 
+        # Write XML to file
         tree = ET.ElementTree(root)
-        tree.write(xml_path)
+        tree.write(xml_path, encoding="utf-8", xml_declaration=True)
         print(f"XML generated and saved to {xml_path}")
         return xml_path
 
@@ -85,21 +146,44 @@ class ReportGenerator(BaseModel):
         """
         Edit a Word document with content controls based on the XML data.
         """
-        # Load the Word template
-        doc = Document(self.template_path)
-
         # Parse the XML to get data
         tree = ET.parse(xml_path)
         root = tree.getroot()
+        data_map = {child.tag: child.text for child in root}  # Create a dictionary of XML data
 
-        # Replace content control tags with XML data
-        for paragraph in doc.paragraphs:
-            for key in root:
-                if f"{{{{{key.tag}}}}}" in paragraph.text:  # Match {{tag}}
-                    paragraph.text = paragraph.text.replace(f"{{{{{key.tag}}}}}", key.text)
+        # Open the Word document as a zip file
+        with ZipFile(self.template_path, "r") as docx:
+            # Extract the XML for the main document
+            document_xml = docx.read("word/document.xml")
 
-        # Save the updated Word document
-        doc.save(output_path)
+        # Parse the XML
+        doc_tree = etree.fromstring(document_xml)
+
+        # Replace content controls (w:sdt and w:sdtContent) with corresponding data
+        namespace = {
+            "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+        }
+        content_controls = doc_tree.xpath("//w:sdt", namespaces=namespace)
+
+        for control in content_controls:
+            tag_element = control.find(".//w:tag", namespaces=namespace)
+            if tag_element is not None:
+                tag = tag_element.attrib.get(f"{{{namespace['w']}}}val")  # Get the tag value
+                if tag in data_map:  # If there's data for this tag
+                    content = control.find(".//w:sdtContent", namespaces=namespace)
+                    if content is not None:
+                        # Replace text inside the content control
+                        for text in content.xpath(".//w:t", namespaces=namespace):
+                            text.text = data_map[tag]
+
+        # Write the updated XML back to the Word document
+        with ZipFile(self.template_path, "r") as docx:
+            with ZipFile(output_path, "w") as new_docx:
+                for file in docx.filelist:
+                    if file.filename != "word/document.xml":
+                        new_docx.writestr(file.filename, docx.read(file.filename))
+                new_docx.writestr("word/document.xml", etree.tostring(doc_tree, pretty_print=True))
+
         print(f"Word document updated and saved to {output_path}")
 
     def call_cpp_for_processing(self, xml_path: Path, cpp_executable: Path = Path("process_report")):
@@ -143,7 +227,7 @@ class ReportGenerator(BaseModel):
 if __name__ == "__main__":
     # Initialize DataManager
     data_manager = DataManager()
-    report=data_manager.insert_mock_data("Walton","maxgreen","FHR")
+    report=data_manager.insert_mock_data("Walton","maxgreen2","FHR")
     # Initialize ReportGenerator with Pydantic
     report_generator = ReportGenerator(
         data_manager=data_manager,
