@@ -41,97 +41,100 @@ class DataManager(BaseModel):
         self._cursor = self._conn.cursor()
         self._create_tables()
 
+    def __enter__(self):
+        """Enable context manager for database connection."""
+        if self._conn is None:
+            self._conn = sqlite3.connect(self.db_path)
+            self._cursor = self._conn.cursor()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Exit the runtime context, ensuring the connection is closed."""
+        self.close()
+
+    def close(self):
+        """Close the database connection."""
+        self._conn.close()
+
     def _create_tables(self):
         """Create necessary tables in the SQLite database."""
+        """Create all tables in the database with foreign key constraints."""
+        schema_queries = [
+            """
+            CREATE TABLE IF NOT EXISTS PowerMeasure (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                type TEXT NOT NULL,
+                voltage REAL NOT NULL,
+                current REAL NOT NULL,
+                power REAL NOT NULL,
+                pf REAL NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS OverLoad (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                load_percentage INTEGER NOT NULL,
+                overload_time_min INTEGER NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS spec (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                phase TEXT NOT NULL,
+                rating_va INTEGER NOT NULL,
+                rated_voltage INTEGER NOT NULL,
+                rated_current INTEGER NOT NULL,
+                min_input_voltage INTEGER NOT NULL,
+                max_input_voltage INTEGER NOT NULL,
+                pf_rated_current INTEGER NOT NULL,
+                max_continous_amp INTEGER NOT NULL,
+                overload_amp INTEGER NOT NULL,
+                overload_long_id INTEGER NOT NULL,
+                overload_medium_id INTEGER NOT NULL,
+                overload_short_id INTEGER NOT NULL,
+                avg_switch_time_ms INTEGER NOT NULL,
+                avg_backup_time_ms INTEGER NOT NULL,
+                FOREIGN KEY (overload_long_id) REFERENCES OverLoad (id) ,
+                FOREIGN KEY (overload_medium_id) REFERENCES OverLoad (id) ,
+                FOREIGN KEY (overload_short_id) REFERENCES OverLoad (id) 
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS ReportSettings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_id INTEGER NOT NULL,
+                standard TEXT NOT NULL,
+                ups_model INTEGER NOT NULL,
+                client_name TEXT NOT NULL,
+                brand_name TEXT NOT NULL,
+                test_engineer_name TEXT NOT NULL,
+                test_approval_name TEXT NOT NULL,
+                spec_id INTEGER NOT NULL,
+                FOREIGN KEY (spec_id) REFERENCES spec (id) 
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS TestReport (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                settings_id INTEGER NOT NULL,
+                test_name TEXT NOT NULL,
+                test_description TEXT NOT NULL,
+                input_power_id INTEGER NOT NULL,
+                output_power_id INTEGER NOT NULL,
+                FOREIGN KEY (settings_id) REFERENCES ReportSettings (id) ON DELETE CASCADE,
+                FOREIGN KEY (input_power_id) REFERENCES PowerMeasure (id) ON DELETE CASCADE,
+                FOREIGN KEY (output_power_id) REFERENCES PowerMeasure (id) ON DELETE CASCADE
+            )
+            """,
+        ]
         try:
-            # Create PowerMeasure table
-            self._cursor.execute("""
-                CREATE TABLE IF NOT EXISTS PowerMeasure (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type TEXT,
-                    voltage REAL,
-                    current REAL,
-                    power REAL,
-                    pf REAL
-                )
-            """)
+            for query in schema_queries:
+                self._cursor.execute(query)
 
-            # Create OverLoad table
-            self._cursor.execute("""
-                CREATE TABLE IF NOT EXISTS OverLoad (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    load_percentage INTEGER,
-                    overload_time_min INTEGER
-                )
-            """)
-
-            # Create spec table
-            self._cursor.execute("""
-                CREATE TABLE IF NOT EXISTS spec (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    phase TEXT,
-                    rating_va INTEGER,
-                    rated_voltage INTEGER,
-                    rated_current INTEGER,
-                    min_input_voltage INTEGER,
-                    max_input_voltage INTEGER,
-                    pf_rated_current INTEGER,
-                    max_continous_amp INTEGER,
-                    overload_amp INTEGER,
-                    overload_long_id INTEGER,
-                    overload_medium_id INTEGER,
-                    overload_short_id INTEGER,
-                    avg_switch_time_ms INTEGER,
-                    avg_backup_time_ms INTEGER,
-                    FOREIGN KEY (overload_long_id) REFERENCES OverLoad (id),
-                    FOREIGN KEY (overload_medium_id) REFERENCES OverLoad (id),
-                    FOREIGN KEY (overload_short_id) REFERENCES OverLoad (id)
-                )
-            """)
-
-            # Create ReportSettings table
-            self._cursor.execute("""
-                CREATE TABLE IF NOT EXISTS ReportSettings (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    report_id INTEGER,
-                    standard TEXT,
-                    ups_model INTEGER,
-                    client_name TEXT,
-                    brand_name TEXT,
-                    test_engineer_name TEXT,
-                    test_approval_name TEXT,
-                    spec_id INTEGER,
-                    FOREIGN KEY (spec_id) REFERENCES spec (id)
-                )
-            """)
-
-            # Create TestReport table
-            self._cursor.execute("""
-                CREATE TABLE IF NOT EXISTS TestReport (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    settings_id INTEGER,
-                    test_name TEXT,
-                    test_description TEXT,
-                    input_power_id INTEGER,
-                    output_power_id INTEGER,
-                    FOREIGN KEY (settings_id) REFERENCES ReportSettings (id),
-                    FOREIGN KEY (input_power_id) REFERENCES PowerMeasure (id),
-                    FOREIGN KEY (output_power_id) REFERENCES PowerMeasure (id)
-                )
-            """)
+         
             self._conn.commit()
         except sqlite3.Error as e:
             raise Exception(f"Error creating tables: {e}")
-
-    def _check_id_exists(self, table_name: str, entry_id: int):
-        """Check if an entry with the given ID exists in the specified table."""
-        try:
-            self._cursor.execute(
-                f"SELECT 1 FROM {table_name} WHERE id = ?", (entry_id,)
-            )
-            return self._cursor.fetchone() is not None
-        except sqlite3.Error as e:
-            raise Exception(f"Error checking ID existence in {table_name}: {e}")
 
     @staticmethod
     def _validate_non_negative_integer(value: Any, field_name: str):
@@ -155,51 +158,12 @@ class DataManager(BaseModel):
             overload.overload_time_min, "overload_time_min"
         )
 
-    def insert_overload(self, overload: OverLoad):
-        """Insert an OverLoad message into the database."""
-        self._validate_overload(overload)
-        try:
-            self._cursor.execute(
-                """
-                INSERT INTO OverLoad (load_percentage, overload_time_min)
-                VALUES (?, ?)
-            """,
-                (overload.load_percentage, overload.overload_time_min),
-            )
-            self._conn.commit()
-            return self._cursor.lastrowid
-        except sqlite3.Error as e:
-            raise Exception(f"Error inserting OverLoad: {e}")
-
     def _validate_power_measure(self, power_measure: PowerMeasure):
         """Validate PowerMeasure object."""
         self._validate_non_negative_float(power_measure.voltage, "voltage")
         self._validate_non_negative_float(power_measure.current, "current")
         self._validate_non_negative_float(power_measure.power, "power")
         self._validate_pf(power_measure.pf)
-
-    def insert_power_measure(self, power: PowerMeasure):
-        """Insert a PowerMeasure message into the database."""
-        self._validate_power_measure(power)
-        try:
-            power_type_name = PowerMeasureType.Name(power.type)
-            self._cursor.execute(
-                """
-                INSERT INTO PowerMeasure (type, voltage, current, power, pf)
-                VALUES (?, ?, ?, ?, ?)
-            """,
-                (
-                    power_type_name,  # Enum to string
-                    power.voltage,
-                    power.current,
-                    power.power,
-                    power.pf,
-                ),
-            )
-            self._conn.commit()
-            return self._cursor.lastrowid
-        except sqlite3.Error as e:
-            raise Exception(f"Error inserting PowerMeasure: {e}")
 
     def _validate_spec(self, ups_spec: spec):
         """Validate spec object."""
@@ -223,6 +187,84 @@ class DataManager(BaseModel):
         self._validate_overload(ups_spec.overload_long)
         self._validate_overload(ups_spec.overload_medium)
         self._validate_overload(ups_spec.overload_short)
+
+    def _validate_test_report(self, report: TestReport):
+        """Validate TestReport object."""
+        # Validate TestReport settings
+        if not isinstance(report.settings, ReportSettings):
+            raise ValueError("Invalid settings: Must be a ReportSettings object.")
+
+        # Validate input and output PowerMeasure
+        if not isinstance(report.inputPower, PowerMeasure):
+            raise ValueError("Invalid inputPower: Must be a PowerMeasure object.")
+        self._validate_power_measure(report.inputPower)
+
+        if not isinstance(report.outputpower, PowerMeasure):
+            raise ValueError("Invalid outputpower: Must be a PowerMeasure object.")
+        self._validate_power_measure(report.outputpower)
+
+        # Validate testName
+        if (
+            not isinstance(report.testName, int)
+            or report.testName not in TestType.values()
+        ):
+            raise ValueError("Invalid testName: Must be a TestType enum value.")
+
+        # Validate testDescription
+        if (
+            not isinstance(report.testDescription, str)
+            or not report.testDescription.strip()
+        ):
+            raise ValueError("Invalid testDescription: Must be a non-empty string.")
+
+    def _check_id_exists(self, table_name: str, entry_id: int):
+        """Check if an entry with the given ID exists in the specified table."""
+        try:
+            self._cursor.execute(
+                f"SELECT 1 FROM {table_name} WHERE id = ?", (entry_id,)
+            )
+            return self._cursor.fetchone() is not None
+        except sqlite3.Error as e:
+            raise Exception(f"Error checking ID existence in {table_name}: {e}")
+
+    def insert_overload(self, overload: OverLoad):
+        """Insert an OverLoad message into the database."""
+        self._validate_overload(overload)
+        try:
+            self._cursor.execute(
+                """
+                INSERT INTO OverLoad (load_percentage, overload_time_min)
+                VALUES (?, ?)
+            """,
+                (overload.load_percentage, overload.overload_time_min),
+            )
+            self._conn.commit()
+            return self._cursor.lastrowid
+        except sqlite3.Error as e:
+            raise Exception(f"Error inserting OverLoad: {e}")
+
+    def insert_power_measure(self, power: PowerMeasure):
+        """Insert a PowerMeasure message into the database."""
+        self._validate_power_measure(power)
+        try:
+            power_type_name = PowerMeasureType.Name(power.type)
+            self._cursor.execute(
+                """
+                INSERT INTO PowerMeasure (type, voltage, current, power, pf)
+                VALUES (?, ?, ?, ?, ?)
+            """,
+                (
+                    power_type_name,  # Enum to string
+                    power.voltage,
+                    power.current,
+                    power.power,
+                    power.pf,
+                ),
+            )
+            self._conn.commit()
+            return self._cursor.lastrowid
+        except sqlite3.Error as e:
+            raise Exception(f"Error inserting PowerMeasure: {e}")
 
     def insert_spec(self, ups_spec: spec):
         """Insert a spec message into the database."""
@@ -308,35 +350,6 @@ class DataManager(BaseModel):
             # Catch any other unexpected exceptions
             raise Exception(f"Unexpected error inserting ReportSettings: {e}")
 
-    def _validate_test_report(self, report: TestReport):
-        """Validate TestReport object."""
-        # Validate TestReport settings
-        if not isinstance(report.settings, ReportSettings):
-            raise ValueError("Invalid settings: Must be a ReportSettings object.")
-
-        # Validate input and output PowerMeasure
-        if not isinstance(report.inputPower, PowerMeasure):
-            raise ValueError("Invalid inputPower: Must be a PowerMeasure object.")
-        self._validate_power_measure(report.inputPower)
-
-        if not isinstance(report.outputpower, PowerMeasure):
-            raise ValueError("Invalid outputpower: Must be a PowerMeasure object.")
-        self._validate_power_measure(report.outputpower)
-
-        # Validate testName
-        if (
-            not isinstance(report.testName, int)
-            or report.testName not in TestType.values()
-        ):
-            raise ValueError("Invalid testName: Must be a TestType enum value.")
-
-        # Validate testDescription
-        if (
-            not isinstance(report.testDescription, str)
-            or not report.testDescription.strip()
-        ):
-            raise ValueError("Invalid testDescription: Must be a non-empty string.")
-
     def insert_test_report(self, report: TestReport):
         """Insert a TestReport message into the database."""
         # Validate TestReport object
@@ -383,18 +396,6 @@ class DataManager(BaseModel):
         except Exception as e:
             # Catch and handle any other exceptions
             raise Exception(f"Unexpected error inserting TestReport: {e}")
-
-    def close(self):
-        """Close the database connection."""
-        self._conn.close()
-
-    def __enter__(self):
-        """Enter the runtime context for the DataManager."""
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        """Exit the runtime context, ensuring the connection is closed."""
-        self.close()
 
     def get_test_report(self, report_id: int):
         """Retrieve a TestReport and related data from the database by report ID."""
@@ -706,7 +707,12 @@ class DataManager(BaseModel):
 
                 # Delete related ReportSettings and cascade to spec
                 if settings_id:
-                    self.delete_report_settings(settings_id)
+                    try:
+                        self.delete_report_settings(settings_id)
+                    except Exception as e:
+                        raise Exception(
+                            f"Failed to delete ReportSettings with ID {settings_id}: {e}"
+                        )
 
             # Finally, delete the TestReport itself
             self._delete_entry("TestReport", test_report_id)
@@ -720,9 +726,7 @@ class DataManager(BaseModel):
         except ValueError as ve:
             return str(ve)
 
-    def insert_mock_data(self, clientname, brandname, engineername):
-        data_manager = DataManager()
-
+    def generate_mock_data(self, clientname, brandname, engineername):
         # Example PowerMeasure objects
         input_power = PowerMeasure(
             type=PowerMeasureType.UPS_INPUT,
@@ -738,6 +742,9 @@ class DataManager(BaseModel):
             power=2310.0,
             pf=0.97,
         )
+        overload_long = OverLoad(load_percentage=110, overload_time_min=10)
+        overload_medium = OverLoad(load_percentage=125, overload_time_min=5)
+        overload_short = OverLoad(load_percentage=150, overload_time_min=2)
 
         # Example spec object
         ups_spec = spec(
@@ -750,9 +757,9 @@ class DataManager(BaseModel):
             pf_rated_current=1,
             Max_Continous_Amp=25,
             overload_Amp=30,
-            overload_long=OverLoad(load_percentage=110, overload_time_min=10),
-            overload_medium=OverLoad(load_percentage=125, overload_time_min=5),
-            overload_short=OverLoad(load_percentage=150, overload_time_min=2),
+            overload_long=overload_long ,
+            overload_medium=overload_medium ,
+            overload_short=overload_short,
             AvgSwitchTime_ms=500,
             AvgBackupTime_ms=120000,
         )
@@ -778,21 +785,21 @@ class DataManager(BaseModel):
             outputpower=output_power,
         )
 
-        # Insert TestReport into the database
-        data_manager.insert_test_report(report)
         print("generated mock report for client :", clientname)
         # Close database connection
-        data_manager.close()
+
         return report
 
 
 # Example Usage
 if __name__ == "__main__":
     data_manager = DataManager()
-    report = data_manager.insert_mock_data("walton", "maxgreen", "fhr")
+    report = data_manager.generate_mock_data("walton", "maxgreen", "fhr")
 
-    # Insert TestReport into the database
     data_manager.insert_test_report(report)
     print("check newly inserted test report")
+    print(f"Deleting TestReport with ID {report.settings.report_id}")
+    print(data_manager.delete_test_report(report.settings.report_id))
+
     # Close database connection
     data_manager.close()
