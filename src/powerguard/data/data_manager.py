@@ -1,6 +1,6 @@
 import sqlite3
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, PrivateAttr, field_validator
 
@@ -16,23 +16,22 @@ class DataManager(BaseModel):
     db_name: str = "test_reports.db"
     db_path: Optional[Path] = None  # Will be set after validation
     _conn: sqlite3.Connection = PrivateAttr()  # Private attribute for connection
-    _cursor: sqlite3.Cursor = PrivateAttr()    # Private attribute for cursor
-  
+    _cursor: sqlite3.Cursor = PrivateAttr()  # Private attribute for cursor
+
     @field_validator("db_name")
     def validate_db_name(cls, v: str):
         """Validate db_name field to ensure it's a string and properly formatted."""
-        if not v.endswith('.db'):
+        if not v.endswith(".db"):
             raise ValueError("Database name must end with '.db'")
         return v
 
     def __init__(self, **kwargs):
         """Initialize the database and ensure all tables are created."""
-        super().__init__(**kwargs)     
-      
-       
-        db_folder =  paths.get("db_dir")
+        super().__init__(**kwargs)
+
+        db_folder = paths.get("db_dir")
         db_folder.mkdir(parents=True, exist_ok=True)
-        
+
         # Set the db_path if it's not provided
         if not self.db_path:
             self.db_path = db_folder / self.db_name
@@ -41,6 +40,7 @@ class DataManager(BaseModel):
         self._conn = sqlite3.connect(self.db_path)
         self._cursor = self._conn.cursor()
         self._create_tables()
+
     def _create_tables(self):
         """Create necessary tables in the SQLite database."""
         try:
@@ -123,20 +123,37 @@ class DataManager(BaseModel):
         except sqlite3.Error as e:
             raise Exception(f"Error creating tables: {e}")
 
+    def _check_id_exists(self, table_name: str, entry_id: int):
+        """Check if an entry with the given ID exists in the specified table."""
+        try:
+            self._cursor.execute(
+                f"SELECT 1 FROM {table_name} WHERE id = ?", (entry_id,)
+            )
+            return self._cursor.fetchone() is not None
+        except sqlite3.Error as e:
+            raise Exception(f"Error checking ID existence in {table_name}: {e}")
+
+    @staticmethod
+    def _validate_non_negative_integer(value: Any, field_name: str):
+        if not isinstance(value, int) or value < 0:
+            raise ValueError(f"{field_name} must be a non-negative integer.")
+
+    @staticmethod
+    def _validate_non_negative_float(value: Any, field_name: str):
+        if not isinstance(value, (float, int)) or value < 0:
+            raise ValueError(f"{field_name} must be a non-negative float.")
+
+    @staticmethod
+    def _validate_pf(pf: Any):
+        if not isinstance(pf, (float, int)) or not (0 <= pf <= 1):
+            raise ValueError("Power factor must be between 0 and 1.")
+
     def _validate_overload(self, overload: OverLoad):
         """Validate OverLoad object."""
-        if (
-            not isinstance(overload.load_percentage, int)
-            or overload.load_percentage < 0
-        ):
-            raise ValueError("Invalid load_percentage: must be a non-negative integer.")
-        if (
-            not isinstance(overload.overload_time_min, int)
-            or overload.overload_time_min < 0
-        ):
-            raise ValueError(
-                "Invalid overload_time_min: must be a non-negative integer."
-            )
+        self._validate_non_negative_integer(overload.load_percentage, "load_percentage")
+        self._validate_non_negative_integer(
+            overload.overload_time_min, "overload_time_min"
+        )
 
     def insert_overload(self, overload: OverLoad):
         """Insert an OverLoad message into the database."""
@@ -153,6 +170,36 @@ class DataManager(BaseModel):
             return self._cursor.lastrowid
         except sqlite3.Error as e:
             raise Exception(f"Error inserting OverLoad: {e}")
+
+    def _validate_power_measure(self, power_measure: PowerMeasure):
+        """Validate PowerMeasure object."""
+        self._validate_non_negative_float(power_measure.voltage, "voltage")
+        self._validate_non_negative_float(power_measure.current, "current")
+        self._validate_non_negative_float(power_measure.power, "power")
+        self._validate_pf(power_measure.pf)
+
+    def insert_power_measure(self, power: PowerMeasure):
+        """Insert a PowerMeasure message into the database."""
+        self._validate_power_measure(power)
+        try:
+            power_type_name = PowerMeasureType.Name(power.type)
+            self._cursor.execute(
+                """
+                INSERT INTO PowerMeasure (type, voltage, current, power, pf)
+                VALUES (?, ?, ?, ?, ?)
+            """,
+                (
+                    power_type_name,  # Enum to string
+                    power.voltage,
+                    power.current,
+                    power.power,
+                    power.pf,
+                ),
+            )
+            self._conn.commit()
+            return self._cursor.lastrowid
+        except sqlite3.Error as e:
+            raise Exception(f"Error inserting PowerMeasure: {e}")
 
     def _validate_spec(self, ups_spec: spec):
         """Validate spec object."""
@@ -261,40 +308,6 @@ class DataManager(BaseModel):
             # Catch any other unexpected exceptions
             raise Exception(f"Unexpected error inserting ReportSettings: {e}")
 
-    def _validate_power_measure(self, power: PowerMeasure):
-        """Validate PowerMeasure object."""
-        if not isinstance(power.voltage, (float, int)) or power.voltage < 0:
-            raise ValueError("Invalid voltage: must be a non-negative number.")
-        if not isinstance(power.current, (float, int)) or power.current < 0:
-            raise ValueError("Invalid current: must be a non-negative number.")
-        if not isinstance(power.power, (float, int)) or power.power < 0:
-            raise ValueError("Invalid power: must be a non-negative number.")
-        if not isinstance(power.pf, (float, int)) or not (0 <= power.pf <= 1):
-            raise ValueError("Invalid pf: must be a number between 0 and 1.")
-
-    def insert_power_measure(self, power: PowerMeasure):
-        """Insert a PowerMeasure message into the database."""
-        self._validate_power_measure(power)
-        try:
-            power_type_name = PowerMeasureType.Name(power.type) 
-            self._cursor.execute(
-                """
-                INSERT INTO PowerMeasure (type, voltage, current, power, pf)
-                VALUES (?, ?, ?, ?, ?)
-            """,
-                (
-                    power_type_name,  # Enum to string
-                    power.voltage,
-                    power.current,
-                    power.power,
-                    power.pf,
-                ),
-            )
-            self._conn.commit()
-            return self._cursor.lastrowid
-        except sqlite3.Error as e:
-            raise Exception(f"Error inserting PowerMeasure: {e}")
-
     def _validate_test_report(self, report: TestReport):
         """Validate TestReport object."""
         # Validate TestReport settings
@@ -310,8 +323,11 @@ class DataManager(BaseModel):
             raise ValueError("Invalid outputpower: Must be a PowerMeasure object.")
         self._validate_power_measure(report.outputpower)
 
-       # Validate testName
-        if not isinstance(report.testName, int) or report.testName not in TestType.values():
+        # Validate testName
+        if (
+            not isinstance(report.testName, int)
+            or report.testName not in TestType.values()
+        ):
             raise ValueError("Invalid testName: Must be a TestType enum value.")
 
         # Validate testDescription
@@ -353,10 +369,10 @@ class DataManager(BaseModel):
                     output_power_id,
                 ),
             )
-            
+
             # Commit the transaction to save changes
             self._conn.commit()
-            
+
             # Optionally return the last inserted row ID
             return self._cursor.lastrowid
 
@@ -368,10 +384,18 @@ class DataManager(BaseModel):
             # Catch and handle any other exceptions
             raise Exception(f"Unexpected error inserting TestReport: {e}")
 
-
     def close(self):
         """Close the database connection."""
         self._conn.close()
+
+    def __enter__(self):
+        """Enter the runtime context for the DataManager."""
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Exit the runtime context, ensuring the connection is closed."""
+        self.close()
+
     def get_test_report(self, report_id: int):
         """Retrieve a TestReport and related data from the database by report ID."""
         try:
@@ -448,8 +472,6 @@ class DataManager(BaseModel):
             return report
         except sqlite3.Error as e:
             raise Exception(f"Error retrieving TestReport: {e}")
-
-
 
     def get_latest_test_report(self):
         """Retrieve the latest TestReport and its associated data."""
@@ -541,15 +563,180 @@ class DataManager(BaseModel):
             return [{"report_id": row[0], "test_name": row[1]} for row in results]
         except sqlite3.Error as e:
             raise Exception(f"Error retrieving TestReport IDs and test names: {e}")
-    def insert_mock_data(self,clientname,brandname,engineername ) :
+
+    def _delete_entry(self, table_name: str, entry_id: int):
+        """Delete an entry from the specified table if it exists."""
+        if not self._check_id_exists(table_name, entry_id):
+            raise ValueError(
+                f"Entry with ID {entry_id} does not exist in {table_name}."
+            )
+
+        try:
+            self._cursor.execute(f"DELETE FROM {table_name} WHERE id = ?", (entry_id,))
+            self._conn.commit()
+            return f"Entry with ID {entry_id} successfully deleted from {table_name}."
+        except sqlite3.Error as e:
+            raise Exception(f"Error deleting entry from {table_name}: {e}")
+
+    def delete_overload(self, overload_id: int):
+        """Delete an OverLoad entry by ID."""
+        try:
+            return self._delete_entry("OverLoad", overload_id)
+        except ValueError as ve:
+            return str(ve)
+        except Exception as e:
+            raise Exception(f"Unexpected error while deleting OverLoad: {e}")
+
+    def delete_power_measure(self, power_measure_id: int):
+        """Delete a PowerMeasure entry by ID."""
+        try:
+            return self._delete_entry("PowerMeasure", power_measure_id)
+        except ValueError as ve:
+            return str(ve)
+        except Exception as e:
+            raise Exception(f"Unexpected error while deleting PowerMeasure: {e}")
+
+    def delete_spec(self, spec_id: int, cascading: bool = True):
+        """
+        Deletes a spec entry by ID. If cascading is True, it also deletes related OverLoad entries.
+        """
+        try:
+            # Check if the spec entry exists
+            if not self._check_id_exists("spec", spec_id):
+                raise ValueError(f"spec with ID {spec_id} does not exist.")
+
+            if cascading:
+                # Get OverLoad IDs associated with the spec
+                self._cursor.execute(
+                    """
+                    SELECT overload_long_id, overload_medium_id, overload_short_id
+                    FROM spec WHERE id = ?
+                    """,
+                    (spec_id,),
+                )
+                overload_ids = self._cursor.fetchone()
+
+                # Delete related OverLoad entries
+                if overload_ids:
+                    for overload_id in overload_ids:
+                        if overload_id:
+                            self._delete_entry("OverLoad", overload_id)
+
+            # Delete the spec entry
+            self._delete_entry("spec", spec_id)
+            self._conn.commit()
+
+            if cascading:
+                return f"spec with ID {spec_id} and related OverLoad entries deleted."
+            else:
+                return f"spec with ID {spec_id} deleted without affecting related OverLoad entries."
+
+        except sqlite3.Error as e:
+            raise Exception(f"Error deleting spec with ID {spec_id}: {e}")
+        except ValueError as ve:
+            return str(ve)
+
+    def delete_report_settings(self, settings_id: int, cascading: bool = True):
+        """
+        Deletes a ReportSettings entry by ID along with its related spec entry.
+        """
+        try:
+            if cascading:
+                # Check if the ReportSettings entry exists
+                if not self._check_id_exists("ReportSettings", settings_id):
+                    raise ValueError(
+                        f"ReportSettings with ID {settings_id} does not exist."
+                    )
+
+                # Get the related spec_id
+                self._cursor.execute(
+                    "SELECT spec_id FROM ReportSettings WHERE id = ?", (settings_id,)
+                )
+                spec_row = self._cursor.fetchone()
+                if spec_row:
+                    spec_id = spec_row[0]
+                    if spec_id:
+                        self.delete_spec(spec_id)  # Cascade to delete the spec
+
+            # Delete the ReportSettings entry
+            self._delete_entry("ReportSettings", settings_id)
+            self._conn.commit()
+            if cascading:
+                return f"ReportSettings with ID {settings_id} and related spec deleted."
+            else:
+                return f"ReportSettings with ID {settings_id} deleted without affecting related spec entries."
+        except sqlite3.Error as e:
+            raise Exception(f"Error deleting ReportSettings with ID {settings_id}: {e}")
+        except ValueError as ve:
+            return str(ve)
+
+    def delete_test_report(self, test_report_id: int, cascading: bool = True):
+        """
+        Deletes a TestReport entry by ID along with all its related entries.
+        This includes cascading deletions for associated entries in:
+        - ReportSettings
+        - PowerMeasure (input and output)
+        """
+        try:
+            if cascading:
+                # Check if the TestReport exists
+                if not self._check_id_exists("TestReport", test_report_id):
+                    raise ValueError(
+                        f"TestReport with ID {test_report_id} does not exist."
+                    )
+
+                # Get related ReportSettings ID and PowerMeasure IDs
+                self._cursor.execute(
+                    "SELECT settings_id, input_power_id, output_power_id FROM TestReport WHERE id = ?",
+                    (test_report_id,),
+                )
+                row = self._cursor.fetchone()
+                if row is None:
+                    raise ValueError(
+                        f"No data found for TestReport with ID {test_report_id}."
+                    )
+
+                settings_id, input_power_id, output_power_id = row
+
+                # Delete related PowerMeasure entries
+                if input_power_id:
+                    self._delete_entry("PowerMeasure", input_power_id)
+                if output_power_id:
+                    self._delete_entry("PowerMeasure", output_power_id)
+
+                # Delete related ReportSettings and cascade to spec
+                if settings_id:
+                    self.delete_report_settings(settings_id)
+
+            # Finally, delete the TestReport itself
+            self._delete_entry("TestReport", test_report_id)
+            self._conn.commit()
+            if cascading:
+                return f"TestReport with ID {test_report_id} and all related entries have been deleted."
+            else:
+                return f"TestReport with ID {test_report_id} deleted without affecting related reportsettings,powermeasure entries."
+        except sqlite3.Error as e:
+            raise Exception(f"Error deleting TestReport with ID {test_report_id}: {e}")
+        except ValueError as ve:
+            return str(ve)
+
+    def insert_mock_data(self, clientname, brandname, engineername):
         data_manager = DataManager()
 
         # Example PowerMeasure objects
         input_power = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT, voltage=230.0, current=10.0, power=2300.0, pf=0.98
+            type=PowerMeasureType.UPS_INPUT,
+            voltage=230.0,
+            current=10.0,
+            power=2300.0,
+            pf=0.98,
         )
         output_power = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT, voltage=220.0, current=10.5, power=2310.0, pf=0.97
+            type=PowerMeasureType.UPS_OUTPUT,
+            voltage=220.0,
+            current=10.5,
+            power=2310.0,
+            pf=0.97,
         )
 
         # Example spec object
@@ -576,8 +763,8 @@ class DataManager(BaseModel):
             standard=TestStandard.IEC_62040_3,
             ups_model=101,
             client_name=clientname,
-            brand_name=brandname ,
-            test_engineer_name=engineername ,
+            brand_name=brandname,
+            test_engineer_name=engineername,
             test_approval_name="Jane Smith",
             spec=ups_spec,
         )
@@ -593,61 +780,16 @@ class DataManager(BaseModel):
 
         # Insert TestReport into the database
         data_manager.insert_test_report(report)
-        print("generated mock report for client :",clientname)
+        print("generated mock report for client :", clientname)
         # Close database connection
         data_manager.close()
         return report
 
+
 # Example Usage
 if __name__ == "__main__":
     data_manager = DataManager()
-
-    # Example PowerMeasure objects
-    input_power = PowerMeasure(
-        type=PowerMeasureType.UPS_INPUT, voltage=230.0, current=10.0, power=2300.0, pf=0.98
-    )
-    output_power = PowerMeasure(
-        type=PowerMeasureType.UPS_OUTPUT, voltage=220.0, current=10.5, power=2310.0, pf=0.97
-    )
-
-    # Example spec object
-    ups_spec = spec(
-        phase=Phase.SINGLE_PHASE,
-        Rating_va=5000,
-        RatedVoltage_volt=230,
-        RatedCurrent_amp=21,
-        MinInputVoltage_volt=200,
-        MaxInputVoltage_volt=240,
-        pf_rated_current=1,
-        Max_Continous_Amp=25,
-        overload_Amp=30,
-        overload_long=OverLoad(load_percentage=110, overload_time_min=10),
-        overload_medium=OverLoad(load_percentage=125, overload_time_min=5),
-        overload_short=OverLoad(load_percentage=150, overload_time_min=2),
-        AvgSwitchTime_ms=500,
-        AvgBackupTime_ms=120000,
-    )
-
-    # Example ReportSettings object
-    settings = ReportSettings(
-        report_id=1,
-        standard=TestStandard.IEC_62040_3,
-        ups_model=101,
-        client_name="ABC Corp",
-        brand_name="Brand Y",
-        test_engineer_name="John Doe",
-        test_approval_name="Jane Smith",
-        spec=ups_spec,
-    )
-
-    # Example TestReport object
-    report = TestReport(
-        settings=settings,
-        testName=TestType.FULL_LOAD_TEST,
-        testDescription="Full load test for the UPS system",
-        inputPower=input_power,
-        outputpower=output_power,
-    )
+    report = data_manager.insert_mock_data("walton", "maxgreen", "fhr")
 
     # Insert TestReport into the database
     data_manager.insert_test_report(report)
