@@ -18,27 +18,53 @@ class ReportGenerator(BaseModel):
     ReportGenerator class for generating formatted Word reports using Pydantic.
     """
     data_manager: DataManager
-    template_path: Path =Field(default="test_report_template.docx")
+    template_path: Path = Field(default="test_report_template.docx")
+    output_path:Path =Field(default= paths.get("output_dir")   )
 
     @field_validator("template_path")
     def validate_template_path(cls, value: Path) -> Path:
         """
         Ensure the template path exists and is a file.
         """
-        # Get the current file's directory (in the 'src' directory).
-        current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+        # Get the template directory from paths
+        template_folder = paths.get("template_dir")        
+        # Make sure the folder exists, create it if it doesn't
+        template_folder.mkdir(parents=True, exist_ok=True)
 
-        # Calculate the path to the 'template' directory (sibling of 'src')
-        template_dir = current_dir.parent.parent.parent / "template"  # This will give the correct path to the template folder
+        # If no template_path was provided, set it to the default in the template folder
+        if not value:
+            value = template_folder / "test_report_template.docx"
 
-        # Now check the full path of the template file in the 'template' directory
-        full_template_path = template_dir / value
+        # Full path to the template file
+        full_template_path = template_folder / value
 
         # Validate if the template file exists and is a file
         if not full_template_path.exists() or not full_template_path.is_file():
             raise ValueError(f"Template file not found: {full_template_path}")
 
         return full_template_path
+    @field_validator("output_path")
+    def validate_output_path(cls, value: Path) -> Path:
+        """
+        Ensure the template path exists and is a file.
+        """
+        
+        output_folder = paths.get("output_dir")       
+        
+        output_folder.mkdir(parents=True, exist_ok=True)
+
+       
+
+        # Full path to the template file
+        full_output_folder= output_folder 
+
+        # Validate if the template file exists and is a file
+        if not full_output_folder.exists() or not full_output_folder.is_dir():
+            raise ValueError(f"Output Folder not found: {full_output_folder}")
+
+        return full_output_folder
+
+
 
     def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
         """
@@ -108,11 +134,10 @@ class ReportGenerator(BaseModel):
         client_name = report.settings.client_name or "UnknownClient"
         ups_model = report.settings.ups_model or "UnknownModel"
         date_str = datetime.now().strftime("%Y%m%d")
-        output_file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}.docx"
-        output_path = Path.cwd() / output_file_name
-
+        output_file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}.docx"            
+        output_file_path = self.output_path / output_file_name
         # Step 5: Edit the Word template
-        self.edit_word_document(output_path, xml_path)
+        self.edit_word_document(output_file_path, xml_path)
 
 
 if __name__ == "__main__":
