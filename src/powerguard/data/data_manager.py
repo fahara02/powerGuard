@@ -27,12 +27,11 @@ class DataManager(BaseModel):
 
     def __init__(self, **kwargs):
         """Initialize the database and ensure all tables are created."""
-        super().__init__(**kwargs)
-        
-        # Create the 'db' directory in the project root
-        project_root = Path(__file__).parent.parent
-        db_folder = project_root / "db"
-        db_folder.mkdir(exist_ok=True)
+        super().__init__(**kwargs)     
+      
+       
+        db_folder =  paths.get("db_dir")
+        db_folder.mkdir(parents=True, exist_ok=True)
         
         # Set the db_path if it's not provided
         if not self.db_path:
