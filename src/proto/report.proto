@@ -23,9 +23,6 @@ message ReportSettings{
     
 
 }
-
-
-
 message TestReport{
 	ReportSettings settings=1;
 	Test.TestType testName=2; 

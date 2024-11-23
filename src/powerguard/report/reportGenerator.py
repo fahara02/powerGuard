@@ -29,7 +29,7 @@ class ReportGenerator(BaseModel):
         current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 
         # Calculate the path to the 'template' directory (sibling of 'src')
-        template_dir = current_dir.parent / "template"  # This will give the correct path to the template folder
+        template_dir = current_dir.parent.parent.parent / "template"  # This will give the correct path to the template folder
 
         # Now check the full path of the template file in the 'template' directory
         full_template_path = template_dir / value
@@ -105,8 +105,8 @@ class ReportGenerator(BaseModel):
             self.call_cpp_for_processing(xml_path)
 
         # Step 4: Autogenerate output file name
-        client_name = report_data.get("clientName", "UnknownClient").replace(" ", "_")
-        ups_model = report_data.get("upsModel", "UnknownModel").replace(" ", "_")
+        client_name = report.settings.client_name or "UnknownClient"
+        ups_model = report.settings.ups_model or "UnknownModel"
         date_str = datetime.now().strftime("%Y%m%d")
         output_file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}.docx"
         output_path = Path.cwd() / output_file_name
@@ -118,7 +118,7 @@ class ReportGenerator(BaseModel):
 if __name__ == "__main__":
     # Initialize DataManager
     data_manager = DataManager()
-
+    report=data_manager.insert_mock_data("Walton","maxgreen","FHR")
     # Initialize ReportGenerator with Pydantic
     report_generator = ReportGenerator(
         data_manager=data_manager,
@@ -126,6 +126,6 @@ if __name__ == "__main__":
     )
 
     # Generate a report
-    report_id = 42
-    report_generator.generate_report(report_id, use_cpp=True)
+    report_id = report.settings.report_id
+    report_generator.generate_report(report_id, use_cpp=False)
 

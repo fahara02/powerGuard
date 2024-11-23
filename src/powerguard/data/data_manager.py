@@ -542,7 +542,62 @@ class DataManager(BaseModel):
             return [{"report_id": row[0], "test_name": row[1]} for row in results]
         except sqlite3.Error as e:
             raise Exception(f"Error retrieving TestReport IDs and test names: {e}")
-    
+    def insert_mock_data(self,clientname,brandname,engineername ) :
+        data_manager = DataManager()
+
+        # Example PowerMeasure objects
+        input_power = PowerMeasure(
+            type=PowerMeasureType.UPS_INPUT, voltage=230.0, current=10.0, power=2300.0, pf=0.98
+        )
+        output_power = PowerMeasure(
+            type=PowerMeasureType.UPS_OUTPUT, voltage=220.0, current=10.5, power=2310.0, pf=0.97
+        )
+
+        # Example spec object
+        ups_spec = spec(
+            phase=Phase.SINGLE_PHASE,
+            Rating_va=5000,
+            RatedVoltage_volt=230,
+            RatedCurrent_amp=21,
+            MinInputVoltage_volt=200,
+            MaxInputVoltage_volt=240,
+            pf_rated_current=1,
+            Max_Continous_Amp=25,
+            overload_Amp=30,
+            overload_long=OverLoad(load_percentage=110, overload_time_min=10),
+            overload_medium=OverLoad(load_percentage=125, overload_time_min=5),
+            overload_short=OverLoad(load_percentage=150, overload_time_min=2),
+            AvgSwitchTime_ms=500,
+            AvgBackupTime_ms=120000,
+        )
+
+        # Example ReportSettings object
+        settings = ReportSettings(
+            report_id=1,
+            standard=TestStandard.IEC_62040_3,
+            ups_model=101,
+            client_name=clientname,
+            brand_name=brandname ,
+            test_engineer_name=engineername ,
+            test_approval_name="Jane Smith",
+            spec=ups_spec,
+        )
+
+        # Example TestReport object
+        report = TestReport(
+            settings=settings,
+            testName=TestType.FULL_LOAD_TEST,
+            testDescription="Full load test for the UPS system",
+            inputPower=input_power,
+            outputpower=output_power,
+        )
+
+        # Insert TestReport into the database
+        data_manager.insert_test_report(report)
+        print("generated mock report for client :",clientname)
+        # Close database connection
+        data_manager.close()
+        return report
 
 # Example Usage
 if __name__ == "__main__":
