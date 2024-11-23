@@ -1,19 +1,23 @@
 import sqlite3
 from pathlib import Path
+from typing import Optional
+
+from pydantic import BaseModel, PrivateAttr, field_validator
 
 # Import generated proto classes
-from proto.pData_pb2 import PowerMeasure
-from proto.ups_test_pb2 import TestType
-from proto.upsDefines_pb2 import spec, OverLoad
-from proto.report_pb2 import TestReport, ReportSettings
-from pydantic import BaseModel, PrivateAttr,field_validator
-from typing import Optional
+from powerguard.bootstrap import paths
+from proto.pData_pb2 import PowerMeasure, PowerMeasureType
+from proto.report_pb2 import ReportSettings, TestReport, TestStandard
+from proto.ups_test_pb2 import TestResult, TestType
+from proto.upsDefines_pb2 import OverLoad, Phase, spec
+
 
 class DataManager(BaseModel):
     db_name: str = "test_reports.db"
     db_path: Optional[Path] = None  # Will be set after validation
     _conn: sqlite3.Connection = PrivateAttr()  # Private attribute for connection
     _cursor: sqlite3.Cursor = PrivateAttr()    # Private attribute for cursor
+  
     @field_validator("db_name")
     def validate_db_name(cls, v: str):
         """Validate db_name field to ensure it's a string and properly formatted."""
@@ -34,11 +38,10 @@ class DataManager(BaseModel):
         if not self.db_path:
             self.db_path = db_folder / self.db_name
 
-        # Initialize database connection
+        # Initialize database connection and cursor
         self._conn = sqlite3.connect(self.db_path)
         self._cursor = self._conn.cursor()
         self._create_tables()
-        super().__init__()
     def _create_tables(self):
         """Create necessary tables in the SQLite database."""
         try:
@@ -148,7 +151,7 @@ class DataManager(BaseModel):
                 (overload.load_percentage, overload.overload_time_min),
             )
             self._conn.commit()
-            return self.cursor.lastrowid
+            return self._cursor.lastrowid
         except sqlite3.Error as e:
             raise Exception(f"Error inserting OverLoad: {e}")
 
@@ -181,6 +184,7 @@ class DataManager(BaseModel):
 
         try:
             # Insert overload entries and get their IDs
+            phase_name = Phase.Name(ups_spec.phase)
             overload_long_id = self.insert_overload(ups_spec.overload_long)
             overload_medium_id = self.insert_overload(ups_spec.overload_medium)
             overload_short_id = self.insert_overload(ups_spec.overload_short)
@@ -198,7 +202,7 @@ class DataManager(BaseModel):
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
                 (
-                    ups_spec.phase.name,  # Enum to string
+                    phase_name,  # Enum converted to string
                     ups_spec.Rating_va,
                     ups_spec.RatedVoltage_volt,
                     ups_spec.RatedCurrent_amp,
@@ -221,29 +225,42 @@ class DataManager(BaseModel):
 
     def insert_report_settings(self, settings: ReportSettings):
         """Insert ReportSettings into the database."""
-        spec_id = self.insert_spec(settings.spec)
+        try:
+            # Insert spec first, since it's a foreign key reference
+            spec_id = self.insert_spec(settings.spec)
 
-        self._cursor.execute(
-            """
-            INSERT INTO ReportSettings (
-                report_id, standard, ups_model, client_name, brand_name,
-                test_engineer_name, test_approval_name, spec_id
+            # Insert ReportSettings data
+            self._cursor.execute(
+                """
+                INSERT INTO ReportSettings (
+                    report_id, standard, ups_model, client_name, brand_name,
+                    test_engineer_name, test_approval_name, spec_id
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    settings.report_id,
+                    TestStandard.Name(settings.standard),  # Convert Enum to string
+                    settings.ups_model,
+                    settings.client_name,
+                    settings.brand_name,
+                    settings.test_engineer_name,
+                    settings.test_approval_name,
+                    spec_id,
+                ),
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                settings.report_id,
-                settings.standard.name,  # Enum to string
-                settings.ups_model,
-                settings.client_name,
-                settings.brand_name,
-                settings.test_engineer_name,
-                settings.test_approval_name,
-                spec_id,
-            ),
-        )
-        self._conn.commit()
-        return self._cursor.lastrowid
+            self._conn.commit()
+
+            # Return the last inserted row ID
+            return self._cursor.lastrowid
+
+        except sqlite3.Error as e:
+            # If any SQLite error occurs, raise a detailed exception
+            raise Exception(f"Error inserting ReportSettings: {e}")
+
+        except Exception as e:
+            # Catch any other unexpected exceptions
+            raise Exception(f"Unexpected error inserting ReportSettings: {e}")
 
     def _validate_power_measure(self, power: PowerMeasure):
         """Validate PowerMeasure object."""
@@ -260,13 +277,14 @@ class DataManager(BaseModel):
         """Insert a PowerMeasure message into the database."""
         self._validate_power_measure(power)
         try:
+            power_type_name = PowerMeasureType.Name(power.type) 
             self._cursor.execute(
                 """
                 INSERT INTO PowerMeasure (type, voltage, current, power, pf)
                 VALUES (?, ?, ?, ?, ?)
             """,
                 (
-                    power.type.name,  # Enum to string
+                    power_type_name,  # Enum to string
                     power.voltage,
                     power.current,
                     power.power,
@@ -293,8 +311,8 @@ class DataManager(BaseModel):
             raise ValueError("Invalid outputpower: Must be a PowerMeasure object.")
         self._validate_power_measure(report.outputpower)
 
-        # Validate testName
-        if not isinstance(report.testName, TestType):
+       # Validate testName
+        if not isinstance(report.testName, int) or report.testName not in TestType.values():
             raise ValueError("Invalid testName: Must be a TestType enum value.")
 
         # Validate testDescription
@@ -314,28 +332,43 @@ class DataManager(BaseModel):
             input_power_id = self.insert_power_measure(report.inputPower)
             output_power_id = self.insert_power_measure(report.outputpower)
 
+            # Convert the TestType enum to its string name
+            test_name = TestType.Name(report.testName)
+
             # Insert ReportSettings
             settings_id = self.insert_report_settings(report.settings)
 
-            # Insert TestReport
+            # Insert TestReport into the database
             self._cursor.execute(
                 """
                 INSERT INTO TestReport (
                     settings_id, test_name, test_description, input_power_id, output_power_id
                 )
                 VALUES (?, ?, ?, ?, ?)
-            """,
+                """,
                 (
                     settings_id,
-                    report.testName.name,  # Enum to string
+                    test_name,  # Enum converted to string
                     report.testDescription,
                     input_power_id,
                     output_power_id,
                 ),
             )
+            
+            # Commit the transaction to save changes
             self._conn.commit()
+            
+            # Optionally return the last inserted row ID
+            return self._cursor.lastrowid
+
         except sqlite3.Error as e:
-            raise Exception(f"Error inserting TestReport: {e}")
+            # Catch and handle SQLite-specific errors
+            raise Exception(f"Error inserting TestReport into database: {e}")
+
+        except Exception as e:
+            # Catch and handle any other exceptions
+            raise Exception(f"Unexpected error inserting TestReport: {e}")
+
 
     def close(self):
         """Close the database connection."""
@@ -509,6 +542,7 @@ class DataManager(BaseModel):
             return [{"report_id": row[0], "test_name": row[1]} for row in results]
         except sqlite3.Error as e:
             raise Exception(f"Error retrieving TestReport IDs and test names: {e}")
+    
 
 # Example Usage
 if __name__ == "__main__":
@@ -516,15 +550,15 @@ if __name__ == "__main__":
 
     # Example PowerMeasure objects
     input_power = PowerMeasure(
-        type=PowerMeasure.UPS_INPUT, voltage=230.0, current=10.0, power=2300.0, pf=0.98
+        type=PowerMeasureType.UPS_INPUT, voltage=230.0, current=10.0, power=2300.0, pf=0.98
     )
     output_power = PowerMeasure(
-        type=PowerMeasure.UPS_OUTPUT, voltage=220.0, current=10.5, power=2310.0, pf=0.97
+        type=PowerMeasureType.UPS_OUTPUT, voltage=220.0, current=10.5, power=2310.0, pf=0.97
     )
 
     # Example spec object
     ups_spec = spec(
-        phase=spec.SINGLE_PHASE,
+        phase=Phase.SINGLE_PHASE,
         Rating_va=5000,
         RatedVoltage_volt=230,
         RatedCurrent_amp=21,
@@ -543,7 +577,7 @@ if __name__ == "__main__":
     # Example ReportSettings object
     settings = ReportSettings(
         report_id=1,
-        standard=ReportSettings.IEC_62040_3,
+        standard=TestStandard.IEC_62040_3,
         ups_model=101,
         client_name="ABC Corp",
         brand_name="Brand Y",
@@ -563,6 +597,6 @@ if __name__ == "__main__":
 
     # Insert TestReport into the database
     data_manager.insert_test_report(report)
-
+    print("check newly inserted test report")
     # Close database connection
     data_manager.close()

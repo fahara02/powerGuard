@@ -1,14 +1,16 @@
-import sys
 import os
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
-from pathlib import Path
-from datetime import datetime
-import xml.etree.ElementTree as ET
-import subprocess
+
 from docx import Document
-from data.data_manager import DataManager  # Replace with actual DataManager implementation
+from pydantic import BaseModel, Field, field_validator
+
+from powerguard.bootstrap import paths
+from powerguard.data.data_manager import DataManager
 
 
 class ReportGenerator(BaseModel):

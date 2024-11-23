@@ -2,11 +2,14 @@
 import os
 import platform
 import socket
-from pydantic import BaseModel, Field, field_validator
 from typing import Type
+
+from pydantic import BaseModel, Field, field_validator
+
+from powerguard.bootstrap import paths
+from powerguard.data.data_manager import DataManager
 from powerguard.server.node_red_server import NodeRedServer
 from proto.report_pb2 import TestReport
-from data.data_manager import DataManager
 
 
 # Pydantic model for Server configuration

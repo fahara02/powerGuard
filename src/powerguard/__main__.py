@@ -1,32 +1,17 @@
-import sys
 import os
+import sys
 from pathlib import Path
 
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
-project_dir=os.path.abspath(os.path.join(parent_dir , ".."))
-template_dir=os.path.join(project_dir,"template")
-proto_dir = os.path.join(parent_dir, "proto")
-data_dir = os.path.join(parent_dir, "data")
-
-# Add parent, proto, and data directories to sys.path
-for directory in [parent_dir, proto_dir, data_dir,template_dir]:
-    if directory not in sys.path:
-        sys.path.insert(0, directory)
-
-# # Debugging - print sys.path for verification
-#print("Updated sys.path:", sys.path)
-print("current dir is",current_dir)
-print("parent dir is",parent_dir)
-print("project dir is",project_dir)
-print("template dir is",template_dir)
-
+from powerguard.bootstrap import paths
+from powerguard.data import DataManager
 from powerguard.gui import setGui
-from powerguard.server import Server,ServerConfig
-from data import DataManager
 from powerguard.report import ReportGenerator
+from powerguard.server import Server, ServerConfig
 
+# Debugging: Print configured paths
+print("Paths configured:")
+for name, path in paths.items():
+    print(f"{name}: {path}")
 
 data_manager = DataManager()
 
