@@ -1,3 +1,6 @@
+import sys
+import os
+from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator
 from pathlib import Path
@@ -13,16 +16,27 @@ class ReportGenerator(BaseModel):
     ReportGenerator class for generating formatted Word reports using Pydantic.
     """
     data_manager: DataManager
-    template_path: Path
+    template_path: Path =Field(default="test_report_template.docx")
 
     @field_validator("template_path")
     def validate_template_path(cls, value: Path) -> Path:
         """
         Ensure the template path exists and is a file.
         """
-        if not value.exists() or not value.is_file():
-            raise ValueError(f"Template file not found: {value}")
-        return value
+        # Get the current file's directory (in the 'src' directory).
+        current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+
+        # Calculate the path to the 'template' directory (sibling of 'src')
+        template_dir = current_dir.parent / "template"  # This will give the correct path to the template folder
+
+        # Now check the full path of the template file in the 'template' directory
+        full_template_path = template_dir / value
+
+        # Validate if the template file exists and is a file
+        if not full_template_path.exists() or not full_template_path.is_file():
+            raise ValueError(f"Template file not found: {full_template_path}")
+
+        return full_template_path
 
     def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
         """
