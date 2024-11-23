@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -99,9 +100,58 @@ class ReportGenerator(BaseModel):
     #     tree.write(xml_path)
     #     print(f"XML generated and saved to {xml_path}")
     #     return xml_path
-    def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
+    # def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
+    #     """
+    #     Generate an XML file from the report data, flattening nested dictionaries.
+    #     """
+    #     def flatten_dict(data, parent_key='', sep='_'):
+    #         """
+    #         Recursively flatten a nested dictionary.
+    #         """
+    #         items = []
+    #         for k, v in data.items():
+    #             new_key = f"{parent_key}{sep}{k}" if parent_key else k
+    #             if isinstance(v, dict):
+    #                 # Recursively flatten dictionaries
+    #                 items.extend(flatten_dict(v, new_key, sep=sep).items())
+    #             elif isinstance(v, list):
+    #                 # Handle lists by indexing items
+    #                 for i, item in enumerate(v):
+    #                     indexed_key = f"{new_key}{sep}{i}"
+    #                     if isinstance(item, dict):
+    #                         items.extend(flatten_dict(item, indexed_key, sep=sep).items())
+    #                     else:
+    #                         items.append((indexed_key, item))
+    #             else:
+    #                 # Add simple key-value pairs
+    #                 items.append((new_key, v))
+    #         return dict(items)
+
+    #     # Flatten the report data, including nested dictionaries and lists
+    #     flattened_data = flatten_dict(report_data)
+
+    #     # Create XML structure
+    #     root = ET.Element("TestReport")
+    #     for key, value in flattened_data.items():
+    #         child = ET.SubElement(root, key)
+    #         # Convert non-string values to strings
+    #         child.text = str(value) if value is not None else ""
+
+    #     # Write XML to file
+    #     tree = ET.ElementTree(root)
+    #     tree.write(xml_path, encoding="utf-8", xml_declaration=True)
+    #     print(f"XML generated and saved to {xml_path}")
+    #     return xml_path
+    def create_xml_from_report(self, report_data: dict, file_name: str) -> Path:
         """
         Generate an XML file from the report data, flattening nested dictionaries.
+
+        Args:
+            report_data (dict): The data to be converted to XML.
+            file_name (str): The name of the output XML file.
+
+        Returns:
+            Path: The path to the saved XML file.
         """
         def flatten_dict(data, parent_key='', sep='_'):
             """
@@ -135,6 +185,9 @@ class ReportGenerator(BaseModel):
             child = ET.SubElement(root, key)
             # Convert non-string values to strings
             child.text = str(value) if value is not None else ""
+
+        # Construct full XML file path in the output directory
+        xml_path = self.output_path / file_name
 
         # Write XML to file
         tree = ET.ElementTree(root)
@@ -197,6 +250,58 @@ class ReportGenerator(BaseModel):
         subprocess.run([str(cpp_executable), str(xml_path)], check=True)
         print("C++ processing completed.")
 
+    def generate_file_name(self, report_data: dict) -> str:
+        """
+        Generate a file name based on client name, UPS model, date, and report ID.
+
+        Args:
+            report_data (dict): The full report data containing `client_name`, `ups_model`, and `report_id`.
+
+        Returns:
+            str: The generated file name.
+        """
+        client_name = report_data.get("settings", {}).get("client_name", "UnknownClient")
+        ups_model = report_data.get("settings", {}).get("ups_model", "UnknownModel")
+        report_id = report_data.get("report_id", "0")
+        date_str = datetime.now().strftime("%Y%m%d")
+
+        # Create a sanitized file name
+        file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}"
+        return file_name.replace(" ", "_")
+
+    def generate_all_reports(self, output_dir: Path = Path("reports")):
+        """
+        Generate XML reports for all test reports in the database.
+
+        Args:
+            output_dir (Path): The directory where the reports will be saved.
+        """
+        try:
+            # Ensure the output directory exists
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            # Retrieve all TestReport IDs and their test names
+            reports = self.get_all_report_id_testName()
+
+            # Generate XML reports for each entry
+            for report in reports:
+                report_id = report["report_id"]
+
+                # Fetch the full report data for this report_id
+                report_data = self.get_test_report(report_id)
+                if not report_data:
+                    print(f"Skipping report_id {report_id}: No data found.")
+                    continue
+
+                # Generate the file name
+                file_name = self.generate_file_name(report_data)
+
+                # Generate the XML report
+                xml_file_path = output_dir / file_name
+                self.create_xml_from_report(report_data, xml_file_path)
+                print(f"Report generated: {xml_file_path}")
+        except sqlite3.Error as e:
+            raise Exception(f"Error generating reports: {e}")
     def generate_report(self, report_id: int, use_cpp: bool = False):
         """
         Generate a formatted report using a template and optionally call a C++ executable.
@@ -207,21 +312,22 @@ class ReportGenerator(BaseModel):
         if not report_data:
             raise ValueError(f"No report found for ID {report_id}")
 
-        # Step 2: Generate XML
-        xml_path = self.create_xml_from_report(report_data)
+        # Step 2: Generate file name
+        file_name = self.generate_file_name(report_data)
 
-        # Step 3: Optionally process XML with C++
+        # Step 3: Generate XML
+        xml_path = self.create_xml_from_report(report_data, f"{file_name}.xml")
+
+        # Step 4: Optionally process XML with C++
         if use_cpp:
             self.call_cpp_for_processing(xml_path)
 
-        # Step 4: Autogenerate output file name
-        client_name = report.settings.client_name or "UnknownClient"
-        ups_model = report.settings.ups_model or "UnknownModel"
-        date_str = datetime.now().strftime("%Y%m%d")
-        output_file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}.docx"            
-        output_file_path = self.output_path / output_file_name
-        # Step 5: Edit the Word template
+        # Step 5: Generate the output Word file path
+        output_file_path = self.output_path / f"{file_name}.docx"
+
+        # Step 6: Edit the Word template
         self.edit_word_document(output_file_path, xml_path)
+
 
 
 if __name__ == "__main__":
