@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10upsDefines.proto\x12\x03ups\">\n\x08OverLoad\x12\x17\n\x0fload_percentage\x18\x01 \x01(\r\x12\x19\n\x11overload_time_min\x18\x02 \x01(\r\"\x99\x03\n\x04spec\x12\x19\n\x05phase\x18\x01 \x01(\x0e\x32\n.ups.Phase\x12\x11\n\tRating_va\x18\x02 \x01(\r\x12\x19\n\x11RatedVoltage_volt\x18\x03 \x01(\r\x12\x18\n\x10RatedCurrent_amp\x18\x04 \x01(\r\x12\x1c\n\x14MinInputVoltage_volt\x18\x05 \x01(\r\x12\x1c\n\x14MaxInputVoltage_volt\x18\x06 \x01(\r\x12\x18\n\x10pf_rated_current\x18\x07 \x01(\r\x12\x19\n\x11Max_Continous_Amp\x18\x08 \x01(\r\x12\x14\n\x0coverload_Amp\x18\t \x01(\r\x12$\n\roverload_long\x18\n \x01(\x0b\x32\r.ups.OverLoad\x12&\n\x0foverload_medium\x18\x0b \x01(\x0b\x32\r.ups.OverLoad\x12%\n\x0eoverload_short\x18\x0c \x01(\x0b\x32\r.ups.OverLoad\x12\x18\n\x10\x41vgSwitchTime_ms\x18\x14 \x01(\x04\x12\x18\n\x10\x41vgBackupTime_ms\x18\x15 \x01(\x04**\n\x05Phase\x12\x10\n\x0cSINGLE_PHASE\x10\x00\x12\x0f\n\x0bTHREE_PHASE\x10\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10upsDefines.proto\x12\x03ups\">\n\x08OverLoad\x12\x17\n\x0fload_percentage\x18\x01 \x01(\r\x12\x19\n\x11overload_time_min\x18\x02 \x01(\r\"\x99\x03\n\x04spec\x12\x19\n\x05phase\x18\x01 \x01(\x0e\x32\n.ups.Phase\x12\x11\n\tRating_va\x18\x02 \x01(\r\x12\x19\n\x11RatedVoltage_volt\x18\x03 \x01(\r\x12\x18\n\x10RatedCurrent_amp\x18\x04 \x01(\r\x12\x1c\n\x14MinInputVoltage_volt\x18\x05 \x01(\r\x12\x1c\n\x14MaxInputVoltage_volt\x18\x06 \x01(\r\x12\x18\n\x10pf_rated_current\x18\x07 \x01(\r\x12\x19\n\x11Max_Continous_Amp\x18\x08 \x01(\r\x12\x14\n\x0coverload_Amp\x18\t \x01(\r\x12$\n\roverload_long\x18\n \x01(\x0b\x32\r.ups.OverLoad\x12&\n\x0foverload_medium\x18\x0b \x01(\x0b\x32\r.ups.OverLoad\x12%\n\x0eoverload_short\x18\x0c \x01(\x0b\x32\r.ups.OverLoad\x12\x18\n\x10\x41vgSwitchTime_ms\x18\x14 \x01(\x04\x12\x18\n\x10\x41vgBackupTime_ms\x18\x15 \x01(\x04**\n\x05Phase\x12\x10\n\x0cSINGLE_PHASE\x10\x00\x12\x0f\n\x0bTHREE_PHASE\x10\x01*\"\n\x04Load\x12\n\n\x06LINEAR\x10\x00\x12\x0e\n\nNON_LINEAR\x10\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,6 +33,8 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_PHASE']._serialized_start=501
   _globals['_PHASE']._serialized_end=543
+  _globals['_LOAD']._serialized_start=545
+  _globals['_LOAD']._serialized_end=579
   _globals['_OVERLOAD']._serialized_start=25
   _globals['_OVERLOAD']._serialized_end=87
   _globals['_SPEC']._serialized_start=90

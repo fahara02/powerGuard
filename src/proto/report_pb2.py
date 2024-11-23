@@ -27,17 +27,17 @@ import ups_test_pb2 as ups__test__pb2
 import upsDefines_pb2 as upsDefines__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0creport.proto\x1a\x0bpData.proto\x1a\x0eups_test.proto\x1a\x10upsDefines.proto\"\x98\x01\n\rReportDetails\x12\x11\n\treport_no\x18\x01 \x01(\r\x12\x1f\n\x08standard\x18\x02 \x01(\x0e\x32\r.TestStandard\x12\x13\n\x0b\x63lient_name\x18\x03 \x01(\t\x12\x12\n\nbrand_name\x18\x04 \x01(\t\x12\x11\n\tups_model\x18\x05 \x01(\r\x12\x17\n\x04spec\x18\x06 \x01(\x0b\x32\t.ups.spec\"u\n\nTestReport\x12\x1f\n\x07\x64\x65tails\x18\x01 \x01(\x0b\x32\x0e.ReportDetails\x12 \n\x08testName\x18\x02 \x01(\x0e\x32\x0e.Test.TestType\x12$\n\x05power\x18\x03 \x01(\x0b\x32\x15.measure.PowerMeasure*c\n\x0cTestStandard\x12\x0f\n\x0bIEC_62040_1\x10\x00\x12\x0f\n\x0bIEC_62040_2\x10\x01\x12\x0f\n\x0bIEC_62040_3\x10\x02\x12\x0f\n\x0bIEC_62040_4\x10\x03\x12\x0f\n\x0bIEC_62040_5\x10\x04\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0creport.proto\x1a\x0bpData.proto\x1a\x0eups_test.proto\x1a\x10upsDefines.proto\"\xd1\x01\n\x0eReportSettings\x12\x11\n\treport_id\x18\x01 \x01(\r\x12\x1f\n\x08standard\x18\x02 \x01(\x0e\x32\r.TestStandard\x12\x11\n\tups_model\x18\x03 \x01(\r\x12\x17\n\x04spec\x18\x04 \x01(\x0b\x32\t.ups.spec\x12\x13\n\x0b\x63lient_name\x18\x05 \x01(\t\x12\x12\n\nbrand_name\x18\x06 \x01(\t\x12\x1a\n\x12test_engineer_name\x18\x07 \x01(\t\x12\x1a\n\x12test_approval_name\x18\x08 \x01(\t\"\xc1\x01\n\nTestReport\x12!\n\x08settings\x18\x01 \x01(\x0b\x32\x0f.ReportSettings\x12 \n\x08testName\x18\x02 \x01(\x0e\x32\x0e.Test.TestType\x12\x17\n\x0ftestDescription\x18\x03 \x01(\t\x12)\n\ninputPower\x18\x04 \x01(\x0b\x32\x15.measure.PowerMeasure\x12*\n\x0boutputpower\x18\x05 \x01(\x0b\x32\x15.measure.PowerMeasure*c\n\x0cTestStandard\x12\x0f\n\x0bIEC_62040_1\x10\x00\x12\x0f\n\x0bIEC_62040_2\x10\x01\x12\x0f\n\x0bIEC_62040_3\x10\x02\x12\x0f\n\x0bIEC_62040_4\x10\x03\x12\x0f\n\x0bIEC_62040_5\x10\x04\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'report_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_TESTSTANDARD']._serialized_start=337
-  _globals['_TESTSTANDARD']._serialized_end=436
-  _globals['_REPORTDETAILS']._serialized_start=64
-  _globals['_REPORTDETAILS']._serialized_end=216
-  _globals['_TESTREPORT']._serialized_start=218
-  _globals['_TESTREPORT']._serialized_end=335
+  _globals['_TESTSTANDARD']._serialized_start=471
+  _globals['_TESTSTANDARD']._serialized_end=570
+  _globals['_REPORTSETTINGS']._serialized_start=64
+  _globals['_REPORTSETTINGS']._serialized_end=273
+  _globals['_TESTREPORT']._serialized_start=276
+  _globals['_TESTREPORT']._serialized_end=469
 # @@protoc_insertion_point(module_scope)

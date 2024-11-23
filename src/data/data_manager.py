@@ -2,10 +2,10 @@ import sqlite3
 from pathlib import Path
 
 # Import generated proto classes
-from pData_pb2 import PowerMeasure
-from ups_test_pb2 import TestType
-from upsDefines_pb2 import spec, OverLoad
-from report_pb2 import TestReport, ReportSettings
+from proto.pData_pb2 import PowerMeasure
+from proto.ups_test_pb2 import TestType
+from proto.upsDefines_pb2 import spec, OverLoad
+from proto.report_pb2 import TestReport, ReportSettings
 
 
 class DataManager:
@@ -106,34 +106,53 @@ class DataManager:
 
     def _validate_overload(self, overload: OverLoad):
         """Validate OverLoad object."""
-        if not isinstance(overload.load_percentage, int) or overload.load_percentage < 0:
+        if (
+            not isinstance(overload.load_percentage, int)
+            or overload.load_percentage < 0
+        ):
             raise ValueError("Invalid load_percentage: must be a non-negative integer.")
-        if not isinstance(overload.overload_time_min, int) or overload.overload_time_min < 0:
-            raise ValueError("Invalid overload_time_min: must be a non-negative integer.")
+        if (
+            not isinstance(overload.overload_time_min, int)
+            or overload.overload_time_min < 0
+        ):
+            raise ValueError(
+                "Invalid overload_time_min: must be a non-negative integer."
+            )
 
     def insert_overload(self, overload: OverLoad):
         """Insert an OverLoad message into the database."""
         self._validate_overload(overload)
         try:
-            self.cursor.execute("""
+            self.cursor.execute(
+                """
                 INSERT INTO OverLoad (load_percentage, overload_time_min)
                 VALUES (?, ?)
-            """, (overload.load_percentage, overload.overload_time_min))
+            """,
+                (overload.load_percentage, overload.overload_time_min),
+            )
             self.conn.commit()
             return self.cursor.lastrowid
         except sqlite3.Error as e:
             raise Exception(f"Error inserting OverLoad: {e}")
-        
+
     def _validate_spec(self, ups_spec: spec):
         """Validate spec object."""
         required_fields = [
-            ups_spec.Rating_va, ups_spec.RatedVoltage_volt, ups_spec.RatedCurrent_amp,
-            ups_spec.MinInputVoltage_volt, ups_spec.MaxInputVoltage_volt,
-            ups_spec.pf_rated_current, ups_spec.Max_Continous_Amp, ups_spec.overload_Amp,
-            ups_spec.AvgSwitchTime_ms, ups_spec.AvgBackupTime_ms
+            ups_spec.Rating_va,
+            ups_spec.RatedVoltage_volt,
+            ups_spec.RatedCurrent_amp,
+            ups_spec.MinInputVoltage_volt,
+            ups_spec.MaxInputVoltage_volt,
+            ups_spec.pf_rated_current,
+            ups_spec.Max_Continous_Amp,
+            ups_spec.overload_Amp,
+            ups_spec.AvgSwitchTime_ms,
+            ups_spec.AvgBackupTime_ms,
         ]
         if not all(isinstance(field, int) and field >= 0 for field in required_fields):
-            raise ValueError("Invalid spec field: all fields must be non-negative integers.")
+            raise ValueError(
+                "Invalid spec field: all fields must be non-negative integers."
+            )
 
         self._validate_overload(ups_spec.overload_long)
         self._validate_overload(ups_spec.overload_medium)
@@ -150,7 +169,8 @@ class DataManager:
             overload_short_id = self.insert_overload(ups_spec.overload_short)
 
             # Insert spec data
-            self.cursor.execute("""
+            self.cursor.execute(
+                """
                 INSERT INTO spec (
                     phase, rating_va, rated_voltage, rated_current,
                     min_input_voltage, max_input_voltage, pf_rated_current,
@@ -159,51 +179,55 @@ class DataManager:
                     avg_switch_time_ms, avg_backup_time_ms
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                ups_spec.phase.name,  # Enum to string
-                ups_spec.Rating_va,
-                ups_spec.RatedVoltage_volt,
-                ups_spec.RatedCurrent_amp,
-                ups_spec.MinInputVoltage_volt,
-                ups_spec.MaxInputVoltage_volt,
-                ups_spec.pf_rated_current,
-                ups_spec.Max_Continous_Amp,
-                ups_spec.overload_Amp,
-                overload_long_id,
-                overload_medium_id,
-                overload_short_id,
-                ups_spec.AvgSwitchTime_ms,
-                ups_spec.AvgBackupTime_ms
-            ))
+            """,
+                (
+                    ups_spec.phase.name,  # Enum to string
+                    ups_spec.Rating_va,
+                    ups_spec.RatedVoltage_volt,
+                    ups_spec.RatedCurrent_amp,
+                    ups_spec.MinInputVoltage_volt,
+                    ups_spec.MaxInputVoltage_volt,
+                    ups_spec.pf_rated_current,
+                    ups_spec.Max_Continous_Amp,
+                    ups_spec.overload_Amp,
+                    overload_long_id,
+                    overload_medium_id,
+                    overload_short_id,
+                    ups_spec.AvgSwitchTime_ms,
+                    ups_spec.AvgBackupTime_ms,
+                ),
+            )
             self.conn.commit()
             return self.cursor.lastrowid
         except sqlite3.Error as e:
             raise Exception(f"Error inserting spec: {e}")
 
-
     def insert_report_settings(self, settings: ReportSettings):
         """Insert ReportSettings into the database."""
         spec_id = self.insert_spec(settings.spec)
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
             INSERT INTO ReportSettings (
                 report_id, standard, ups_model, client_name, brand_name,
                 test_engineer_name, test_approval_name, spec_id
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            settings.report_id,
-            settings.standard.name,  # Enum to string
-            settings.ups_model,
-            settings.client_name,
-            settings.brand_name,
-            settings.test_engineer_name,
-            settings.test_approval_name,
-            spec_id
-        ))
+        """,
+            (
+                settings.report_id,
+                settings.standard.name,  # Enum to string
+                settings.ups_model,
+                settings.client_name,
+                settings.brand_name,
+                settings.test_engineer_name,
+                settings.test_approval_name,
+                spec_id,
+            ),
+        )
         self.conn.commit()
         return self.cursor.lastrowid
-    
+
     def _validate_power_measure(self, power: PowerMeasure):
         """Validate PowerMeasure object."""
         if not isinstance(power.voltage, (float, int)) or power.voltage < 0:
@@ -215,22 +239,23 @@ class DataManager:
         if not isinstance(power.pf, (float, int)) or not (0 <= power.pf <= 1):
             raise ValueError("Invalid pf: must be a number between 0 and 1.")
 
-
-
     def insert_power_measure(self, power: PowerMeasure):
         """Insert a PowerMeasure message into the database."""
         self._validate_power_measure(power)
         try:
-            self.cursor.execute("""
+            self.cursor.execute(
+                """
                 INSERT INTO PowerMeasure (type, voltage, current, power, pf)
                 VALUES (?, ?, ?, ?, ?)
-            """, (
-                power.type.name,  # Enum to string
-                power.voltage,
-                power.current,
-                power.power,
-                power.pf
-            ))
+            """,
+                (
+                    power.type.name,  # Enum to string
+                    power.voltage,
+                    power.current,
+                    power.power,
+                    power.pf,
+                ),
+            )
             self.conn.commit()
             return self.cursor.lastrowid
         except sqlite3.Error as e:
@@ -241,7 +266,7 @@ class DataManager:
         # Validate TestReport settings
         if not isinstance(report.settings, ReportSettings):
             raise ValueError("Invalid settings: Must be a ReportSettings object.")
-        
+
         # Validate input and output PowerMeasure
         if not isinstance(report.inputPower, PowerMeasure):
             raise ValueError("Invalid inputPower: Must be a PowerMeasure object.")
@@ -256,7 +281,10 @@ class DataManager:
             raise ValueError("Invalid testName: Must be a TestType enum value.")
 
         # Validate testDescription
-        if not isinstance(report.testDescription, str) or not report.testDescription.strip():
+        if (
+            not isinstance(report.testDescription, str)
+            or not report.testDescription.strip()
+        ):
             raise ValueError("Invalid testDescription: Must be a non-empty string.")
 
     def insert_test_report(self, report: TestReport):
@@ -273,22 +301,24 @@ class DataManager:
             settings_id = self.insert_report_settings(report.settings)
 
             # Insert TestReport
-            self.cursor.execute("""
+            self.cursor.execute(
+                """
                 INSERT INTO TestReport (
                     settings_id, test_name, test_description, input_power_id, output_power_id
                 )
                 VALUES (?, ?, ?, ?, ?)
-            """, (
-                settings_id,
-                report.testName.name,  # Enum to string
-                report.testDescription,
-                input_power_id,
-                output_power_id
-            ))
+            """,
+                (
+                    settings_id,
+                    report.testName.name,  # Enum to string
+                    report.testDescription,
+                    input_power_id,
+                    output_power_id,
+                ),
+            )
             self.conn.commit()
         except sqlite3.Error as e:
             raise Exception(f"Error inserting TestReport: {e}")
-
 
     def close(self):
         """Close the database connection."""
@@ -300,8 +330,12 @@ if __name__ == "__main__":
     data_manager = DataManager()
 
     # Example PowerMeasure objects
-    input_power = PowerMeasure(type=PowerMeasure.UPS_INPUT, voltage=230.0, current=10.0, power=2300.0, pf=0.98)
-    output_power = PowerMeasure(type=PowerMeasure.UPS_OUTPUT, voltage=220.0, current=10.5, power=2310.0, pf=0.97)
+    input_power = PowerMeasure(
+        type=PowerMeasure.UPS_INPUT, voltage=230.0, current=10.0, power=2300.0, pf=0.98
+    )
+    output_power = PowerMeasure(
+        type=PowerMeasure.UPS_OUTPUT, voltage=220.0, current=10.5, power=2310.0, pf=0.97
+    )
 
     # Example spec object
     ups_spec = spec(
@@ -318,7 +352,7 @@ if __name__ == "__main__":
         overload_medium=OverLoad(load_percentage=125, overload_time_min=5),
         overload_short=OverLoad(load_percentage=150, overload_time_min=2),
         AvgSwitchTime_ms=500,
-        AvgBackupTime_ms=120000
+        AvgBackupTime_ms=120000,
     )
 
     # Example ReportSettings object
@@ -330,7 +364,7 @@ if __name__ == "__main__":
         brand_name="Brand Y",
         test_engineer_name="John Doe",
         test_approval_name="Jane Smith",
-        spec=ups_spec
+        spec=ups_spec,
     )
 
     # Example TestReport object
@@ -339,7 +373,7 @@ if __name__ == "__main__":
         testName=TestType.FULL_LOAD_TEST,
         testDescription="Full load test for the UPS system",
         inputPower=input_power,
-        outputpower=output_power
+        outputpower=output_power,
     )
 
     # Insert TestReport into the database
