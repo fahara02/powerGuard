@@ -333,7 +333,7 @@ class ReportGenerator(BaseModel):
 if __name__ == "__main__":
     # Initialize DataManager
     data_manager = DataManager()
-    report=data_manager.insert_mock_data("Walton","maxgreen2","FHR")
+   
     # Initialize ReportGenerator with Pydantic
     report_generator = ReportGenerator(
         data_manager=data_manager,
@@ -341,6 +341,8 @@ if __name__ == "__main__":
     )
 
     # Generate a report
+    report=data_manager.generate_mock_data(112,"ABB","maxgreen2","FHR")
+    data_manager.insert_test_report(report)
     report_id = report.settings.report_id
     report_generator.generate_report(report_id, use_cpp=False)
 

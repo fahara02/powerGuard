@@ -661,7 +661,7 @@ class DataManager(BaseModel):
                 JOIN
                     PowerMeasure AS PowerMeasure2 ON TestReport.output_power_id = PowerMeasure2.id
                 WHERE
-                    TestReport.id = ?
+                    ReportSettings.report_id = ?
             """,
                 (report_id,),
             )
@@ -954,7 +954,7 @@ class DataManager(BaseModel):
         except ValueError as ve:
             return str(ve)
 
-    def generate_mock_data(self, clientname, brandname, engineername):
+    def generate_mock_data(self,reportId, clientname, brandname, engineername):
         # Example PowerMeasure objects
         input_power = PowerMeasure(
             type=PowerMeasureType.UPS_INPUT,
@@ -994,7 +994,7 @@ class DataManager(BaseModel):
 
         # Example ReportSettings object
         settings = ReportSettings(
-            report_id=1,
+            report_id=reportId,
             standard=TestStandard.IEC_62040_3,
             ups_model=101,
             client_name=clientname,
@@ -1022,7 +1022,12 @@ class DataManager(BaseModel):
 # Example Usage
 if __name__ == "__main__":
     data_manager = DataManager()
-    report = data_manager.generate_mock_data("walton", "maxgreen", "fhr")
+    report = data_manager.generate_mock_data(2,"walton", "maxgreen", "fhr")
+
+    report_id= data_manager.insert_test_report(report)
+    unique_id=report.settings.report_id
+    print(f"check newly inserted test report with id {report_id} for unique id {unique_id} ")
+    report = data_manager.generate_mock_data(3,"walton", "maxgreen", "fhr")
 
     report_id= data_manager.insert_test_report(report)
     unique_id=report.settings.report_id
