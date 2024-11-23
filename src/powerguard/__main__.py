@@ -1,5 +1,6 @@
 import sys
 import os
+from pathlib import Path
 
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,12 +17,22 @@ for directory in [parent_dir, proto_dir, data_dir]:
 # print("Updated sys.path:", sys.path)
 
 from powerguard.gui import setGui
-from powerguard.server import Server
+from powerguard.server import Server,ServerConfig
 from data import DataManager
+from powerguard.report import ReportGenerator
 
 
-server = Server()
+data_manager = DataManager()
 
+    # Create a ServerConfig instance with the desired configuration
+server_config = ServerConfig(host="0.0.0.0", port=12345, node_red_dir="node-red", flows_file="flows/flows_modbus.json")
+
+    # Now create and start the server, passing in the ServerConfig and DataManager instances
+server = Server(server_config, data_manager)
+# report_generator = ReportGenerator(
+#         data_manager=data_manager,
+#         template_path=Path("test_report_template.docx")
+#     )
 
 def main():
     print("Hello from powerguard!")

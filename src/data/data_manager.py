@@ -6,27 +6,44 @@ from proto.pData_pb2 import PowerMeasure
 from proto.ups_test_pb2 import TestType
 from proto.upsDefines_pb2 import spec, OverLoad
 from proto.report_pb2 import TestReport, ReportSettings
+from pydantic import BaseModel, PrivateAttr,field_validator
+from typing import Optional
 
+class DataManager(BaseModel):
+    db_name: str = "test_reports.db"
+    db_path: Optional[Path] = None  # Will be set after validation
+    _conn: sqlite3.Connection = PrivateAttr()  # Private attribute for connection
+    _cursor: sqlite3.Cursor = PrivateAttr()    # Private attribute for cursor
+    @field_validator("db_name")
+    def validate_db_name(cls, v: str):
+        """Validate db_name field to ensure it's a string and properly formatted."""
+        if not v.endswith('.db'):
+            raise ValueError("Database name must end with '.db'")
+        return v
 
-class DataManager:
-    def __init__(self, db_name="test_reports.db"):
+    def __init__(self, **kwargs):
         """Initialize the database and ensure all tables are created."""
+        super().__init__(**kwargs)
+        
         # Create the 'db' directory in the project root
         project_root = Path(__file__).parent.parent
         db_folder = project_root / "db"
         db_folder.mkdir(exist_ok=True)
-        self.db_path = db_folder / db_name
+        
+        # Set the db_path if it's not provided
+        if not self.db_path:
+            self.db_path = db_folder / self.db_name
 
         # Initialize database connection
-        self.conn = sqlite3.connect(self.db_path)
-        self.cursor = self.conn.cursor()
+        self._conn = sqlite3.connect(self.db_path)
+        self._cursor = self._conn.cursor()
         self._create_tables()
-
+        super().__init__()
     def _create_tables(self):
         """Create necessary tables in the SQLite database."""
         try:
             # Create PowerMeasure table
-            self.cursor.execute("""
+            self._cursor.execute("""
                 CREATE TABLE IF NOT EXISTS PowerMeasure (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     type TEXT,
@@ -38,7 +55,7 @@ class DataManager:
             """)
 
             # Create OverLoad table
-            self.cursor.execute("""
+            self._cursor.execute("""
                 CREATE TABLE IF NOT EXISTS OverLoad (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     load_percentage INTEGER,
@@ -47,7 +64,7 @@ class DataManager:
             """)
 
             # Create spec table
-            self.cursor.execute("""
+            self._cursor.execute("""
                 CREATE TABLE IF NOT EXISTS spec (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     phase TEXT,
@@ -71,7 +88,7 @@ class DataManager:
             """)
 
             # Create ReportSettings table
-            self.cursor.execute("""
+            self._cursor.execute("""
                 CREATE TABLE IF NOT EXISTS ReportSettings (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     report_id INTEGER,
@@ -87,7 +104,7 @@ class DataManager:
             """)
 
             # Create TestReport table
-            self.cursor.execute("""
+            self._cursor.execute("""
                 CREATE TABLE IF NOT EXISTS TestReport (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     settings_id INTEGER,
@@ -100,7 +117,7 @@ class DataManager:
                     FOREIGN KEY (output_power_id) REFERENCES PowerMeasure (id)
                 )
             """)
-            self.conn.commit()
+            self._conn.commit()
         except sqlite3.Error as e:
             raise Exception(f"Error creating tables: {e}")
 
@@ -123,14 +140,14 @@ class DataManager:
         """Insert an OverLoad message into the database."""
         self._validate_overload(overload)
         try:
-            self.cursor.execute(
+            self._cursor.execute(
                 """
                 INSERT INTO OverLoad (load_percentage, overload_time_min)
                 VALUES (?, ?)
             """,
                 (overload.load_percentage, overload.overload_time_min),
             )
-            self.conn.commit()
+            self._conn.commit()
             return self.cursor.lastrowid
         except sqlite3.Error as e:
             raise Exception(f"Error inserting OverLoad: {e}")
@@ -169,7 +186,7 @@ class DataManager:
             overload_short_id = self.insert_overload(ups_spec.overload_short)
 
             # Insert spec data
-            self.cursor.execute(
+            self._cursor.execute(
                 """
                 INSERT INTO spec (
                     phase, rating_va, rated_voltage, rated_current,
@@ -197,8 +214,8 @@ class DataManager:
                     ups_spec.AvgBackupTime_ms,
                 ),
             )
-            self.conn.commit()
-            return self.cursor.lastrowid
+            self._conn.commit()
+            return self._cursor.lastrowid
         except sqlite3.Error as e:
             raise Exception(f"Error inserting spec: {e}")
 
@@ -206,7 +223,7 @@ class DataManager:
         """Insert ReportSettings into the database."""
         spec_id = self.insert_spec(settings.spec)
 
-        self.cursor.execute(
+        self._cursor.execute(
             """
             INSERT INTO ReportSettings (
                 report_id, standard, ups_model, client_name, brand_name,
@@ -225,8 +242,8 @@ class DataManager:
                 spec_id,
             ),
         )
-        self.conn.commit()
-        return self.cursor.lastrowid
+        self._conn.commit()
+        return self._cursor.lastrowid
 
     def _validate_power_measure(self, power: PowerMeasure):
         """Validate PowerMeasure object."""
@@ -243,7 +260,7 @@ class DataManager:
         """Insert a PowerMeasure message into the database."""
         self._validate_power_measure(power)
         try:
-            self.cursor.execute(
+            self._cursor.execute(
                 """
                 INSERT INTO PowerMeasure (type, voltage, current, power, pf)
                 VALUES (?, ?, ?, ?, ?)
@@ -256,8 +273,8 @@ class DataManager:
                     power.pf,
                 ),
             )
-            self.conn.commit()
-            return self.cursor.lastrowid
+            self._conn.commit()
+            return self._cursor.lastrowid
         except sqlite3.Error as e:
             raise Exception(f"Error inserting PowerMeasure: {e}")
 
@@ -301,7 +318,7 @@ class DataManager:
             settings_id = self.insert_report_settings(report.settings)
 
             # Insert TestReport
-            self.cursor.execute(
+            self._cursor.execute(
                 """
                 INSERT INTO TestReport (
                     settings_id, test_name, test_description, input_power_id, output_power_id
@@ -316,18 +333,18 @@ class DataManager:
                     output_power_id,
                 ),
             )
-            self.conn.commit()
+            self._conn.commit()
         except sqlite3.Error as e:
             raise Exception(f"Error inserting TestReport: {e}")
 
     def close(self):
         """Close the database connection."""
-        self.conn.close()
+        self._conn.close()
     def get_test_report(self, report_id: int):
         """Retrieve a TestReport and related data from the database by report ID."""
         try:
             # Fetch the TestReport details
-            self.cursor.execute(
+            self._cursor.execute(
                 """
                 SELECT
                     TestReport.id,
@@ -363,7 +380,7 @@ class DataManager:
             """,
                 (report_id,),
             )
-            result = self.cursor.fetchone()
+            result = self._cursor.fetchone()
             if not result:
                 return None
 
@@ -406,7 +423,7 @@ class DataManager:
         """Retrieve the latest TestReport and its associated data."""
         try:
             # Fetch the latest TestReport
-            self.cursor.execute(
+            self._cursor.execute(
                 """
                 SELECT
                     TestReport.id,
@@ -442,7 +459,7 @@ class DataManager:
                 LIMIT 1
             """
             )
-            result = self.cursor.fetchone()
+            result = self._cursor.fetchone()
             if not result:
                 return None
 
@@ -482,7 +499,7 @@ class DataManager:
     def get_all_report_id_testName(self):
         """Retrieve all TestReport IDs and their corresponding test names."""
         try:
-            self.cursor.execute(
+            self._cursor.execute(
                 """
                 SELECT id, test_name
                 FROM TestReport

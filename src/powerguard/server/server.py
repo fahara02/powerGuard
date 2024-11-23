@@ -1,35 +1,56 @@
+# import os
 import os
 import platform
 import socket
-import sys
-
-
+from pydantic import BaseModel, Field, field_validator
+from typing import Type
 from powerguard.server.node_red_server import NodeRedServer
-from proto.report_pb2 import TestReport, ReportSettings
-from data  import DataManager
+from proto.report_pb2 import TestReport
+from data.data_manager import DataManager
 
 
+# Pydantic model for Server configuration
+class ServerConfig(BaseModel):
+    host: str = Field(default="0.0.0.0", description="Host address")
+    port: int = Field(default=12345, description="Port number")
+    node_red_dir: str = Field(default="node-red", description="Node-RED directory path")
+    flows_file: str = Field(default="flows/flows_modbus.json", description="Flows file path")
 
-class Server:
-    def __init__(
-        self,
-        host="0.0.0.0",
-        port=12345,
-        node_red_dir="node-red",
-        flows_file="flows/flows_modbus.json",
-    ):
-        self.host = host
-        self.port = port
-        self.server_socket = None
-        self.node_red_dir = node_red_dir
-        self.flows_file = flows_file
-        self.node_red = NodeRedServer(node_red_dir, flows_file)
-        self.install_node_red_if_needed()  # Install Node-RED if needed
-        self.data_manager = DataManager()
+    @field_validator("host")
+    def validate_host(cls, v):
+        """Ensure the host is a valid IP address or a hostname."""
+        if not v or not isinstance(v, str):
+            raise ValueError("Invalid host value")
+        return v
+
+    @field_validator("port")
+    def validate_port(cls, v):
+        """Ensure the port number is between 1 and 65535."""
+        if not (1 <= v <= 65535):
+            raise ValueError("Port must be between 1 and 65535")
+        return v
+
+
+class Server(BaseModel):
+    config: ServerConfig  # This is the Pydantic model containing configuration
+    data_manager: DataManager  # Expecting a DataManager instance
+    node_red: NodeRedServer = None
+    server_socket: socket.socket = None
+
+    class Config:
+        # This tells Pydantic to ignore extra fields during initialization
+        extra = "ignore"
+        arbitrary_types_allowed = True
+
+    def __init__(self, config: ServerConfig, data_manager: DataManager):
+        super().__init__(config=config, data_manager=data_manager)
+        self.node_red = NodeRedServer(config.node_red_dir, config.flows_file)
+        self.install_node_red_if_needed()
+
     def is_node_red_installed(self):
         """Check if Node-RED is installed."""
         node_red_exec = os.path.join(
-            self.node_red_dir,
+            self.config.node_red_dir,
             "node_modules",
             ".bin",
             "node-red.cmd" if platform.system().lower() == "windows" else "node-red",
@@ -46,6 +67,7 @@ class Server:
             else:
                 print("Node-RED must be installed to run the server.")
                 exit(1)
+
     def process_and_store_report(self, report_data: TestReport):
         """Process and store a TestReport message in the database."""
         try:
@@ -54,6 +76,7 @@ class Server:
             print("TestReport successfully stored.")
         except Exception as e:
             print(f"Error storing TestReport: {e}")
+
     def start_server(self):
         """Start the server and manage communication."""
         try:
@@ -67,9 +90,9 @@ class Server:
             self.node_red.import_flows()
 
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server_socket.bind((self.host, self.port))
+            self.server_socket.bind((self.config.host, self.config.port))
             self.server_socket.listen(5)
-            print(f"Server listening on {self.host}:{self.port}")
+            print(f"Server listening on {self.config.host}:{self.config.port}")
 
             while True:
                 client_socket, address = self.server_socket.accept()
@@ -105,5 +128,12 @@ class Server:
 
 
 if __name__ == "__main__":
-    server = Server()
+    # Create a DataManager instance first
+    data_manager = DataManager()
+
+    # Create a ServerConfig instance with the desired configuration
+    server_config = ServerConfig(host="0.0.0.0", port=12345, node_red_dir="node-red", flows_file="flows/flows_modbus.json")
+
+    # Now create and start the server, passing in the ServerConfig and DataManager instances
+    server = Server(config=server_config, data_manager=data_manager)
     server.start_server()

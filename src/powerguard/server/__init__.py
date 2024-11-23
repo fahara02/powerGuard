@@ -1,2 +1,2 @@
-from .server import Server
+from .server import Server,ServerConfig
 
