@@ -12,8 +12,8 @@ for directory in [parent_dir, proto_dir, data_dir]:
     if directory not in sys.path:
         sys.path.insert(0, directory)
 
-# Debugging - print sys.path for verification
-print("Updated sys.path:", sys.path)
+# # Debugging - print sys.path for verification
+# print("Updated sys.path:", sys.path)
 
 from powerguard.gui import setGui
 from powerguard.server import Server
@@ -26,7 +26,7 @@ server = Server()
 def main():
     print("Hello from powerguard!")
     print("Setting up database")
-    dataManager=DataManager()
+  
 
     setGui()
     server.start_server()

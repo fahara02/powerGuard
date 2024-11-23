@@ -24,7 +24,7 @@ class Server:
         self.flows_file = flows_file
         self.node_red = NodeRedServer(node_red_dir, flows_file)
         self.install_node_red_if_needed()  # Install Node-RED if needed
-
+        self.data_manager = DataManager()
     def is_node_red_installed(self):
         """Check if Node-RED is installed."""
         node_red_exec = os.path.join(
@@ -45,7 +45,14 @@ class Server:
             else:
                 print("Node-RED must be installed to run the server.")
                 exit(1)
-
+    def process_and_store_report(self, report_data: TestReport):
+        """Process and store a TestReport message in the database."""
+        try:
+            print("Storing TestReport in the database...")
+            self.data_manager.insert_test_report(report_data)
+            print("TestReport successfully stored.")
+        except Exception as e:
+            print(f"Error storing TestReport: {e}")
     def start_server(self):
         """Start the server and manage communication."""
         try:
@@ -80,6 +87,9 @@ class Server:
                     print(f"Name: {report_data.testDescription}")
                     print(f"Description: {report_data.value}")
 
+                    # Store in database
+                    self.process_and_store_report(report_data)
+                    
                 except Exception as e:
                     print(f"Error processing data: {e}")
                 finally:
@@ -90,6 +100,7 @@ class Server:
             if self.server_socket:
                 self.server_socket.close()
                 print("Server socket closed.")
+                self.data_manager.close()
 
 
 if __name__ == "__main__":
