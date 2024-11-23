@@ -400,6 +400,99 @@ class DataManager:
         except sqlite3.Error as e:
             raise Exception(f"Error retrieving TestReport: {e}")
 
+
+
+    def get_latest_test_report(self):
+        """Retrieve the latest TestReport and its associated data."""
+        try:
+            # Fetch the latest TestReport
+            self.cursor.execute(
+                """
+                SELECT
+                    TestReport.id,
+                    TestReport.test_name,
+                    TestReport.test_description,
+                    ReportSettings.report_id,
+                    ReportSettings.standard,
+                    ReportSettings.ups_model,
+                    ReportSettings.client_name,
+                    ReportSettings.brand_name,
+                    ReportSettings.test_engineer_name,
+                    ReportSettings.test_approval_name,
+                    PowerMeasure1.type AS input_type,
+                    PowerMeasure1.voltage AS input_voltage,
+                    PowerMeasure1.current AS input_current,
+                    PowerMeasure1.power AS input_power,
+                    PowerMeasure1.pf AS input_pf,
+                    PowerMeasure2.type AS output_type,
+                    PowerMeasure2.voltage AS output_voltage,
+                    PowerMeasure2.current AS output_current,
+                    PowerMeasure2.power AS output_power,
+                    PowerMeasure2.pf AS output_pf
+                FROM
+                    TestReport
+                JOIN
+                    ReportSettings ON TestReport.settings_id = ReportSettings.id
+                JOIN
+                    PowerMeasure AS PowerMeasure1 ON TestReport.input_power_id = PowerMeasure1.id
+                JOIN
+                    PowerMeasure AS PowerMeasure2 ON TestReport.output_power_id = PowerMeasure2.id
+                ORDER BY
+                    TestReport.id DESC
+                LIMIT 1
+            """
+            )
+            result = self.cursor.fetchone()
+            if not result:
+                return None
+
+            # Map the fetched data to a dictionary or structured object
+            report = {
+                "test_report_id": result[0],
+                "test_name": result[1],
+                "test_description": result[2],
+                "settings": {
+                    "report_id": result[3],
+                    "standard": result[4],
+                    "ups_model": result[5],
+                    "client_name": result[6],
+                    "brand_name": result[7],
+                    "test_engineer_name": result[8],
+                    "test_approval_name": result[9],
+                },
+                "input_power": {
+                    "type": result[10],
+                    "voltage": result[11],
+                    "current": result[12],
+                    "power": result[13],
+                    "pf": result[14],
+                },
+                "output_power": {
+                    "type": result[15],
+                    "voltage": result[16],
+                    "current": result[17],
+                    "power": result[18],
+                    "pf": result[19],
+                },
+            }
+            return report
+        except sqlite3.Error as e:
+            raise Exception(f"Error retrieving the latest TestReport: {e}")
+
+    def get_all_report_id_testName(self):
+        """Retrieve all TestReport IDs and their corresponding test names."""
+        try:
+            self.cursor.execute(
+                """
+                SELECT id, test_name
+                FROM TestReport
+                """
+            )
+            results = self.cursor.fetchall()
+            return [{"report_id": row[0], "test_name": row[1]} for row in results]
+        except sqlite3.Error as e:
+            raise Exception(f"Error retrieving TestReport IDs and test names: {e}")
+
 # Example Usage
 if __name__ == "__main__":
     data_manager = DataManager()

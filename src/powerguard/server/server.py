@@ -6,6 +6,7 @@ import sys
 
 from powerguard.server.node_red_server import NodeRedServer
 from proto.report_pb2 import TestReport, ReportSettings
+from data  import DataManager
 
 
 
@@ -89,7 +90,7 @@ class Server:
 
                     # Store in database
                     self.process_and_store_report(report_data)
-                    
+
                 except Exception as e:
                     print(f"Error processing data: {e}")
                 finally:
