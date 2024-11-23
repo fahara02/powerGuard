@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 from pathlib import Path
 from typing import Any, Optional
@@ -102,7 +103,7 @@ class DataManager(BaseModel):
             """
             CREATE TABLE IF NOT EXISTS ReportSettings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                report_id INTEGER NOT NULL,
+                report_id INTEGER NOT NULL UNIQUE,
                 standard TEXT NOT NULL,
                 ups_model INTEGER NOT NULL,
                 client_name TEXT NOT NULL,
@@ -226,6 +227,25 @@ class DataManager(BaseModel):
             return self._cursor.fetchone() is not None
         except sqlite3.Error as e:
             raise Exception(f"Error checking ID existence in {table_name}: {e}")
+        
+    def _check_value_exists(self, table_name: str, column_name: str, value: any):
+        """
+        Check if a specific value exists in a given column of a table.
+
+        Args:
+            table_name (str): Name of the table to query.
+            column_name (str): Name of the column to check.
+            value (any): Value to search for in the specified column.
+
+        Returns:
+            bool: True if the value exists, False otherwise.
+        """
+        try:
+            query = f"SELECT 1 FROM {table_name} WHERE {column_name} = ?"
+            self._cursor.execute(query, (value,))
+            return self._cursor.fetchone() is not None
+        except sqlite3.Error as e:
+            raise Exception(f"Error checking value in {table_name}.{column_name}: {e}")
 
     def insert_overload(self, overload: OverLoad):
         """Insert an OverLoad message into the database."""
@@ -314,6 +334,15 @@ class DataManager(BaseModel):
     def insert_report_settings(self, settings: ReportSettings):
         """Insert ReportSettings into the database."""
         try:
+            # Check if report_id already exists
+            if self._check_value_exists("ReportSettings", "report_id", settings.report_id):
+                logging.debug("ReportSettings with report_id %s already exists.", settings.report_id)
+                # Optionally, return the existing ID
+                self._cursor.execute(
+                    "SELECT id FROM ReportSettings WHERE report_id = ?", (settings.report_id,)
+                )
+                return self._cursor.fetchone()[0]
+
             # Insert spec first, since it's a foreign key reference
             spec_id = self.insert_spec(settings.spec)
 
@@ -343,8 +372,8 @@ class DataManager(BaseModel):
             return self._cursor.lastrowid
 
         except sqlite3.Error as e:
-            # If any SQLite error occurs, raise a detailed exception
             raise Exception(f"Error inserting ReportSettings: {e}")
+
 
         except Exception as e:
             # Catch any other unexpected exceptions
@@ -352,7 +381,7 @@ class DataManager(BaseModel):
 
     def insert_test_report(self, report: TestReport):
         """Insert a TestReport message into the database."""
-        # Validate TestReport object
+        logging.debug("Inserting TestReport: %s with report_id %d", report, report.settings.report_id)
         self._validate_test_report(report)
 
         try:
@@ -363,39 +392,70 @@ class DataManager(BaseModel):
             # Convert the TestType enum to its string name
             test_name = TestType.Name(report.testName)
 
-            # Insert ReportSettings
-            settings_id = self.insert_report_settings(report.settings)
-
-            # Insert TestReport into the database
-            self._cursor.execute(
-                """
-                INSERT INTO TestReport (
-                    settings_id, test_name, test_description, input_power_id, output_power_id
+            # Check if report_id exists and handle accordingly
+            if self._check_value_exists("ReportSettings", "report_id", report.settings.report_id):
+                # If the report_id already exists, fetch its settings_id
+                logging.debug("ReportSettings with report_id %d already exists.", report.settings.report_id)
+                self._cursor.execute(
+                    "SELECT id FROM ReportSettings WHERE report_id = ?", (report.settings.report_id,)
                 )
-                VALUES (?, ?, ?, ?, ?)
-                """,
-                (
-                    settings_id,
-                    test_name,  # Enum converted to string
-                    report.testDescription,
-                    input_power_id,
-                    output_power_id,
-                ),
-            )
+                settings_id = self._cursor.fetchone()[0]
+            else:
+                # Insert new ReportSettings and get its ID
+                logging.debug("Creating new ReportSettings for report_id %d.", report.settings.report_id)
+                settings_id = self.insert_report_settings(report.settings)
+
+            # Check if a TestReport with this settings_id already exists
+            if self._check_id_exists("TestReport", settings_id):
+                # Optionally handle overwrite: Update instead of inserting a new TestReport
+                logging.debug("Updating existing TestReport for settings_id %d.", settings_id)
+                self._cursor.execute(
+                    """
+                    UPDATE TestReport
+                    SET test_name = ?, test_description = ?, input_power_id = ?, output_power_id = ?
+                    WHERE settings_id = ?
+                    """,
+                    (
+                        test_name,
+                        report.testDescription,
+                        input_power_id,
+                        output_power_id,
+                        settings_id,
+                    ),
+                )
+            else:
+                # Insert a new TestReport
+                logging.debug("Inserting new TestReport for settings_id %d.", settings_id)
+                self._cursor.execute(
+                    """
+                    INSERT INTO TestReport (
+                        settings_id, test_name, test_description, input_power_id, output_power_id
+                    )
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        settings_id,
+                        test_name,
+                        report.testDescription,
+                        input_power_id,
+                        output_power_id,
+                    ),
+                )
 
             # Commit the transaction to save changes
             self._conn.commit()
 
-            # Optionally return the last inserted row ID
+            # Return the last inserted or updated row ID
             return self._cursor.lastrowid
 
         except sqlite3.Error as e:
             # Catch and handle SQLite-specific errors
-            raise Exception(f"Error inserting TestReport into database: {e}")
+            raise Exception(f"Error inserting/updating TestReport into database: {e}")
 
         except Exception as e:
             # Catch and handle any other exceptions
-            raise Exception(f"Unexpected error inserting TestReport: {e}")
+            raise Exception(f"Unexpected error inserting/updating TestReport: {e}")
+
 
     def get_test_report(self, report_id: int):
         """Retrieve a TestReport and related data from the database by report ID."""
@@ -796,10 +856,10 @@ if __name__ == "__main__":
     data_manager = DataManager()
     report = data_manager.generate_mock_data("walton", "maxgreen", "fhr")
 
-    data_manager.insert_test_report(report)
+    report_id= data_manager.insert_test_report(report)
     print("check newly inserted test report")
-    print(f"Deleting TestReport with ID {report.settings.report_id}")
-    print(data_manager.delete_test_report(report.settings.report_id))
+    print(f"Deleting TestReport with ID {report_id}")
+    print(data_manager.delete_test_report(report_id))
 
     # Close database connection
     data_manager.close()
