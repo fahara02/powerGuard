@@ -4,10 +4,17 @@ enum Phase {
     SINGLE_PHASE=0;
     THREE_PHASE=1;
 }
-enum Load{
+enum LOAD{
 	LINEAR=0;
 	NON_LINEAR=1;
 }
+enum MODE{
+	NORMAL_MODE=0;
+	STORAGE_MODE=1;
+	FAULT_MODE=2;
+	ALARM_MODE=4;
+}
+
 message OverLoad{
     uint32 load_percentage=1;
     uint32 overload_time_min=2;
