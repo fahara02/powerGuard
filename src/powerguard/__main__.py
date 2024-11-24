@@ -7,6 +7,7 @@ from powerguard.data import DataManager
 from powerguard.gui import setGui
 from powerguard.report import ReportGenerator
 from powerguard.server import Server, ServerConfig
+from powerguard.UPS_Test import TestManager
 
 # Debugging: Print configured paths
 print("Paths configured:")
@@ -22,6 +23,7 @@ server_config = ServerConfig(
 )
 server = Server(server_config, data_manager)
 report_generator = ReportGenerator(data_manager=data_manager)
+test_manager=TestManager()
 
 
 def main():
