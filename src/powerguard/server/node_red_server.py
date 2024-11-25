@@ -3,15 +3,36 @@ import os
 import platform
 import subprocess
 import time
+from pathlib import Path
 
 import netifaces
 import requests
 
 
 class NodeRedServer:
-    def __init__(self, node_red_dir="node-red", flows_file="flows/flows_modbus.json"):
+    def __init__(self, node_red_dir: Path, flows_file: Path):
+        """
+        Initialize the Node-RED server instance.
+
+        Args:
+            node_red_dir (Path): Path to the Node-RED directory.
+            flows_file (Path): Path to the flows configuration file.
+        """
         self.node_red_dir = node_red_dir
         self.flows_file = flows_file
+
+        # Ensure the directory and file paths are valid
+        self._validate_paths()
+
+    def _validate_paths(self):
+        """Validate that the provided paths exist or are valid."""
+        if not self.node_red_dir.exists():
+            raise FileNotFoundError(
+                f"Node-RED directory not found: {self.node_red_dir}"
+            )
+
+        if not self.flows_file.exists():
+            raise FileNotFoundError(f"Flows file not found: {self.flows_file}")
 
     def get_ip_address(self):
         """Fetch the local IP address of the machine (non-loopback)."""
@@ -136,4 +157,5 @@ class NodeRedServer:
             else:
                 print(f"Failed to import flows: {response.status_code}")
         except Exception as e:
+            print(f"Error importing flows: {e}")
             print(f"Error importing flows: {e}")

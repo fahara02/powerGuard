@@ -19,11 +19,11 @@ server_config = ServerConfig(
     host="0.0.0.0",
     port=12345,
     node_red_dir="node-red",
-    flows_file="flows/flows_modbus.json",
+    flows_file="flows_modbus.json",
 )
 server = Server(server_config, data_manager)
 report_generator = ReportGenerator(data_manager=data_manager)
-test_manager=TestManager()
+test_manager = TestManager()
 
 
 def main():

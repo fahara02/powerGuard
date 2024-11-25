@@ -2,15 +2,19 @@ import logging
 import sqlite3
 from pathlib import Path
 from typing import Any, Optional
+import time
+from datetime import datetime, timezone
+from google.protobuf.timestamp_pb2 import Timestamp
 
 from pydantic import BaseModel, PrivateAttr, field_validator
 
 # Import generated proto classes
 from powerguard.bootstrap import paths
+from google.protobuf.timestamp_pb2 import Timestamp
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
-from proto.report_pb2 import ReportSettings, TestReport, TestStandard
+from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_test_pb2 import TestResult, TestType
-from proto.upsDefines_pb2 import OverLoad, Phase, spec
+from proto.upsDefines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 
 
 class DataManager(BaseModel):
@@ -59,18 +63,23 @@ class DataManager(BaseModel):
 
     def _create_tables(self):
         """Create necessary tables in the SQLite database."""
-        """Create all tables in the database with foreign key constraints."""
+
         schema_queries = [
+            # PowerMeasure table
             """
             CREATE TABLE IF NOT EXISTS PowerMeasure (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                type TEXT NOT NULL,
+                measurement_id INTEGER NOT NULL, -- FK linking to Measurement table   
+                type TEXT NOT NULL,             
+                name TEXT NOT NULL,
                 voltage REAL NOT NULL,
                 current REAL NOT NULL,
                 power REAL NOT NULL,
-                pf REAL NOT NULL
+                pf REAL NOT NULL,
+                FOREIGN KEY (measurement_id) REFERENCES Measurement (id) ON DELETE CASCADE
             )
             """,
+            # OverLoad table
             """
             CREATE TABLE IF NOT EXISTS OverLoad (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,6 +87,7 @@ class DataManager(BaseModel):
                 overload_time_min INTEGER NOT NULL
             )
             """,
+            # spec table
             """
             CREATE TABLE IF NOT EXISTS spec (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,6 +110,7 @@ class DataManager(BaseModel):
                 FOREIGN KEY (overload_short_id) REFERENCES OverLoad (id) 
             )
             """,
+            # ReportSettings table
             """
             CREATE TABLE IF NOT EXISTS ReportSettings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,19 +125,43 @@ class DataManager(BaseModel):
                 FOREIGN KEY (spec_id) REFERENCES spec (id) 
             )
             """,
+            # Measurement table
             """
-            CREATE TABLE IF NOT EXISTS TestReport (
+            CREATE TABLE IF NOT EXISTS Measurement (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                settings_id INTEGER NOT NULL,
-                test_name TEXT NOT NULL,
-                test_description TEXT NOT NULL,
-                input_power_id INTEGER NOT NULL,
-                output_power_id INTEGER NOT NULL,
-                FOREIGN KEY (settings_id) REFERENCES ReportSettings (id) ON DELETE CASCADE,
-                FOREIGN KEY (input_power_id) REFERENCES PowerMeasure (id) ON DELETE CASCADE,
-                FOREIGN KEY (output_power_id) REFERENCES PowerMeasure (id) ON DELETE CASCADE
+                m_unique_id INTEGER NOT NULL UNIQUE, -- Unique proto ID                
+                timestamp DATETIME NOT NULL,
+                name TEXT NOT NULL,
+                mode TEXT NOT NULL,
+                phase_name TEXT NOT NULL,
+                load_type TEXT NOT NULL,
+                step_id INTEGER NOT NULL,
+                load_percentage INTEGER NOT NULL,                
+                steady_state_voltage_tol INTEGER NOT NULL,
+                voltage_dc_component INTEGER NOT NULL,
+                load_pf_deviation INTEGER NOT NULL,
+                switch_time_ms INTEGER NOT NULL,
+                run_interval_sec INTEGER NOT NULL,
+                backup_time_sec INTEGER NOT NULL,
+                overload_time_sec INTEGER NOT NULL,
+                temperature_1 INTEGER NOT NULL,
+                temperature_2 INTEGER NOT NULL,
+                test_report_id INTEGER NOT NULL,     -- Links to TestReport               
+                FOREIGN KEY (test_report_id) REFERENCES TestReport (id) ON DELETE CASCADE                
             )
             """,
+            # TestReport table
+            """
+        CREATE TABLE IF NOT EXISTS TestReport (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            settings_id INTEGER NOT NULL,
+            test_name TEXT NOT NULL,
+            test_description TEXT NOT NULL,
+            test_result TEXT NOT NULL,           
+            FOREIGN KEY (settings_id) REFERENCES ReportSettings (id) ON DELETE CASCADE
+           
+        )
+        """,
         ]
         try:
             for query in schema_queries:
@@ -188,27 +223,126 @@ class DataManager(BaseModel):
         self._validate_overload(ups_spec.overload_medium)
         self._validate_overload(ups_spec.overload_short)
 
+    def validate_measurement(self, measurement: Measurement):
+        """Validate a Measurement object to ensure data integrity."""
+
+        # Check required fields are not None
+        required_fields = [
+            "m_unique_id",
+            "time_stamp",
+            "name",
+            "mode",
+            "phase_name",
+            "load_type",
+            "step_id",
+            "load_percentage",
+            "steady_state_voltage_tol",
+            "voltage_dc_component",
+            "load_pf_deviation",
+            "switch_time_ms",
+            "run_interval_sec",
+            "backup_time_sec",
+            "overload_time_sec",
+            "temperature_1",
+            "temperature_2",
+        ]
+
+        for field in required_fields:
+            if getattr(measurement, field, None) is None:
+                raise ValueError(f"Field '{field}' is required and cannot be None.")
+
+        # Ensure time_stamp is a Protobuf Timestamp
+        if not isinstance(measurement.time_stamp, Timestamp):
+            raise TypeError(
+                f"time_stamp must be a google.protobuf.Timestamp, got {type(measurement.time_stamp)}"
+            )
+
+        # Convert Protobuf Timestamp to datetime and validate
+        time_stamp_dt = measurement.time_stamp.ToDatetime()
+
+        if not isinstance(time_stamp_dt, datetime):
+            raise ValueError("time_stamp conversion to datetime failed")
+
+        # Check numeric fields are within expected ranges
+        if not (0 <= measurement.load_percentage <= 100):
+            raise ValueError("load_percentage must be between 0 and 100.")
+
+        if measurement.steady_state_voltage_tol < 0:
+            raise ValueError("steady_state_voltage_tol must be non-negative.")
+
+        if measurement.voltage_dc_component < 0:
+            raise ValueError("voltage_dc_component must be non-negative.")
+
+        if measurement.load_pf_deviation < 0:
+            raise ValueError("load_pf_deviation must be non-negative.")
+
+        if measurement.switch_time_ms < 0:
+            raise ValueError("switch_time_ms must be non-negative.")
+
+        if measurement.run_interval_sec < 0:
+            raise ValueError("run_interval_sec must be non-negative.")
+
+        if measurement.backup_time_sec < 0:
+            raise ValueError("backup_time_sec must be non-negative.")
+
+        if measurement.overload_time_sec < 0:
+            raise ValueError("overload_time_sec must be non-negative.")
+
+        if measurement.temperature_1 < -273 or measurement.temperature_2 < -273:
+            raise ValueError("Temperature values cannot be below absolute zero.")
+
+    def measurement_to_db_row(self, measurement, test_report_id):
+        # Convert Protobuf Timestamp to ISO 8601 string
+        time_stamp_str = measurement.time_stamp.ToDatetime().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        return (
+            int(measurement.m_unique_id),  # Ensure it's an integer
+            time_stamp_str,  # ISO 8601 format
+            str(measurement.name),  # Convert to string
+            MODE.Name(
+                measurement.mode
+            ),  # Convert enum to string (if SQLite expects text)
+            str(measurement.phase_name),  # Convert to string
+            LOAD.Name(
+                measurement.load_type
+            ),  # Convert enum to string (if SQLite expects text)
+            int(measurement.step_id),  # Ensure it's an integer
+            int(measurement.load_percentage),  # Ensure it's an integer
+            int(measurement.steady_state_voltage_tol),  # Ensure it's an integer
+            int(measurement.voltage_dc_component),  # Ensure it's an integer
+            int(measurement.load_pf_deviation),  # Ensure it's an integer
+            int(measurement.switch_time_ms),  # Ensure it's an integer
+            int(measurement.run_interval_sec),  # Ensure it's an integer
+            int(measurement.backup_time_sec),  # Ensure it's an integer
+            int(measurement.overload_time_sec),  # Ensure it's an integer
+            int(measurement.temperature_1),  # Ensure it's an integer
+            int(measurement.temperature_2),  # Ensure it's an integer
+            int(test_report_id),  # Ensure it's an integer (foreign key)
+        )
+
     def _validate_test_report(self, report: TestReport):
         """Validate TestReport object."""
         # Validate TestReport settings
         if not isinstance(report.settings, ReportSettings):
             raise ValueError("Invalid settings: Must be a ReportSettings object.")
 
-        # Validate input and output PowerMeasure
-        if not isinstance(report.inputPower, PowerMeasure):
-            raise ValueError("Invalid inputPower: Must be a PowerMeasure object.")
-        self._validate_power_measure(report.inputPower)
+        # # Validate input and output PowerMeasure
+        # if not isinstance(report.inputPower, PowerMeasure):
+        #     raise ValueError("Invalid inputPower: Must be a PowerMeasure object.")
+        # self._validate_power_measure(report.inputPower)
 
-        if not isinstance(report.outputpower, PowerMeasure):
-            raise ValueError("Invalid outputpower: Must be a PowerMeasure object.")
-        self._validate_power_measure(report.outputpower)
+        # if not isinstance(report.outputpower, PowerMeasure):
+        #     raise ValueError("Invalid outputpower: Must be a PowerMeasure object.")
+        # self._validate_power_measure(report.outputpower)
 
-        # Validate testName
-        if (
-            not isinstance(report.testName, int)
-            or report.testName not in TestType.values()
-        ):
-            raise ValueError("Invalid testName: Must be a TestType enum value.")
+        # # Validate testName
+        # if (
+        #     not isinstance(report.testName, int)
+        #     or report.testName not in TestType.values()
+        # ):
+        #     raise ValueError("Invalid testName: Must be a TestType enum value.")
 
         # Validate testDescription
         if (
@@ -248,22 +382,24 @@ class DataManager(BaseModel):
 
     def insert_overload(self, overload: OverLoad):
         """Insert an OverLoad message into the database or return the existing entry if it already exists."""
-        self._validate_overload(overload)
+        self._validate_overload(overload)  # Validate overload details
         try:
             # Check if the same OverLoad already exists
-            self._cursor.execute(
-                """
+            query = """
                 SELECT id
                 FROM OverLoad
                 WHERE load_percentage = ? AND overload_time_min = ?
-                """,
-                (overload.load_percentage, overload.overload_time_min),
+            """
+            self._cursor.execute(
+                query, (overload.load_percentage, overload.overload_time_min)
             )
-            existing_id = self._cursor.fetchone()
+            existing_row = self._cursor.fetchone()
 
-            if existing_id:
-                # Return the existing ID if a match is found
-                return existing_id[0]
+            if existing_row:
+                logging.debug(
+                    f"Overload with load_percentage={overload.load_percentage} and overload_time_min={overload.overload_time_min} already exists."
+                )
+                return existing_row[0]
 
             # Insert a new OverLoad entry if no match exists
             self._cursor.execute(
@@ -279,30 +415,52 @@ class DataManager(BaseModel):
             return self._cursor.lastrowid
 
         except sqlite3.Error as e:
+            logging.error(f"Database error while inserting OverLoad: {e}")
             raise Exception(f"Error inserting OverLoad: {e}")
 
-    def insert_power_measure(self, power: PowerMeasure):
+    def insert_power_measure(
+        self, power: PowerMeasure, measurement_id: int, savepoint_name: str
+    ):
         """Insert a PowerMeasure message into the database."""
-        self._validate_power_measure(power)
+        self._validate_power_measure(power)  # Ensure the power measure is valid
+
         try:
-            power_type_name = PowerMeasureType.Name(power.type)
+            # Convert enum to string for storing in the database
+            power_type_name = PowerMeasureType.Name(power.type)  # Enum to string
+            measurement_name = str(power.name)  # Convert name to string
+
+            # Start the savepoint for this operation to ensure rollback on error
+            self._conn.execute(f"SAVEPOINT {savepoint_name}")
+
+            # Insert into PowerMeasure table with measurement_id as FK
             self._cursor.execute(
                 """
-                INSERT INTO PowerMeasure (type, voltage, current, power, pf)
-                VALUES (?, ?, ?, ?, ?)
-            """,
+                INSERT INTO PowerMeasure (measurement_id, type, name, voltage, current, power, pf)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
                 (
-                    power_type_name,  # Enum to string
-                    power.voltage,
-                    power.current,
-                    power.power,
-                    power.pf,
+                    measurement_id,  # Foreign key linking to Measurement
+                    power_type_name,  # Type of the power measure (converted from enum)
+                    measurement_name,  # Name of the power measure
+                    power.voltage,  # Voltage value
+                    power.current,  # Current value
+                    power.power,  # Power value
+                    power.pf,  # Power factor value
                 ),
             )
-            self._conn.commit()
-            return self._cursor.lastrowid
+
+            # Commit the changes to the database
+            # self._conn.commit()
+
         except sqlite3.Error as e:
+            # Rollback to the savepoint in case of an error
+            self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
             raise Exception(f"Error inserting PowerMeasure: {e}")
+
+        except Exception as e:
+            # Rollback to the savepoint for any other unexpected error
+            self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+            raise Exception(f"Unexpected error inserting PowerMeasure: {e}")
 
     def insert_spec(self, ups_spec: spec):
         """Insert a spec message into the database or return the existing entry if it already exists."""
@@ -310,14 +468,14 @@ class DataManager(BaseModel):
 
         try:
             # Insert overload entries and get their IDs
-            phase_name = Phase.Name(ups_spec.phase)
-            overload_long_id = self.insert_overload(ups_spec.overload_long)
-            overload_medium_id = self.insert_overload(ups_spec.overload_medium)
-            overload_short_id = self.insert_overload(ups_spec.overload_short)
+            overload_ids = {
+                "long": self.insert_overload(ups_spec.overload_long),
+                "medium": self.insert_overload(ups_spec.overload_medium),
+                "short": self.insert_overload(ups_spec.overload_short),
+            }
 
             # Check if the same spec already exists
-            self._cursor.execute(
-                """
+            query = """
                 SELECT id
                 FROM spec
                 WHERE phase = ? AND rating_va = ? AND rated_voltage = ? AND rated_current = ?
@@ -325,24 +483,25 @@ class DataManager(BaseModel):
                 AND max_continous_amp = ? AND overload_amp = ?
                 AND overload_long_id = ? AND overload_medium_id = ? AND overload_short_id = ?
                 AND avg_switch_time_ms = ? AND avg_backup_time_ms = ?
-                """,
-                (
-                    phase_name,  # Enum converted to string
-                    ups_spec.Rating_va,
-                    ups_spec.RatedVoltage_volt,
-                    ups_spec.RatedCurrent_amp,
-                    ups_spec.MinInputVoltage_volt,
-                    ups_spec.MaxInputVoltage_volt,
-                    ups_spec.pf_rated_current,
-                    ups_spec.Max_Continous_Amp,
-                    ups_spec.overload_Amp,
-                    overload_long_id,
-                    overload_medium_id,
-                    overload_short_id,
-                    ups_spec.AvgSwitchTime_ms,
-                    ups_spec.AvgBackupTime_ms,
-                ),
+            """
+            params = (
+                Phase.Name(ups_spec.phase),  # Enum converted to string
+                ups_spec.Rating_va,
+                ups_spec.RatedVoltage_volt,
+                ups_spec.RatedCurrent_amp,
+                ups_spec.MinInputVoltage_volt,
+                ups_spec.MaxInputVoltage_volt,
+                ups_spec.pf_rated_current,
+                ups_spec.Max_Continous_Amp,
+                ups_spec.overload_Amp,
+                overload_ids["long"],
+                overload_ids["medium"],
+                overload_ids["short"],
+                ups_spec.AvgSwitchTime_ms,
+                ups_spec.AvgBackupTime_ms,
             )
+
+            self._cursor.execute(query, params)
             existing_id = self._cursor.fetchone()
 
             if existing_id:
@@ -350,8 +509,7 @@ class DataManager(BaseModel):
                 return existing_id[0]
 
             # Insert a new spec entry if no match exists
-            self._cursor.execute(
-                """
+            insert_query = """
                 INSERT INTO spec (
                     phase, rating_va, rated_voltage, rated_current,
                     min_input_voltage, max_input_voltage, pf_rated_current,
@@ -360,24 +518,9 @@ class DataManager(BaseModel):
                     avg_switch_time_ms, avg_backup_time_ms
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    phase_name,
-                    ups_spec.Rating_va,
-                    ups_spec.RatedVoltage_volt,
-                    ups_spec.RatedCurrent_amp,
-                    ups_spec.MinInputVoltage_volt,
-                    ups_spec.MaxInputVoltage_volt,
-                    ups_spec.pf_rated_current,
-                    ups_spec.Max_Continous_Amp,
-                    ups_spec.overload_Amp,
-                    overload_long_id,
-                    overload_medium_id,
-                    overload_short_id,
-                    ups_spec.AvgSwitchTime_ms,
-                    ups_spec.AvgBackupTime_ms,
-                ),
-            )
+            """
+
+            self._cursor.execute(insert_query, params)
             self._conn.commit()
 
             # Return the newly inserted row ID
@@ -389,20 +532,16 @@ class DataManager(BaseModel):
     def insert_report_settings(self, settings: ReportSettings):
         """Insert ReportSettings into the database."""
         try:
-            # Check if report_id already exists
-            if self._check_value_exists(
-                "ReportSettings", "report_id", settings.report_id
-            ):
+            # Check if report_id already exists in the ReportSettings table
+            query = "SELECT id FROM ReportSettings WHERE report_id = ?"
+            self._cursor.execute(query, (settings.report_id,))
+            existing_row = self._cursor.fetchone()
+            if existing_row:
                 logging.debug(
                     "ReportSettings with report_id %s already exists.",
                     settings.report_id,
                 )
-                # Optionally, return the existing ID
-                self._cursor.execute(
-                    "SELECT id FROM ReportSettings WHERE report_id = ?",
-                    (settings.report_id,),
-                )
-                return self._cursor.fetchone()[0]
+                return existing_row[0]
 
             # Insert spec first, since it's a foreign key reference
             spec_id = self.insert_spec(settings.spec)
@@ -439,6 +578,51 @@ class DataManager(BaseModel):
             # Catch any other unexpected exceptions
             raise Exception(f"Unexpected error inserting ReportSettings: {e}")
 
+    def insert_measurement(self, measurement, test_report_id, savepoint_name: str):
+        """Insert a Measurement record and its associated PowerMeasures."""
+        try:
+            # Start a savepoint for this operation
+            self._conn.execute(f"SAVEPOINT {savepoint_name}")
+
+            # Validate the measurement
+            self.validate_measurement(measurement)
+
+            # Convert measurement to row
+            db_row = self.measurement_to_db_row(measurement, test_report_id)
+
+            # Insert Measurement into the database
+            self._cursor.execute(
+                """
+                INSERT INTO Measurement (
+                    m_unique_id, timestamp, name, mode, phase_name, load_type,
+                    step_id, load_percentage, steady_state_voltage_tol, voltage_dc_component,
+                    load_pf_deviation, switch_time_ms, run_interval_sec, backup_time_sec,
+                    overload_time_sec, temperature_1, temperature_2, test_report_id
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                db_row,
+            )
+            measurement_id = self._cursor.lastrowid  # Get the new ID
+
+            # Insert associated PowerMeasures
+            if measurement.power_measures:
+                for power_measure in measurement.power_measures:
+                    power_measure_savepoint_name = (
+                        f"{savepoint_name}_power_measure_{power_measure.name}"
+                    )
+                    self.insert_power_measure(
+                        power_measure, measurement_id, power_measure_savepoint_name
+                    )
+
+            # Only release savepoint here (no commit)
+            self._conn.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+
+        except sqlite3.Error as e:
+            # Rollback to the savepoint on error
+            self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+            raise Exception(f"Error inserting Measurement: {e}")
+
     def insert_test_report(self, report: TestReport):
         """Insert a TestReport message into the database."""
         logging.debug(
@@ -452,20 +636,27 @@ class DataManager(BaseModel):
             # Convert the TestType enum to its string name
             test_name = TestType.Name(report.testName)
 
-            # Check if report_id exists and handle accordingly
-            if self._check_value_exists(
-                "ReportSettings", "report_id", report.settings.report_id
-            ):
-                # If the report_id already exists, fetch its settings_id
+            # Generate a unique savepoint name using report ID
+            savepoint_name = f"test_report_{report.settings.report_id}"
+
+            # Start the transaction and set savepoint
+            self._conn.execute("BEGIN")
+            self._conn.execute(f"SAVEPOINT {savepoint_name}")
+
+            # Check if report_id already exists in the ReportSettings table
+            query_same_report_id = (
+                "SELECT report_id FROM ReportSettings WHERE report_id = ?"
+            )
+            self._cursor.execute(query_same_report_id, (report.settings.report_id,))
+            existing_row = self._cursor.fetchone()
+
+            if existing_row:
+                # Return the existing ID if report_id exists
                 logging.debug(
                     "ReportSettings with report_id %d already exists.",
                     report.settings.report_id,
                 )
-                self._cursor.execute(
-                    "SELECT id FROM ReportSettings WHERE report_id = ?",
-                    (report.settings.report_id,),
-                )
-                settings_id = self._cursor.fetchone()[0]
+                return existing_row[0]
             else:
                 # Insert new ReportSettings and get its ID
                 logging.debug(
@@ -475,17 +666,13 @@ class DataManager(BaseModel):
                 settings_id = self.insert_report_settings(report.settings)
 
             # Check if a TestReport with this settings_id already exists
-            self._cursor.execute(
-                "SELECT id, input_power_id, output_power_id FROM TestReport WHERE settings_id = ?",
-                (settings_id,),
-            )
+            query_same_settings_id = "SELECT id FROM TestReport WHERE settings_id = ?"
+            self._cursor.execute(query_same_settings_id, (settings_id,))
             test_report_row = self._cursor.fetchone()
 
             if test_report_row:
-                # If TestReport exists, reuse the existing PowerMeasure IDs
+                # If TestReport exists, reuse the existing ID
                 test_report_id = test_report_row[0]
-                input_power_id = test_report_row[1]
-                output_power_id = test_report_row[2]
                 logging.debug(
                     "Updating existing TestReport with id %d for settings_id %d.",
                     test_report_id,
@@ -495,21 +682,17 @@ class DataManager(BaseModel):
                 self._cursor.execute(
                     """
                     UPDATE TestReport
-                    SET test_name = ?, test_description = ?
+                    SET test_name = ?, test_description = ?, test_result = ?
                     WHERE id = ?
                     """,
                     (
                         test_name,
                         report.testDescription,
+                        TestResult.Name(report.test_result),
                         test_report_id,
                     ),
                 )
             else:
-                # Insert new PowerMeasure objects
-                logging.debug("Creating new PowerMeasure entries for the TestReport.")
-                input_power_id = self.insert_power_measure(report.inputPower)
-                output_power_id = self.insert_power_measure(report.outputpower)
-
                 # Insert a new TestReport
                 logging.debug(
                     "Inserting new TestReport for settings_id %d.", settings_id
@@ -517,19 +700,44 @@ class DataManager(BaseModel):
                 self._cursor.execute(
                     """
                     INSERT INTO TestReport (
-                        settings_id, test_name, test_description, input_power_id, output_power_id
+                        settings_id, test_name, test_description, test_result
                     )
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?)
                     """,
                     (
                         settings_id,
                         test_name,
                         report.testDescription,
-                        input_power_id,
-                        output_power_id,
+                        TestResult.Name(report.test_result),
                     ),
                 )
                 test_report_id = self._cursor.lastrowid
+
+            # Insert associated measurements
+            if report.measurements:
+                logging.debug(
+                    "Inserting measurements for TestReport ID %d.", test_report_id
+                )
+                for measurement in report.measurements:
+                    # Insert measurement and handle savepoint correctly
+                    try:
+                        measurement_savepoint_name = (
+                            f"measurement_{measurement.m_unique_id}"
+                        )
+                        self._conn.execute(f"SAVEPOINT {measurement_savepoint_name}")
+                        self.insert_measurement(
+                            measurement, test_report_id, measurement_savepoint_name
+                        )
+                        self._conn.execute(
+                            f"RELEASE SAVEPOINT {measurement_savepoint_name}"
+                        )
+                    except Exception as e:
+                        # If there's an error with the measurement insertion, rollback to savepoint
+                        logging.error(f"Error inserting measurement: {e}")
+                        self._conn.execute(
+                            f"ROLLBACK TO SAVEPOINT {measurement_savepoint_name}"
+                        )
+                        raise
 
             # Commit the transaction to save changes
             self._conn.commit()
@@ -538,12 +746,15 @@ class DataManager(BaseModel):
             return test_report_id
 
         except sqlite3.Error as e:
-            # Catch and handle SQLite-specific errors
+            # Rollback the transaction in case of any SQLite error
+            self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
             raise Exception(f"Error inserting/updating TestReport into database: {e}")
 
         except Exception as e:
-            # Catch and handle any other exceptions
-            raise Exception(f"Unexpected error inserting/updating TestReport: {e}")
+            # Handle any unexpected errors and rollback
+            logging.error(f"Unexpected error inserting/updating TestReport: {e}")
+            self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+            raise
 
     def get_test_report(self, report_id: int):
         """Retrieve a TestReport and related data from the database by report ID."""
@@ -954,35 +1165,24 @@ class DataManager(BaseModel):
             logging.error(f"Unexpected error during database cleanup: {e}")
             raise Exception(f"Unexpected error during database cleanup: {e}")
 
-    def generate_mock_data(self, reportId, clientname, brandname, engineername):
-        # Example PowerMeasure objects
-        input_power = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT,
-            voltage=230.0,
-            current=10.0,
-            power=2300.0,
-            pf=0.98,
-        )
-        output_power = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT,
-            voltage=220.0,
-            current=10.5,
-            power=2310.0,
-            pf=0.97,
-        )
+    def generate_mock_data(self, report_id, client_name, brand_name, engineer_name):
+        now = datetime.now(tz=timezone.utc)
+        timestamp_proto = Timestamp()
+        timestamp_proto.FromDatetime(now)
+        # Create OverLoad objects
         overload_long = OverLoad(load_percentage=110, overload_time_min=10)
         overload_medium = OverLoad(load_percentage=125, overload_time_min=5)
         overload_short = OverLoad(load_percentage=150, overload_time_min=2)
 
-        # Example spec object
+        # Create the spec object
         ups_spec = spec(
-            phase=Phase.SINGLE_PHASE,
+            phase=Phase.SINGLE_PHASE,  # SINGLE_PHASE from enum Phase
             Rating_va=5000,
             RatedVoltage_volt=230,
             RatedCurrent_amp=21,
             MinInputVoltage_volt=200,
             MaxInputVoltage_volt=240,
-            pf_rated_current=1,
+            pf_rated_current=100,  # 1.0 PF represented as 100 for simplicity
             Max_Continous_Amp=25,
             overload_Amp=30,
             overload_long=overload_long,
@@ -992,50 +1192,82 @@ class DataManager(BaseModel):
             AvgBackupTime_ms=120000,
         )
 
-        # Example ReportSettings object
-        settings = ReportSettings(
-            report_id=reportId,
+        # Create PowerMeasure objects
+        input_power = PowerMeasure(
+            type=PowerMeasureType.UPS_INPUT,
+            name="input_power",
+            voltage=230.0,
+            current=10.0,
+            power=2300.0,
+            pf=0.98,
+        )
+        output_power = PowerMeasure(
+            type=PowerMeasureType.UPS_OUTPUT,
+            name="output_power",
+            voltage=220.0,
+            current=10.5,
+            power=2310.0,
+            pf=0.97,
+        )
+        pMeasures = [input_power, output_power]
+        # Create a ReportSettings object
+        report_settings = ReportSettings(
+            report_id=report_id,
             standard=TestStandard.IEC_62040_3,
             ups_model=101,
-            client_name=clientname,
-            brand_name=brandname,
-            test_engineer_name=engineername,
-            test_approval_name="Jane Smith",
             spec=ups_spec,
+            client_name=client_name,
+            brand_name=brand_name,
+            test_engineer_name=engineer_name,
+            test_approval_name="Jane Smith",
         )
 
-        # Example TestReport object
-        report = TestReport(
-            settings=settings,
+        # Create a Measurement object
+        measurement = Measurement(
+            m_unique_id=12345,  # Example unique ID
+            time_stamp=timestamp_proto,  # Example UNIX timestamp
+            name="Full Load Test",
+            mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
+            phase_name="Phase 1",
+            load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
+            step_id=1,
+            load_percentage=100,
+            power_measures=pMeasures,
+            steady_state_voltage_tol=5,
+            voltage_dc_component=0,
+            load_pf_deviation=2,
+            switch_time_ms=500,
+            run_interval_sec=3600,
+            backup_time_sec=1800,
+            overload_time_sec=300,
+            temperature_1=25,
+            temperature_2=30,
+        )
+
+        # Create the TestReport object
+        test_report = TestReport(
+            settings=report_settings,
             testName=TestType.FULL_LOAD_TEST,
             testDescription="Full load test for the UPS system",
-            inputPower=input_power,
-            outputpower=output_power,
+            measurements=[measurement],
+            test_result=TestResult.TEST_SUCCESSFUL,  # TEST_SUCCESSFUL from enum TestResult
         )
 
-        print("generated mock report for client :", clientname)
-        # Close database connection
-
-        return report
+        print(f"Generated mock report for client: {client_name}")
+        return test_report
 
 
 # Example Usage
 if __name__ == "__main__":
     data_manager = DataManager()
-    report = data_manager.generate_mock_data(2, "walton", "maxgreen", "fhr")
+    report = data_manager.generate_mock_data(3119, "walton", "maxgreen", "fhr")
 
     report_id = data_manager.insert_test_report(report)
     unique_id = report.settings.report_id
     print(
         f"check newly inserted test report with id {report_id} for unique id {unique_id} "
     )
-    report = data_manager.generate_mock_data(3, "walton", "maxgreen", "fhr")
 
-    report_id = data_manager.insert_test_report(report)
-    unique_id = report.settings.report_id
-    print(
-        f"check newly inserted test report with id {report_id} for unique id {unique_id} "
-    )
     # print(f"Deleting TestReport with ID {report_id}")
     # print(data_manager.delete_test_report(report_id))
 

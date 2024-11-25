@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 import "pData.proto";
 import "ups_test.proto";
 import "upsDefines.proto";
@@ -22,29 +23,23 @@ message ReportSettings{
 }
 message Measurement{
     uint32 m_unique_id=1;
-	string name=2;	
-	ups.MODE mode=3;	
-	string phase_name=4;
-	ups.LOAD load_type=5;
-	uint32 step_1_id=6;	
-	uint32 load_percentage_1=7;
-	uint32 step_2_id=8;	
-	uint32 load_percentage_2=9;
-	measure.PowerMeasure inputPower= 10;
-	measure.PowerMeasure outputpower=11; 
-	repeated measure.PowerMeasure other_power_measure=12;
-	uint32 steady_state_voltage_tol=13;
-	uint32 voltage_dc_component=14;
-	uint32 load_pf_deviation_1=15;   
-	uint32 switch_time1_ms=16;
-	uint32 switch_time2_ms=17;
-	uint32 run1_interval_sec=18;
-	uint32 run2_interval_sec=19;
-	uint32 run3_interval_sec=20;
-	uint32 backup_time_sec=21;
-	uint32 overload__time_sec=22;	
-	uint32 temperature_1=23;
-	uint32 temperature_2=24;
+	google.protobuf.Timestamp time_stamp=2;
+	string name=3;	
+	ups.MODE mode=4;	
+	string phase_name=5;
+	ups.LOAD load_type=6;
+	uint32 step_id=7;	
+	uint32 load_percentage=8;	
+	repeated measure.PowerMeasure power_measures= 9;	
+	uint32 steady_state_voltage_tol=10;
+	uint32 voltage_dc_component=11;
+	uint32 load_pf_deviation=12;   
+	uint32 switch_time_ms=13;
+	uint32 run_interval_sec=14;
+	uint32 backup_time_sec=15;
+	uint32 overload_time_sec=16;	
+	uint32 temperature_1=17;
+	uint32 temperature_2=18;
 		
 }
 
@@ -52,8 +47,8 @@ message TestReport{
 	ReportSettings settings=1;
 	Test.TestType testName=2; 
 	string testDescription=3;
-    measure.PowerMeasure inputPower= 4;
-	measure.PowerMeasure outputpower=5;
+    repeated Measurement  measurements=4;
+	Test.TestResult test_result=5;
 }
 
 

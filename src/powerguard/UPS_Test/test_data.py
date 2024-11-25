@@ -85,16 +85,17 @@ class TestManager:
         """Retrieve the description for a given TestType."""
         return self.test_descriptions.get(test_type, "Description not found.")
 
+
 # Example Usage
 if __name__ == "__main__":
     manager = TestManager()
-    
+
     # Retrieve and print specific descriptions
     print("AC_INPUT_RETURN Description:")
     print(manager.get_test_description(TestType.AC_INPUT_RETURN))
-    
+
     print("\nEFFICIENCY_NORMAL_MODE Description:")
     print(manager.get_test_description(TestType.EFFICIENCY_NORMAL_MODE))
-    
+
     print("\nFULL_LOAD_TEST Description:")
     print(manager.get_test_description(TestType.FULL_LOAD_TEST))
