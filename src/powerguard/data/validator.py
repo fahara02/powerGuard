@@ -145,7 +145,10 @@ class Validator:
             if getattr(report, field, None) is None:
                 raise ValueError(f"Field '{field}' is required and cannot be None.")
 
-        if not isinstance(report.settings.report_id, int) or report.settings.report_id < 0:
+        if (
+            not isinstance(report.settings.report_id, int)
+            or report.settings.report_id < 0
+        ):
             raise ValueError("report_id must be a non-negative integer.")
 
         #     # Validate testName as an enum
@@ -155,11 +158,10 @@ class Validator:
         # Validate testDescription and test_result as strings
         for field, name in [
             (report.testDescription, "testDescription"),
-            
         ]:
             if not isinstance(field, str) or not field.strip():
                 raise ValueError(f"{name} must be a non-empty string.")
-            
+
         if report.settings:
             self._validate_spec(report.settings.spec)
         if report.measurements:

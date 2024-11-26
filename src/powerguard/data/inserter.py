@@ -10,6 +10,7 @@ class Inserter:
     def __init__(self, conn, cursor):
         self._conn = conn
         self._cursor = cursor
+
     def measurement_to_db_row(self, measurement, test_report_id):
         # Convert Protobuf Timestamp to ISO 8601 string
         time_stamp_str = measurement.time_stamp.ToDatetime().strftime(
@@ -40,6 +41,7 @@ class Inserter:
             int(measurement.temperature_2),  # Ensure it's an integer
             int(test_report_id),  # Ensure it's an integer (foreign key)
         )
+
     def insert_overload(
         self,
         overload: OverLoad,
@@ -290,7 +292,10 @@ class Inserter:
                         f"{savepoint_name}_power_measure_{power_measure.name}"
                     )
                     self.insert_power_measure(
-                        power_measure, measurement_id, power_measure_savepoint_name,False
+                        power_measure,
+                        measurement_id,
+                        power_measure_savepoint_name,
+                        False,
                     )
 
             # Only release savepoint here (no commit)

@@ -177,8 +177,6 @@ class DataManager(BaseModel):
         except sqlite3.Error as e:
             raise Exception(f"Error creating tables: {e}")
 
-  
-
     def _check_id_exists(self, table_name: str, entry_id: int):
         """Check if an entry with the given ID exists in the specified table."""
         try:
