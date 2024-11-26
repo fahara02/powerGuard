@@ -167,293 +167,98 @@ class ReportGenerator(BaseModel):
     #     aggregated["measurements"] = list(measurements.values())
 
     #     return aggregated
-    # def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    #     """
-    #     Aggregates data from a list of rows into a hierarchical structure.
-    #     Args:
-    #         rows (list): List of dictionaries containing report data.
-    #     Returns:
-    #         dict: Aggregated report data.
-    #     """
-    #     if not rows:
-    #         raise ValueError("No rows provided to aggregate")
 
-    #     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
-    #         raise TypeError("Rows must be a list of dictionaries")
 
-    #     # Start with the first row
-    #     aggregated = {
-    #         "test_report_id": rows[0]["test_report_id"],
-    #         "test_name": rows[0]["test_name"],
-    #         "test_description": rows[0]["test_description"],
-    #         "test_result": rows[0]["test_result"],
-    #         "client_name": rows[0]["client_name"],
-    #         "standard": rows[0]["standard"],
-    #         "ups_model": rows[0]["ups_model"],
-    #         "measurements": [],  # This will hold the list of measurements
-    #     }
-
-    #     # Group data for measurements and power measures
-    #     measurements = defaultdict(lambda: {"power_measures": []})
-
-    #     for row in rows:
-    #         measurement_id = row["measurement_unique_id"]
-    #         measurement = measurements[measurement_id]
-
-    #         # Only update measurement details once
-    #         if not measurement.get("measurement_name"):
-    #             measurement.update(
-    #                 {
-    #                     "measurement_unique_id": row.get("measurement_unique_id"),
-    #                     "measurement_name": row.get("measurement_name"),
-    #                     "measurement_timestamp": row.get("measurement_timestamp"),
-    #                     "measurement_loadtype": row.get("measurement_loadtype"),
-    #                     "load_percentage": row.get("load_percentage", 0),  # Default to 0 if missing
-    #                     "phase_name": row.get("phase_name", "Unknown"),  # Default to "Unknown" if missing
-    #                     "step_id": row.get("step_id", 0),  # Default to 0 if missing
-    #                     "steady_state_voltage_tol": row.get("steady_state_voltage_tol", 0),  # Default to 0 if missing
-    #                     "voltage_dc_component": row.get("voltage_dc_component", 0),  # Default to 0 if missing
-    #                     "load_pf_deviation": row.get("load_pf_deviation", 0),  # Default to 0 if missing
-    #                     "switch_time_ms": row.get("switch_time_ms", 0),  # Default to 0 if missing
-    #                     "run_interval_sec": row.get("run_interval_sec", 0),  # Default to 0 if missing
-    #                     "backup_time_sec": row.get("backup_time_sec", 0),  # Default to 0 if missing
-    #                     "overload_time_sec": row.get("overload_time_sec", 0),  # Default to 0 if missing
-    #                     "temperature_1": row.get("temperature_1", 0),  # Default to 0 if missing
-    #                     "temperature_2": row.get("temperature_2", 0),  # Default to 0 if missing
-    #                 }
-    #             )
-
-    #         # Add power measures to this measurement
-    #         if row.get("power_measure_id"):
-    #             measurement["power_measures"].append(
-    #                 {
-    #                     "power_measure_id": row["power_measure_id"],
-    #                     "power_measure_type": row["power_measure_type"],
-    #                     "power_measure_name": row["power_measure_name"],
-    #                     "power_measure_voltage": row["power_measure_voltage"],
-    #                     "power_measure_current": row["power_measure_current"],
-    #                     "power_measure_power": row["power_measure_power"],
-    #                     "power_measure_pf": row["power_measure_pf"],
-    #                 }
-    #             )
-
-    #     # Convert measurements to a list and add to the report
-    #     for index, measurement in enumerate(measurements.values()):  # Add index here
-    #         # Create a flattened list for each measurement
-    #         measurement_data = {
-    #             f"measurements_{index}_measurement_unique_id": measurement["measurement_unique_id"],
-    #             f"measurements_{index}_measurement_name": measurement["measurement_name"],
-    #             f"measurements_{index}_measurement_timestamp": measurement["measurement_timestamp"],
-    #             f"measurements_{index}_measurement_loadtype": measurement["measurement_loadtype"],
-    #             f"measurements_{index}_load_percentage": measurement["load_percentage"],
-    #             f"measurements_{index}_phase_name": measurement["phase_name"],
-    #             f"measurements_{index}_step_id": measurement["step_id"],
-    #             f"measurements_{index}_steady_state_voltage_tol": measurement["steady_state_voltage_tol"],
-    #             f"measurements_{index}_voltage_dc_component": measurement["voltage_dc_component"],
-    #             f"measurements_{index}_load_pf_deviation": measurement["load_pf_deviation"],
-    #             f"measurements_{index}_switch_time_ms": measurement["switch_time_ms"],
-    #             f"measurements_{index}_run_interval_sec": measurement["run_interval_sec"],
-    #             f"measurements_{index}_backup_time_sec": measurement["backup_time_sec"],
-    #             f"measurements_{index}_overload_time_sec": measurement["overload_time_sec"],
-    #             f"measurements_{index}_temperature_1": measurement["temperature_1"],
-    #             f"measurements_{index}_temperature_2": measurement["temperature_2"],
-    #         }
-
-    #         # Add power measures after the measurement data
-    #         for i, power_measure in enumerate(measurement["power_measures"]):
-    #             measurement_data.update({
-    #                 f"measurements_{index}_power_measures_{i}_power_measure_id": power_measure["power_measure_id"],
-    #                 f"measurements_{index}_power_measures_{i}_power_measure_type": power_measure["power_measure_type"],
-    #                 f"measurements_{index}_power_measures_{i}_power_measure_name": power_measure["power_measure_name"],
-    #                 f"measurements_{index}_power_measures_{i}_power_measure_voltage": power_measure["power_measure_voltage"],
-    #                 f"measurements_{index}_power_measures_{i}_power_measure_current": power_measure["power_measure_current"],
-    #                 f"measurements_{index}_power_measures_{i}_power_measure_power": power_measure["power_measure_power"],
-    #                 f"measurements_{index}_power_measures_{i}_power_measure_pf": power_measure["power_measure_pf"],
-    #             })
-
-    #         # Add the measurement data with power measures to the final report
-    #         aggregated["measurements"].append(measurement_data)
-
-    #     return aggregated
-
-    # def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    #     """
-    #     Aggregates data from a list of rows into a hierarchical structure.
-    #     Args:
-    #         rows (list): List of dictionaries containing report data.
-    #     Returns:
-    #         dict: Aggregated report data.
-    #     """
-    #     if not rows:
-    #         raise ValueError("No rows provided to aggregate")
-    #     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
-    #         raise TypeError("Rows must be a list of dictionaries")
-
-    #     # Initialize the aggregated report with basic details from the first row
-    #     aggregated = {key: rows[0][key] for key in [
-    #         "test_report_id", "test_name", "test_description",
-    #         "test_result", "client_name", "standard", "ups_model"
-    #     ]}
-    #     aggregated["measurements"] = []
-
-    #     # Group and aggregate measurements
-    #     measurements = defaultdict(lambda: {
-    #         **{key: None for key in [
-    #             "measurement_unique_id", "measurement_name", "measurement_timestamp",
-    #             "measurement_loadtype", "load_percentage", "phase_name", "step_id",
-    #             "steady_state_voltage_tol", "voltage_dc_component", "load_pf_deviation",
-    #             "switch_time_ms", "run_interval_sec", "backup_time_sec",
-    #             "overload_time_sec", "temperature_1", "temperature_2"
-    #         ]},
-    #         "power_measures": []
-    #     })
-
-    #     for row in rows:
-    #         measurement = measurements[row["measurement_unique_id"]]
-    #         if not measurement["measurement_name"]:  # Fill measurement details only once
-    #             measurement.update({
-    #                 key: row.get(key, 0 if "time" in key or "tol" in key else "Unknown")
-    #                 for key in measurement if key != "power_measures"
-    #             })
-    #         if row.get("power_measure_id"):
-    #             measurement["power_measures"].append({
-    #                 key: row[key] for key in [
-    #                     "power_measure_id", "power_measure_type", "power_measure_name",
-    #                     "power_measure_voltage", "power_measure_current", "power_measure_power", "power_measure_pf"
-    #                 ]
-    #             })
-
-    #     # Add ordered measurements with power measures to the final report
-    #     for index, (measurement_id, measurement) in enumerate(measurements.items()):
-    #         measurement_data = {
-    #             f"measurements_{index}_{key}": value for key, value in measurement.items()
-    #             if key != "power_measures"
-    #         }
-    #         for i, power_measure in enumerate(measurement["power_measures"]):
-    #             measurement_data.update({
-    #                 f"measurements_{index}_power_measures_{i}_{key}": value
-    #                 for key, value in power_measure.items()
-    #             })
-    #         aggregated["measurements"].append(measurement_data)
-
-    #     return aggregated
 
     def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Aggregates data from a list of rows into a hierarchical structure.
+        Aggregates and sorts data from a list of rows into a hierarchical structure.
         Args:
             rows (list): List of dictionaries containing report data.
         Returns:
-            dict: Aggregated report data.
+            dict: Aggregated and sorted report data with power measures coming last.
         """
         if not rows:
             raise ValueError("No rows provided to aggregate")
+
         if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
             raise TypeError("Rows must be a list of dictionaries")
 
-        # Mandatory keys
-        mandatory_keys = {
-            "measurement_unique_id",
-            "measurement_name",
-            "measurement_timestamp",
-        }
-
-        # Validate rows for mandatory keys
-        for row in rows:
-            missing_keys = mandatory_keys - row.keys()
-            if missing_keys:
-                raise ValueError(f"Missing mandatory keys {missing_keys} in row: {row}")
-
-        # Initialize the aggregated report with basic details from the first row
+        # Start with the first row
         aggregated = {
-            key: rows[0][key]
-            for key in [
-                "test_report_id",
-                "test_name",
-                "test_description",
-                "test_result",
-                "client_name",
-                "standard",
-                "ups_model",
-            ]
+            "test_report_id": rows[0]["test_report_id"],
+            "test_name": rows[0]["test_name"],
+            "test_description": rows[0]["test_description"],
+            "test_result": rows[0]["test_result"],
+            "client_name": rows[0]["client_name"],
+            "standard": rows[0]["standard"],
+            "ups_model": rows[0]["ups_model"],
+            "measurements": [],  # This will hold the list of sorted measurements
         }
-        aggregated["measurements"] = []
 
-        # Group and aggregate measurements
-        measurements = defaultdict(
-            lambda: {
-                **{
-                    key: None
-                    for key in [
-                        "measurement_unique_id",
-                        "measurement_name",
-                        "measurement_timestamp",
-                        "measurement_loadtype",
-                        "load_percentage",
-                        "phase_name",
-                        "step_id",
-                        "steady_state_voltage_tol",
-                        "voltage_dc_component",
-                        "load_pf_deviation",
-                        "switch_time_ms",
-                        "run_interval_sec",
-                        "backup_time_sec",
-                        "overload_time_sec",
-                        "temperature_1",
-                        "temperature_2",
-                    ]
-                },
-                "power_measures": [],
-            }
-        )
+        # Group data for measurements and power measures
+        measurements = defaultdict(lambda: {"power_measures": []})
 
         for row in rows:
-            measurement = measurements[row["measurement_unique_id"]]
-            if not measurement[
-                "measurement_name"
-            ]:  # Fill measurement details only once
+            measurement_id = row["measurement_unique_id"]
+            measurement = measurements[measurement_id]
+
+            # Update measurement details, ensuring power measures are added last
+            if not measurement.get("measurement_name"):
                 measurement.update(
                     {
-                        key: row.get(
-                            key, 0 if "time" in key or "tol" in key else "Unknown"
-                        )
-                        for key in measurement
-                        if key != "power_measures"
+                        "measurement_unique_id": row.get("measurement_unique_id"),
+                        "measurement_name": row.get("measurement_name"),
+                        "measurement_timestamp": row.get("measurement_timestamp"),
+                        "measurement_loadtype": row.get("measurement_loadtype"),
+                        "load_percentage": row.get("load_percentage", 0),
+                        "phase_name": row.get("phase_name", "Unknown"),
+                        "step_id": row.get("step_id", 0),
+                        "steady_state_voltage_tol": row.get("steady_state_voltage_tol", 0),
+                        "voltage_dc_component": row.get("voltage_dc_component", 0),
+                        "load_pf_deviation": row.get("load_pf_deviation", 0),
+                        "switch_time_ms": row.get("switch_time_ms", 0),
+                        "run_interval_sec": row.get("run_interval_sec", 0),
+                        "backup_time_sec": row.get("backup_time_sec", 0),
+                        "overload_time_sec": row.get("overload_time_sec", 0),
+                        "temperature_1": row.get("temperature_1", 0),
+                        "temperature_2": row.get("temperature_2", 0),
                     }
                 )
+
+            # Add power measures to this measurement
             if row.get("power_measure_id"):
                 measurement["power_measures"].append(
                     {
-                        key: row[key]
-                        for key in [
-                            "power_measure_id",
-                            "power_measure_type",
-                            "power_measure_name",
-                            "power_measure_voltage",
-                            "power_measure_current",
-                            "power_measure_power",
-                            "power_measure_pf",
-                        ]
+                        "power_measure_id": row["power_measure_id"],
+                        "power_measure_type": row["power_measure_type"],
+                        "power_measure_name": row["power_measure_name"],
+                        "power_measure_voltage": row["power_measure_voltage"],
+                        "power_measure_current": row["power_measure_current"],
+                        "power_measure_power": row["power_measure_power"],
+                        "power_measure_pf": row["power_measure_pf"],
                     }
                 )
 
-        # Add ordered measurements with power measures to the final report
-        for index, (measurement_id, measurement) in enumerate(measurements.items()):
-            measurement_data = {
-                f"measurements_{index}_{key}": value
-                for key, value in measurement.items()
-                if key != "power_measures"
-            }
-            for i, power_measure in enumerate(measurement["power_measures"]):
-                measurement_data.update(
-                    {
-                        f"measurements_{index}_power_measures_{i}_{key}": value
-                        for key, value in power_measure.items()
-                    }
-                )
-            aggregated["measurements"].append(measurement_data)
+        # Sort measurements by `measurement_unique_id`
+        sorted_measurements = sorted(
+            measurements.values(),
+            key=lambda m: m["measurement_unique_id"]
+        )
+
+        # Ensure power measures come last in each measurement
+        for measurement in sorted_measurements:
+            power_measures = measurement.pop("power_measures", [])
+            measurement["power_measures"] = sorted(
+                power_measures,
+                key=lambda pm: pm["power_measure_id"]
+            )
+
+        # Add sorted measurements to the final report
+        aggregated["measurements"] = sorted_measurements
 
         return aggregated
+
 
     def create_xml_from_report(self, report_data: list[dict], file_name: str) -> Path:
         """
