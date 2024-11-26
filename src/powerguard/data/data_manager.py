@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+from typing import Optional, Dict, Any
 from pathlib import Path
 from typing import Any, Optional
 import time
@@ -15,8 +16,10 @@ from proto.pData_pb2 import PowerMeasure, PowerMeasureType
 from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_test_pb2 import TestResult, TestType
 from proto.upsDefines_pb2 import LOAD, MODE, OverLoad, Phase, spec
+
 from powerguard.data.validator import Validator
 from powerguard.data.inserter import Inserter
+from powerguard.data.fetcher import Fetcher
 
 
 class DataManager(BaseModel):
@@ -26,6 +29,7 @@ class DataManager(BaseModel):
     _cursor: sqlite3.Cursor = PrivateAttr()  # Private attribute for cursor
     _validator: Validator = PrivateAttr()
     _inserter: Inserter = PrivateAttr()
+    _fetcher: Fetcher = PrivateAttr()
 
     @field_validator("db_name")
     def validate_db_name(cls, v: str):
@@ -51,6 +55,7 @@ class DataManager(BaseModel):
         self._create_tables()
         self._validator = Validator()
         self._inserter = Inserter(self._conn, self._cursor)
+        self._fetcher = Fetcher(self._conn, self._cursor)
 
     def __enter__(self):
         """Enable context manager for database connection."""
@@ -135,7 +140,7 @@ class DataManager(BaseModel):
             """
             CREATE TABLE IF NOT EXISTS Measurement (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                m_unique_id INTEGER NOT NULL UNIQUE, -- Unique proto ID                
+                m_unique_id INTEGER NOT NULL , -- Unique proto ID                
                 timestamp DATETIME NOT NULL,
                 name TEXT NOT NULL,
                 mode TEXT NOT NULL,
@@ -234,159 +239,23 @@ class DataManager(BaseModel):
         self._validator._validate_test_report(report)
         return self._inserter.insert_test_report(report)
 
-    def get_test_report(self, report_id: int):
-        """Retrieve a TestReport and related data from the database by report ID."""
-        try:
-            # Fetch the TestReport details
-            self._cursor.execute(
-                """
-                SELECT
-                    TestReport.id,
-                    TestReport.test_name,
-                    TestReport.test_description,
-                    ReportSettings.report_id,
-                    ReportSettings.standard,
-                    ReportSettings.ups_model,
-                    ReportSettings.client_name,
-                    ReportSettings.brand_name,
-                    ReportSettings.test_engineer_name,
-                    ReportSettings.test_approval_name,
-                    PowerMeasure1.type AS input_type,
-                    PowerMeasure1.voltage AS input_voltage,
-                    PowerMeasure1.current AS input_current,
-                    PowerMeasure1.power AS input_power,
-                    PowerMeasure1.pf AS input_pf,
-                    PowerMeasure2.type AS output_type,
-                    PowerMeasure2.voltage AS output_voltage,
-                    PowerMeasure2.current AS output_current,
-                    PowerMeasure2.power AS output_power,
-                    PowerMeasure2.pf AS output_pf
-                FROM
-                    TestReport
-                JOIN
-                    ReportSettings ON TestReport.settings_id = ReportSettings.id
-                JOIN
-                    PowerMeasure AS PowerMeasure1 ON TestReport.input_power_id = PowerMeasure1.id
-                JOIN
-                    PowerMeasure AS PowerMeasure2 ON TestReport.output_power_id = PowerMeasure2.id
-                WHERE
-                    ReportSettings.report_id = ?
-            """,
-                (report_id,),
-            )
-            result = self._cursor.fetchone()
-            if not result:
-                return None
+    def get_test_report_by_report_id(self, report_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Fetch a test report using the report ID from ReportSettings.
+        Args:
+            report_id (int): The report ID linking ReportSettings to TestReport.
+        Returns:
+            Optional[Dict[str, Any]]: The test report details if found, None otherwise.
+        """
+        return self._fetcher.get_test_report_by_report_id(report_id)
 
-            # Map the fetched data to a dictionary or a structured object
-            report = {
-                "test_report_id": result[0],
-                "test_name": result[1],
-                "test_description": result[2],
-                "settings": {
-                    "report_id": result[3],
-                    "standard": result[4],
-                    "ups_model": result[5],
-                    "client_name": result[6],
-                    "brand_name": result[7],
-                    "test_engineer_name": result[8],
-                    "test_approval_name": result[9],
-                },
-                "input_power": {
-                    "type": result[10],
-                    "voltage": result[11],
-                    "current": result[12],
-                    "power": result[13],
-                    "pf": result[14],
-                },
-                "output_power": {
-                    "type": result[15],
-                    "voltage": result[16],
-                    "current": result[17],
-                    "power": result[18],
-                    "pf": result[19],
-                },
-            }
-            return report
-        except sqlite3.Error as e:
-            raise Exception(f"Error retrieving TestReport: {e}")
+    def get_test_report(self, id: int):
+        """Retrieve a TestReport and related data from the database by TestReport table ID."""
+        return self._fetcher.get_test_report(report_id)
 
     def get_latest_test_report(self):
         """Retrieve the latest TestReport and its associated data."""
-        try:
-            # Fetch the latest TestReport
-            self._cursor.execute(
-                """
-                SELECT
-                    TestReport.id,
-                    TestReport.test_name,
-                    TestReport.test_description,
-                    ReportSettings.report_id,
-                    ReportSettings.standard,
-                    ReportSettings.ups_model,
-                    ReportSettings.client_name,
-                    ReportSettings.brand_name,
-                    ReportSettings.test_engineer_name,
-                    ReportSettings.test_approval_name,
-                    PowerMeasure1.type AS input_type,
-                    PowerMeasure1.voltage AS input_voltage,
-                    PowerMeasure1.current AS input_current,
-                    PowerMeasure1.power AS input_power,
-                    PowerMeasure1.pf AS input_pf,
-                    PowerMeasure2.type AS output_type,
-                    PowerMeasure2.voltage AS output_voltage,
-                    PowerMeasure2.current AS output_current,
-                    PowerMeasure2.power AS output_power,
-                    PowerMeasure2.pf AS output_pf
-                FROM
-                    TestReport
-                JOIN
-                    ReportSettings ON TestReport.settings_id = ReportSettings.id
-                JOIN
-                    PowerMeasure AS PowerMeasure1 ON TestReport.input_power_id = PowerMeasure1.id
-                JOIN
-                    PowerMeasure AS PowerMeasure2 ON TestReport.output_power_id = PowerMeasure2.id
-                ORDER BY
-                    TestReport.id DESC
-                LIMIT 1
-            """
-            )
-            result = self._cursor.fetchone()
-            if not result:
-                return None
-
-            # Map the fetched data to a dictionary or structured object
-            report = {
-                "test_report_id": result[0],
-                "test_name": result[1],
-                "test_description": result[2],
-                "settings": {
-                    "report_id": result[3],
-                    "standard": result[4],
-                    "ups_model": result[5],
-                    "client_name": result[6],
-                    "brand_name": result[7],
-                    "test_engineer_name": result[8],
-                    "test_approval_name": result[9],
-                },
-                "input_power": {
-                    "type": result[10],
-                    "voltage": result[11],
-                    "current": result[12],
-                    "power": result[13],
-                    "pf": result[14],
-                },
-                "output_power": {
-                    "type": result[15],
-                    "voltage": result[16],
-                    "current": result[17],
-                    "power": result[18],
-                    "pf": result[19],
-                },
-            }
-            return report
-        except sqlite3.Error as e:
-            raise Exception(f"Error retrieving the latest TestReport: {e}")
+        return self._fetcher.get_latest_report()
 
     def get_all_report_id_testName(self):
         """Retrieve all TestReport IDs and their corresponding test names."""

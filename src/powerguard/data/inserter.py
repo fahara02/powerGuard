@@ -252,17 +252,67 @@ class Inserter:
             # Catch any other unexpected exceptions
             raise Exception(f"Unexpected error inserting ReportSettings: {e}")
 
+    # def insert_measurement(
+    #     self,
+    #     measurement,
+    #     test_report_id,
+    #     savepoint_name: str,
+    #     no_commit: bool = False,
+    # ):
+    #     """Insert a Measurement record and its associated PowerMeasures."""
+    #     try:
+    #         # Start a savepoint for this operation
+    #         self._conn.execute(f"SAVEPOINT {savepoint_name}")
+
+    #         # Convert measurement to row
+    #         db_row = self.measurement_to_db_row(measurement, test_report_id)
+
+    #         # Insert Measurement into the database
+    #         self._cursor.execute(
+    #             """
+    #             INSERT INTO Measurement (
+    #                 m_unique_id, timestamp, name, mode, phase_name, load_type,
+    #                 step_id, load_percentage, steady_state_voltage_tol, voltage_dc_component,
+    #                 load_pf_deviation, switch_time_ms, run_interval_sec, backup_time_sec,
+    #                 overload_time_sec, temperature_1, temperature_2, test_report_id
+    #             )
+    #             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    #             """,
+    #             db_row,
+    #         )
+    #         measurement_id = self._cursor.lastrowid  # Get the new ID
+
+    #         # Insert associated PowerMeasures
+    #         if measurement.power_measures:
+    #             for power_measure in measurement.power_measures:
+    #                 power_measure_savepoint_name = (
+    #                     f"{savepoint_name}_power_measure_{power_measure.name}"
+    #                 )
+    #                 self.insert_power_measure(
+    #                     power_measure,
+    #                     measurement_id,
+    #                     power_measure_savepoint_name,
+    #                     True,
+    #                 )
+
+    #         # Only release savepoint here (no commit)
+    #         self._conn.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+    #         if no_commit:
+    #             logging.debug(f"Exiting without commit ")
+    #         else:
+    #             self._conn.commit()
+
+    #     except sqlite3.Error as e:
+    #         # Rollback to the savepoint on error
+    #         self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+    #         raise Exception(f"Error inserting Measurement: {e}")
     def insert_measurement(
-        self,
-        measurement,
-        test_report_id,
-        savepoint_name: str,
-        no_commit: bool = False,
+        self, measurement, test_report_id, savepoint_name: str, no_commit: bool = False
     ):
         """Insert a Measurement record and its associated PowerMeasures."""
         try:
             # Start a savepoint for this operation
-            self._conn.execute(f"SAVEPOINT {savepoint_name}")         
+            self._conn.execute(f"SAVEPOINT {savepoint_name}")
 
             # Convert measurement to row
             db_row = self.measurement_to_db_row(measurement, test_report_id)
@@ -283,8 +333,8 @@ class Inserter:
             measurement_id = self._cursor.lastrowid  # Get the new ID
 
             # Insert associated PowerMeasures
-            if measurement.power_measures:
-                for power_measure in measurement.power_measures:
+            for power_measure in measurement.power_measures:
+                try:
                     power_measure_savepoint_name = (
                         f"{savepoint_name}_power_measure_{power_measure.name}"
                     )
@@ -294,18 +344,28 @@ class Inserter:
                         power_measure_savepoint_name,
                         True,
                     )
+                except Exception as e:
+                    logging.error(
+                        f"Error inserting PowerMeasure for measurement_id {measurement_id}: {e}"
+                    )
+                    self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+                    raise
 
-            # Only release savepoint here (no commit)
-            self._conn.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+            # Commit or release savepoint
             if no_commit:
-                logging.debug(f"Exiting without commit ")
+                logging.debug("Exiting without commit.")
             else:
+                self._conn.execute(f"RELEASE SAVEPOINT {savepoint_name}")
                 self._conn.commit()
 
         except sqlite3.Error as e:
-            # Rollback to the savepoint on error
             self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+            logging.error(f"Database error inserting Measurement: {e}")
             raise Exception(f"Error inserting Measurement: {e}")
+        except Exception as e:
+            self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+            logging.error(f"Unexpected error inserting Measurement: {e}")
+            raise
 
     def insert_test_report(self, report: TestReport):
         """Insert a TestReport message into the database."""
@@ -409,7 +469,10 @@ class Inserter:
                         )
                         self._conn.execute(f"SAVEPOINT {measurement_savepoint_name}")
                         self.insert_measurement(
-                            measurement, test_report_id, measurement_savepoint_name,True
+                            measurement,
+                            test_report_id,
+                            measurement_savepoint_name,
+                            True,
                         )
                         self._conn.execute(
                             f"RELEASE SAVEPOINT {measurement_savepoint_name}"

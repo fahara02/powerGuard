@@ -319,7 +319,7 @@ class ReportGenerator(BaseModel):
         Generate a formatted report using a template and optionally call a C++ executable.
         """
         # Step 1: Retrieve report data from DataManager
-        report_data = self.data_manager.get_test_report(report_id)
+        report_data = self.data_manager.get_test_report_by_report_id(report_id)
 
         if not report_data:
             raise ValueError(f"No report found for ID {report_id}")
