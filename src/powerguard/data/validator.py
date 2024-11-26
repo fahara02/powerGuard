@@ -1,4 +1,5 @@
 from pathlib import Path
+from enum import Enum
 from typing import Any, Optional
 from datetime import datetime, timezone
 from google.protobuf.timestamp_pb2 import Timestamp
@@ -6,6 +7,7 @@ from google.protobuf.timestamp_pb2 import Timestamp
 from google.protobuf.timestamp_pb2 import Timestamp
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
 from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
+
 from proto.ups_test_pb2 import TestResult, TestType
 from proto.upsDefines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 
@@ -15,10 +17,14 @@ class Validator:
     def _validate_non_negative(value: Any, field_name: str, types: tuple):
         """Generic validation for non-negative numbers."""
         if not isinstance(value, types) or value < 0:
-            raise ValueError(f"{field_name} must be a non-negative {', '.join(t.__name__ for t in types)}.")
+            raise ValueError(
+                f"{field_name} must be a non-negative {', '.join(t.__name__ for t in types)}."
+            )
 
     @staticmethod
-    def _validate_range(value: Any, field_name: str, min_val: float, max_val: float, types: tuple):
+    def _validate_range(
+        value: Any, field_name: str, min_val: float, max_val: float, types: tuple
+    ):
         """Generic validation for values within a range."""
         if not isinstance(value, types) or not (min_val <= value <= max_val):
             raise ValueError(f"{field_name} must be between {min_val} and {max_val}.")
@@ -30,7 +36,9 @@ class Validator:
     def _validate_overload(self, overload: OverLoad):
         """Validate OverLoad object."""
         self._validate_non_negative(overload.load_percentage, "load_percentage", (int,))
-        self._validate_non_negative(overload.overload_time_min, "overload_time_min", (int,))
+        self._validate_non_negative(
+            overload.overload_time_min, "overload_time_min", (int,)
+        )
 
     def _validate_power_measure(self, power_measure: PowerMeasure):
         """Validate PowerMeasure object."""
@@ -70,11 +78,23 @@ class Validator:
     def validate_measurement(self, measurement: Measurement):
         """Validate a Measurement object to ensure data integrity."""
         required_fields = [
-            "m_unique_id", "time_stamp", "name", "mode", "phase_name", "load_type",
-            "step_id", "load_percentage", "steady_state_voltage_tol", 
-            "voltage_dc_component", "load_pf_deviation", "switch_time_ms", 
-            "run_interval_sec", "backup_time_sec", "overload_time_sec", 
-            "temperature_1", "temperature_2"
+            "m_unique_id",
+            "time_stamp",
+            "name",
+            "mode",
+            "phase_name",
+            "load_type",
+            "step_id",
+            "load_percentage",
+            "steady_state_voltage_tol",
+            "voltage_dc_component",
+            "load_pf_deviation",
+            "switch_time_ms",
+            "run_interval_sec",
+            "backup_time_sec",
+            "overload_time_sec",
+            "temperature_1",
+            "temperature_2",
         ]
 
         for field in required_fields:
@@ -82,14 +102,18 @@ class Validator:
                 raise ValueError(f"Field '{field}' is required and cannot be None.")
 
         if not isinstance(measurement.time_stamp, Timestamp):
-            raise TypeError(f"time_stamp must be a google.protobuf.Timestamp, got {type(measurement.time_stamp)}")
-        
+            raise TypeError(
+                f"time_stamp must be a google.protobuf.Timestamp, got {type(measurement.time_stamp)}"
+            )
+
         time_stamp_dt = measurement.time_stamp.ToDatetime()
         if not isinstance(time_stamp_dt, datetime):
             raise ValueError("time_stamp conversion to datetime failed")
 
-        self._validate_range(measurement.load_percentage, "load_percentage", 0, 100, (int,))
-        
+        self._validate_range(
+            measurement.load_percentage, "load_percentage", 0, 100, (int,)
+        )
+
         for field, name in [
             (measurement.steady_state_voltage_tol, "steady_state_voltage_tol"),
             (measurement.voltage_dc_component, "voltage_dc_component"),
@@ -104,23 +128,40 @@ class Validator:
         if measurement.temperature_1 < -273 or measurement.temperature_2 < -273:
             raise ValueError("Temperature values cannot be below absolute zero.")
 
+        if measurement.power_measures:
+            for power_measure in measurement.power_measures:
+                self._validate_power_measure(power_measure)
+
     def _validate_test_report(self, report: TestReport):
         """Validate TestReport object."""
         required_fields = [
-            "settings_id", "test_name", "test_description", "test_result"
+            "settings",
+            "testName",
+            "testDescription",
+            "test_result",
         ]
 
         for field in required_fields:
             if getattr(report, field, None) is None:
                 raise ValueError(f"Field '{field}' is required and cannot be None.")
 
-        if not isinstance(report.settings_id, int) or report.settings_id < 0:
-            raise ValueError("settings_id must be a non-negative integer.")
+        if not isinstance(report.settings.report_id, int) or report.settings.report_id < 0:
+            raise ValueError("report_id must be a non-negative integer.")
 
+        #     # Validate testName as an enum
+        # if not isinstance(report.testName, TestProto.TestType):  # Adjusted for enum type
+        #     raise ValueError("testName must be a valid TestType enum value.")
+
+        # Validate testDescription and test_result as strings
         for field, name in [
-            (report.test_name, "test_name"),
-            (report.test_description, "test_description"),
-            (report.test_result, "test_result"),
+            (report.testDescription, "testDescription"),
+            
         ]:
             if not isinstance(field, str) or not field.strip():
                 raise ValueError(f"{name} must be a non-empty string.")
+            
+        if report.settings:
+            self._validate_spec(report.settings.spec)
+        if report.measurements:
+            for measurement in report.measurements:
+                self.validate_measurement(measurement)
