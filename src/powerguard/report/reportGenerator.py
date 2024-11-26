@@ -276,6 +276,68 @@ class ReportGenerator(BaseModel):
 
     #     return aggregated
 
+    # def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    #     """
+    #     Aggregates data from a list of rows into a hierarchical structure.
+    #     Args:
+    #         rows (list): List of dictionaries containing report data.
+    #     Returns:
+    #         dict: Aggregated report data.
+    #     """
+    #     if not rows:
+    #         raise ValueError("No rows provided to aggregate")
+    #     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+    #         raise TypeError("Rows must be a list of dictionaries")
+
+    #     # Initialize the aggregated report with basic details from the first row
+    #     aggregated = {key: rows[0][key] for key in [
+    #         "test_report_id", "test_name", "test_description",
+    #         "test_result", "client_name", "standard", "ups_model"
+    #     ]}
+    #     aggregated["measurements"] = []
+
+    #     # Group and aggregate measurements
+    #     measurements = defaultdict(lambda: {
+    #         **{key: None for key in [
+    #             "measurement_unique_id", "measurement_name", "measurement_timestamp",
+    #             "measurement_loadtype", "load_percentage", "phase_name", "step_id",
+    #             "steady_state_voltage_tol", "voltage_dc_component", "load_pf_deviation",
+    #             "switch_time_ms", "run_interval_sec", "backup_time_sec",
+    #             "overload_time_sec", "temperature_1", "temperature_2"
+    #         ]},
+    #         "power_measures": []
+    #     })
+
+    #     for row in rows:
+    #         measurement = measurements[row["measurement_unique_id"]]
+    #         if not measurement["measurement_name"]:  # Fill measurement details only once
+    #             measurement.update({
+    #                 key: row.get(key, 0 if "time" in key or "tol" in key else "Unknown")
+    #                 for key in measurement if key != "power_measures"
+    #             })
+    #         if row.get("power_measure_id"):
+    #             measurement["power_measures"].append({
+    #                 key: row[key] for key in [
+    #                     "power_measure_id", "power_measure_type", "power_measure_name",
+    #                     "power_measure_voltage", "power_measure_current", "power_measure_power", "power_measure_pf"
+    #                 ]
+    #             })
+
+    #     # Add ordered measurements with power measures to the final report
+    #     for index, (measurement_id, measurement) in enumerate(measurements.items()):
+    #         measurement_data = {
+    #             f"measurements_{index}_{key}": value for key, value in measurement.items()
+    #             if key != "power_measures"
+    #         }
+    #         for i, power_measure in enumerate(measurement["power_measures"]):
+    #             measurement_data.update({
+    #                 f"measurements_{index}_power_measures_{i}_{key}": value
+    #                 for key, value in power_measure.items()
+    #             })
+    #         aggregated["measurements"].append(measurement_data)
+
+    #     return aggregated
+
     def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Aggregates data from a list of rows into a hierarchical structure.
@@ -289,56 +351,109 @@ class ReportGenerator(BaseModel):
         if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
             raise TypeError("Rows must be a list of dictionaries")
 
+        # Mandatory keys
+        mandatory_keys = {
+            "measurement_unique_id",
+            "measurement_name",
+            "measurement_timestamp",
+        }
+
+        # Validate rows for mandatory keys
+        for row in rows:
+            missing_keys = mandatory_keys - row.keys()
+            if missing_keys:
+                raise ValueError(f"Missing mandatory keys {missing_keys} in row: {row}")
+
         # Initialize the aggregated report with basic details from the first row
-        aggregated = {key: rows[0][key] for key in [
-            "test_report_id", "test_name", "test_description",
-            "test_result", "client_name", "standard", "ups_model"
-        ]}
+        aggregated = {
+            key: rows[0][key]
+            for key in [
+                "test_report_id",
+                "test_name",
+                "test_description",
+                "test_result",
+                "client_name",
+                "standard",
+                "ups_model",
+            ]
+        }
         aggregated["measurements"] = []
 
         # Group and aggregate measurements
-        measurements = defaultdict(lambda: {
-            **{key: None for key in [
-                "measurement_unique_id", "measurement_name", "measurement_timestamp",
-                "measurement_loadtype", "load_percentage", "phase_name", "step_id",
-                "steady_state_voltage_tol", "voltage_dc_component", "load_pf_deviation",
-                "switch_time_ms", "run_interval_sec", "backup_time_sec",
-                "overload_time_sec", "temperature_1", "temperature_2"
-            ]},
-            "power_measures": []
-        })
+        measurements = defaultdict(
+            lambda: {
+                **{
+                    key: None
+                    for key in [
+                        "measurement_unique_id",
+                        "measurement_name",
+                        "measurement_timestamp",
+                        "measurement_loadtype",
+                        "load_percentage",
+                        "phase_name",
+                        "step_id",
+                        "steady_state_voltage_tol",
+                        "voltage_dc_component",
+                        "load_pf_deviation",
+                        "switch_time_ms",
+                        "run_interval_sec",
+                        "backup_time_sec",
+                        "overload_time_sec",
+                        "temperature_1",
+                        "temperature_2",
+                    ]
+                },
+                "power_measures": [],
+            }
+        )
 
         for row in rows:
             measurement = measurements[row["measurement_unique_id"]]
-            if not measurement["measurement_name"]:  # Fill measurement details only once
-                measurement.update({
-                    key: row.get(key, 0 if "time" in key or "tol" in key else "Unknown")
-                    for key in measurement if key != "power_measures"
-                })
+            if not measurement[
+                "measurement_name"
+            ]:  # Fill measurement details only once
+                measurement.update(
+                    {
+                        key: row.get(
+                            key, 0 if "time" in key or "tol" in key else "Unknown"
+                        )
+                        for key in measurement
+                        if key != "power_measures"
+                    }
+                )
             if row.get("power_measure_id"):
-                measurement["power_measures"].append({
-                    key: row[key] for key in [
-                        "power_measure_id", "power_measure_type", "power_measure_name",
-                        "power_measure_voltage", "power_measure_current", "power_measure_power", "power_measure_pf"
-                    ]
-                })
+                measurement["power_measures"].append(
+                    {
+                        key: row[key]
+                        for key in [
+                            "power_measure_id",
+                            "power_measure_type",
+                            "power_measure_name",
+                            "power_measure_voltage",
+                            "power_measure_current",
+                            "power_measure_power",
+                            "power_measure_pf",
+                        ]
+                    }
+                )
 
         # Add ordered measurements with power measures to the final report
         for index, (measurement_id, measurement) in enumerate(measurements.items()):
             measurement_data = {
-                f"measurements_{index}_{key}": value for key, value in measurement.items()
+                f"measurements_{index}_{key}": value
+                for key, value in measurement.items()
                 if key != "power_measures"
             }
             for i, power_measure in enumerate(measurement["power_measures"]):
-                measurement_data.update({
-                    f"measurements_{index}_power_measures_{i}_{key}": value
-                    for key, value in power_measure.items()
-                })
+                measurement_data.update(
+                    {
+                        f"measurements_{index}_power_measures_{i}_{key}": value
+                        for key, value in power_measure.items()
+                    }
+                )
             aggregated["measurements"].append(measurement_data)
 
         return aggregated
-
-
 
     def create_xml_from_report(self, report_data: list[dict], file_name: str) -> Path:
         """
@@ -405,7 +520,6 @@ class ReportGenerator(BaseModel):
         tree.write(xml_path, encoding="utf-8", xml_declaration=True)
         print(f"XML generated and saved to {xml_path}")
         return xml_path
-  
 
     def generate_report(self, report_id: int, use_cpp: bool = False):
         """
@@ -441,6 +555,7 @@ class ReportGenerator(BaseModel):
 
         # Step 7: Edit the Word template
         self.edit_word_document(output_file_path, xml_path)
+
     def edit_word_document(self, output_path: Path, xml_path: Path):
         """
         Edit a Word document with content controls based on the XML data.
@@ -560,5 +675,3 @@ if __name__ == "__main__":
     print("-------------------report object----------------------")
 
     report_generator.generate_report(report_id, use_cpp=False)
-
-

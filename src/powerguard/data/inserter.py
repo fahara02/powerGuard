@@ -367,79 +367,84 @@ class Inserter:
             logging.error(f"Unexpected error inserting Measurement: {e}")
             raise
 
+
     def insert_test_report(self, report: TestReport):
-        """Insert a TestReport message into the database."""
+        """Insert or update a TestReport message in the database."""
         logging.debug(
-            "Inserting TestReport: %s with report_id %d",
+            "Inserting/Updating TestReport: %s with report_id %d",
             report,
             report.settings.report_id,
         )
 
         try:
-            # Convert the TestType enum to its string name
+            # Convert TestType enum to its string name
             test_name = TestType.Name(report.testName)
-
-            # Generate a unique savepoint name using report ID
             savepoint_name = f"test_report_{report.settings.report_id}"
 
-            # Start the transaction and set savepoint
+            # Start transaction and set savepoint
             self._conn.execute("BEGIN")
             self._conn.execute(f"SAVEPOINT {savepoint_name}")
 
-            # Check if report_id already exists in the ReportSettings table
-            query_same_report_id = (
-                "SELECT report_id FROM ReportSettings WHERE report_id = ?"
-            )
-            self._cursor.execute(query_same_report_id, (report.settings.report_id,))
-            existing_row = self._cursor.fetchone()
+            # Check if report_id already exists in ReportSettings
+            query_report_id = "SELECT id FROM ReportSettings WHERE report_id = ?"
+            self._cursor.execute(query_report_id, (report.settings.report_id,))
+            report_settings_row = self._cursor.fetchone()
 
-            if existing_row:
-                # Return the existing ID if report_id exists
-                logging.debug(
-                    "ReportSettings with report_id %d already exists.",
-                    report.settings.report_id,
-                )
-                return existing_row[0]
+            if report_settings_row:
+                # Existing report_id: reuse settings_id and update TestReport
+                settings_id = report_settings_row[0]
+                logging.debug("ReportSettings with report_id %d found.", report.settings.report_id)
+
+                # Check if TestReport exists for this settings_id
+                query_test_report = "SELECT id FROM TestReport WHERE settings_id = ?"
+                self._cursor.execute(query_test_report, (settings_id,))
+                test_report_row = self._cursor.fetchone()
+
+                if test_report_row:
+                    # Update the existing TestReport
+                    test_report_id = test_report_row[0]
+                    logging.debug(
+                        "Updating existing TestReport with id %d for settings_id %d.",
+                        test_report_id,
+                        settings_id,
+                    )
+                    self._cursor.execute(
+                        """
+                        UPDATE TestReport
+                        SET test_name = ?, test_description = ?, test_result = ?
+                        WHERE id = ?
+                        """,
+                        (
+                            test_name,
+                            report.testDescription,
+                            TestResult.Name(report.test_result),
+                            test_report_id,
+                        ),
+                    )
+                else:
+                    # Insert a new TestReport for existing settings_id
+                    logging.debug("Inserting new TestReport for existing settings_id %d.", settings_id)
+                    self._cursor.execute(
+                        """
+                        INSERT INTO TestReport (
+                            settings_id, test_name, test_description, test_result
+                        )
+                        VALUES (?, ?, ?, ?)
+                        """,
+                        (
+                            settings_id,
+                            test_name,
+                            report.testDescription,
+                            TestResult.Name(report.test_result),
+                        ),
+                    )
+                    test_report_id = self._cursor.lastrowid
             else:
-                # Insert new ReportSettings and get its ID
-                logging.debug(
-                    "Creating new ReportSettings for report_id %d.",
-                    report.settings.report_id,
-                )
+                # New report_id: insert ReportSettings and TestReport
+                logging.debug("Creating new ReportSettings for report_id %d.", report.settings.report_id)
                 settings_id = self.insert_report_settings(report.settings)
 
-            # Check if a TestReport with this settings_id already exists
-            query_same_settings_id = "SELECT id FROM TestReport WHERE settings_id = ?"
-            self._cursor.execute(query_same_settings_id, (settings_id,))
-            test_report_row = self._cursor.fetchone()
-
-            if test_report_row:
-                # If TestReport exists, reuse the existing ID
-                test_report_id = test_report_row[0]
-                logging.debug(
-                    "Updating existing TestReport with id %d for settings_id %d.",
-                    test_report_id,
-                    settings_id,
-                )
-                # Update the existing TestReport
-                self._cursor.execute(
-                    """
-                    UPDATE TestReport
-                    SET test_name = ?, test_description = ?, test_result = ?
-                    WHERE id = ?
-                    """,
-                    (
-                        test_name,
-                        report.testDescription,
-                        TestResult.Name(report.test_result),
-                        test_report_id,
-                    ),
-                )
-            else:
-                # Insert a new TestReport
-                logging.debug(
-                    "Inserting new TestReport for settings_id %d.", settings_id
-                )
+                logging.debug("Inserting new TestReport for new settings_id %d.", settings_id)
                 self._cursor.execute(
                     """
                     INSERT INTO TestReport (
@@ -462,11 +467,8 @@ class Inserter:
                     "Inserting measurements for TestReport ID %d.", test_report_id
                 )
                 for measurement in report.measurements:
-                    # Insert measurement and handle savepoint correctly
                     try:
-                        measurement_savepoint_name = (
-                            f"measurement_{measurement.m_unique_id}"
-                        )
+                        measurement_savepoint_name = f"measurement_{measurement.m_unique_id}"
                         self._conn.execute(f"SAVEPOINT {measurement_savepoint_name}")
                         self.insert_measurement(
                             measurement,
@@ -474,15 +476,10 @@ class Inserter:
                             measurement_savepoint_name,
                             True,
                         )
-                        self._conn.execute(
-                            f"RELEASE SAVEPOINT {measurement_savepoint_name}"
-                        )
+                        self._conn.execute(f"RELEASE SAVEPOINT {measurement_savepoint_name}")
                     except Exception as e:
-                        # If there's an error with the measurement insertion, rollback to savepoint
                         logging.error(f"Error inserting measurement: {e}")
-                        self._conn.execute(
-                            f"ROLLBACK TO SAVEPOINT {measurement_savepoint_name}"
-                        )
+                        self._conn.execute(f"ROLLBACK TO SAVEPOINT {measurement_savepoint_name}")
                         raise
 
             # Commit the transaction to save changes
