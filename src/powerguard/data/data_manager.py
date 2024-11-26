@@ -554,7 +554,24 @@ class DataManager(BaseModel):
             power=2310.0,
             pf=0.97,
         )
-        pMeasures = [input_power, output_power]
+        input_power2 = PowerMeasure(
+            type=PowerMeasureType.UPS_INPUT,
+            name="input_power",
+            voltage=231.0,
+            current=11.0,
+            power=2350.0,
+            pf=0.98,
+        )
+        output_power2 = PowerMeasure(
+            type=PowerMeasureType.UPS_OUTPUT,
+            name="output_power",
+            voltage=220.0,
+            current=11.5,
+            power=2360.0,
+            pf=0.97,
+        )
+        pMeasures1 = [input_power, output_power]
+        pMeasures2 = [input_power2, output_power2]
         # Create a ReportSettings object
         report_settings = ReportSettings(
             report_id=report_id,
@@ -568,8 +585,8 @@ class DataManager(BaseModel):
         )
 
         # Create a Measurement object
-        measurement = Measurement(
-            m_unique_id=12345,  # Example unique ID
+        measurement1 = Measurement(
+            m_unique_id=1136,  # Example unique ID
             time_stamp=timestamp_proto,  # Example UNIX timestamp
             name="Full Load Test",
             mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
@@ -577,7 +594,7 @@ class DataManager(BaseModel):
             load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
             step_id=1,
             load_percentage=100,
-            power_measures=pMeasures,
+            power_measures=pMeasures1,
             steady_state_voltage_tol=5,
             voltage_dc_component=0,
             load_pf_deviation=2,
@@ -588,13 +605,33 @@ class DataManager(BaseModel):
             temperature_1=25,
             temperature_2=30,
         )
-
+        measurement2 = Measurement(
+            m_unique_id=1137,  # Example unique ID
+            time_stamp=timestamp_proto,  # Example UNIX timestamp
+            name="Full Load Test",
+            mode=MODE.STORAGE_MODE,  # NORMAL_MODE from enum MODE
+            phase_name="Phase 1",
+            load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
+            step_id=1,
+            load_percentage=100,
+            power_measures=pMeasures2,
+            steady_state_voltage_tol=5,
+            voltage_dc_component=0,
+            load_pf_deviation=2,
+            switch_time_ms=500,
+            run_interval_sec=3600,
+            backup_time_sec=1800,
+            overload_time_sec=300,
+            temperature_1=25,
+            temperature_2=30,
+        )
+        measurements=[measurement1,measurement2]
         # Create the TestReport object
         test_report = TestReport(
             settings=report_settings,
             testName=TestType.FULL_LOAD_TEST,
             testDescription="Full load test for the UPS system",
-            measurements=[measurement],
+            measurements=measurements,
             test_result=TestResult.TEST_SUCCESSFUL,  # TEST_SUCCESSFUL from enum TestResult
         )
 

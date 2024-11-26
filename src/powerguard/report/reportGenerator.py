@@ -93,49 +93,7 @@ class ReportGenerator(BaseModel):
         file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}"
         return file_name.replace(" ", "_")
 
-    # def aggregate_report_data(self,rows: list[dict]) -> dict:
-    #     """
-    #     Aggregate a list of rows into a single dictionary suitable for generating a report.
-
-    #     Args:
-    #         rows (list[dict]): List of rows fetched from the database.
-
-    #     Returns:
-    #         dict: Aggregated report data.
-    #     """
-    #     if not rows:
-    #         raise ValueError("No rows provided to aggregate.")
-
-    #     # Start with the first row for basic information
-    #     aggregated = rows[0].copy()
-
-    #     # Collect measurements and power measures into separate lists
-    #     measurements = {}
-    #     for row in rows:
-    #         measurement_id = row.get("measurement_unique_id")
-    #         if measurement_id not in measurements:
-    #             measurements[measurement_id] = {
-    #                 "measurement_name": row.get("measurement_name"),
-    #                 "measurement_timestamp": row.get("measurement_timestamp"),
-    #                 "measurement_loadtype": row.get("measurement_loadtype"),
-    #                 "power_measures": [],
-    #             }
-    #         measurements[measurement_id]["power_measures"].append(
-    #             {
-    #                 "power_measure_id": row.get("power_measure_id"),
-    #                 "power_measure_type": row.get("power_measure_type"),
-    #                 "power_measure_name": row.get("power_measure_name"),
-    #                 "power_measure_voltage": row.get("power_measure_voltage"),
-    #                 "power_measure_current": row.get("power_measure_current"),
-    #                 "power_measure_power": row.get("power_measure_power"),
-    #                 "power_measure_pf": row.get("power_measure_pf"),
-    #             }
-    #         )
-
-    #     # Flatten measurements into a list
-    #     aggregated["measurements"] = list(measurements.values())
-    #     return aggregated
-    # def aggregate_report_data(self, rows):
+    # def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     #     """
     #     Aggregates data from a list of rows into a hierarchical structure.
     #     Args:
@@ -149,36 +107,65 @@ class ReportGenerator(BaseModel):
     #     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
     #         raise TypeError("Rows must be a list of dictionaries")
 
-    #     aggregated = rows[0].copy()  # Start with the first row
-    #     aggregated["measurements"] = []
+    #     # Start with the first row
+    #     aggregated = {
+    #         "test_report_id": rows[0]["test_report_id"],
+    #         "test_name": rows[0]["test_name"],
+    #         "test_description": rows[0]["test_description"],
+    #         "test_result": rows[0]["test_result"],
+    #         "client_name": rows[0]["client_name"],
+    #         "standard": rows[0]["standard"],
+    #         "ups_model": rows[0]["ups_model"],
+    #         "measurements": [],  # This will hold the list of measurements
+    #     }
 
     #     # Group data for measurements and power measures
     #     measurements = defaultdict(lambda: {"power_measures": []})
 
     #     for row in rows:
-    #         measurement_id = row.get("measurement_unique_id")
-    #         if measurement_id:
-    #             measurement = measurements[measurement_id]
-    #             if not measurement.get("measurement_name"):
-    #                 measurement.update({
-    #                     "measurement_unique_id": measurement_id,
-    #                     "measurement_name": row["measurement_name"],
-    #                     "measurement_timestamp": row["measurement_timestamp"],
-    #                     "measurement_loadtype": row["measurement_loadtype"]
-    #                 })
-    #             if row.get("power_measure_id"):
-    #                 measurement["power_measures"].append({
+    #         measurement_id = row["measurement_unique_id"]
+    #         measurement = measurements[measurement_id]
+
+    #         # Only update measurement details once
+    #         if not measurement.get("measurement_name"):
+    #             measurement.update(
+    #                 {
+    #                     "measurement_unique_id": row.get("measurement_unique_id"),
+    #                     "measurement_name": row.get("measurement_name"),
+    #                     "measurement_timestamp": row.get("measurement_timestamp"),
+    #                     "measurement_loadtype": row.get("measurement_loadtype"),
+    #                     "load_percentage": row.get("load_percentage", 0),  # Default to 0 if missing
+    #                     "phase_name": row.get("phase_name", "Unknown"),  # Default to "Unknown" if missing
+    #                     "step_id": row.get("step_id", 0),  # Default to 0 if missing
+    #                     "steady_state_voltage_tol": row.get("steady_state_voltage_tol", 0),  # Default to 0 if missing
+    #                     "voltage_dc_component": row.get("voltage_dc_component", 0),  # Default to 0 if missing
+    #                     "load_pf_deviation": row.get("load_pf_deviation", 0),  # Default to 0 if missing
+    #                     "switch_time_ms": row.get("switch_time_ms", 0),  # Default to 0 if missing
+    #                     "run_interval_sec": row.get("run_interval_sec", 0),  # Default to 0 if missing
+    #                     "backup_time_sec": row.get("backup_time_sec", 0),  # Default to 0 if missing
+    #                     "overload_time_sec": row.get("overload_time_sec", 0),  # Default to 0 if missing
+    #                     "temperature_1": row.get("temperature_1", 0),  # Default to 0 if missing
+    #                     "temperature_2": row.get("temperature_2", 0),  # Default to 0 if missing
+    #                 }
+    #             )
+
+    #         # Add power measures to this measurement
+    #         if row.get("power_measure_id"):
+    #             measurement["power_measures"].append(
+    #                 {
     #                     "power_measure_id": row["power_measure_id"],
     #                     "power_measure_type": row["power_measure_type"],
     #                     "power_measure_name": row["power_measure_name"],
     #                     "power_measure_voltage": row["power_measure_voltage"],
     #                     "power_measure_current": row["power_measure_current"],
     #                     "power_measure_power": row["power_measure_power"],
-    #                     "power_measure_pf": row["power_measure_pf"]
-    #                 })
+    #                     "power_measure_pf": row["power_measure_pf"],
+    #                 }
+    #             )
 
-    #     # Convert measurements to a list
+    #     # Convert measurements to a list and add to the report
     #     aggregated["measurements"] = list(measurements.values())
+
     #     return aggregated
     def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -203,7 +190,7 @@ class ReportGenerator(BaseModel):
             "client_name": rows[0]["client_name"],
             "standard": rows[0]["standard"],
             "ups_model": rows[0]["ups_model"],
-            "measurements": [],
+            "measurements": [],  # This will hold the list of measurements
         }
 
         # Group data for measurements and power measures
@@ -214,28 +201,27 @@ class ReportGenerator(BaseModel):
             measurement = measurements[measurement_id]
 
             # Only update measurement details once
-        if not measurement.get("measurement_name"):
-            measurement.update(
-                {
-                    "measurement_unique_id": row.get("measurement_unique_id"),
-                    "measurement_name": row.get("measurement_name"),
-                    "measurement_timestamp": row.get("measurement_timestamp"),
-                    "measurement_loadtype": row.get("measurement_loadtype"),
-                    "load_percentage": row.get("load_percentage", 0),  # Default to 0 if missing
-                    "phase_name": row.get("phase_name", "Unknown"),  # Default to "Unknown" if missing
-                    "step_id": row.get("step_id", 0),  # Default to 0 if missing
-                    "steady_state_voltage_tol": row.get("steady_state_voltage_tol", 0),  # Default to 0 if missing
-                    "voltage_dc_component": row.get("voltage_dc_component", 0),  # Default to 0 if missing
-                    "load_pf_deviation": row.get("load_pf_deviation", 0),  # Default to 0 if missing
-                    "switch_time_ms": row.get("switch_time_ms", 0),  # Default to 0 if missing
-                    "run_interval_sec": row.get("run_interval_sec", 0),  # Default to 0 if missing
-                    "backup_time_sec": row.get("backup_time_sec", 0),  # Default to 0 if missing
-                    "overload_time_sec": row.get("overload_time_sec", 0),  # Default to 0 if missing
-                    "temperature_1": row.get("temperature_1", 0),  # Default to 0 if missing
-                    "temperature_2": row.get("temperature_2", 0),  # Default to 0 if missing
-                }
-            )
-
+            if not measurement.get("measurement_name"):
+                measurement.update(
+                    {
+                        "measurement_unique_id": row.get("measurement_unique_id"),
+                        "measurement_name": row.get("measurement_name"),
+                        "measurement_timestamp": row.get("measurement_timestamp"),
+                        "measurement_loadtype": row.get("measurement_loadtype"),
+                        "load_percentage": row.get("load_percentage", 0),  # Default to 0 if missing
+                        "phase_name": row.get("phase_name", "Unknown"),  # Default to "Unknown" if missing
+                        "step_id": row.get("step_id", 0),  # Default to 0 if missing
+                        "steady_state_voltage_tol": row.get("steady_state_voltage_tol", 0),  # Default to 0 if missing
+                        "voltage_dc_component": row.get("voltage_dc_component", 0),  # Default to 0 if missing
+                        "load_pf_deviation": row.get("load_pf_deviation", 0),  # Default to 0 if missing
+                        "switch_time_ms": row.get("switch_time_ms", 0),  # Default to 0 if missing
+                        "run_interval_sec": row.get("run_interval_sec", 0),  # Default to 0 if missing
+                        "backup_time_sec": row.get("backup_time_sec", 0),  # Default to 0 if missing
+                        "overload_time_sec": row.get("overload_time_sec", 0),  # Default to 0 if missing
+                        "temperature_1": row.get("temperature_1", 0),  # Default to 0 if missing
+                        "temperature_2": row.get("temperature_2", 0),  # Default to 0 if missing
+                    }
+                )
 
             # Add power measures to this measurement
             if row.get("power_measure_id"):
@@ -252,9 +238,46 @@ class ReportGenerator(BaseModel):
                 )
 
         # Convert measurements to a list and add to the report
-        aggregated["measurements"] = list(measurements.values())
+        for index, measurement in enumerate(measurements.values()):  # Add index here
+            # Create a flattened list for each measurement
+            measurement_data = {
+                f"measurements_{index}_measurement_unique_id": measurement["measurement_unique_id"],
+                f"measurements_{index}_measurement_name": measurement["measurement_name"],
+                f"measurements_{index}_measurement_timestamp": measurement["measurement_timestamp"],
+                f"measurements_{index}_measurement_loadtype": measurement["measurement_loadtype"],
+                f"measurements_{index}_load_percentage": measurement["load_percentage"],
+                f"measurements_{index}_phase_name": measurement["phase_name"],
+                f"measurements_{index}_step_id": measurement["step_id"],
+                f"measurements_{index}_steady_state_voltage_tol": measurement["steady_state_voltage_tol"],
+                f"measurements_{index}_voltage_dc_component": measurement["voltage_dc_component"],
+                f"measurements_{index}_load_pf_deviation": measurement["load_pf_deviation"],
+                f"measurements_{index}_switch_time_ms": measurement["switch_time_ms"],
+                f"measurements_{index}_run_interval_sec": measurement["run_interval_sec"],
+                f"measurements_{index}_backup_time_sec": measurement["backup_time_sec"],
+                f"measurements_{index}_overload_time_sec": measurement["overload_time_sec"],
+                f"measurements_{index}_temperature_1": measurement["temperature_1"],
+                f"measurements_{index}_temperature_2": measurement["temperature_2"],
+            }
+
+            # Add power measures after the measurement data
+            for i, power_measure in enumerate(measurement["power_measures"]):
+                measurement_data.update({
+                    f"measurements_{index}_power_measures_{i}_power_measure_id": power_measure["power_measure_id"],
+                    f"measurements_{index}_power_measures_{i}_power_measure_type": power_measure["power_measure_type"],
+                    f"measurements_{index}_power_measures_{i}_power_measure_name": power_measure["power_measure_name"],
+                    f"measurements_{index}_power_measures_{i}_power_measure_voltage": power_measure["power_measure_voltage"],
+                    f"measurements_{index}_power_measures_{i}_power_measure_current": power_measure["power_measure_current"],
+                    f"measurements_{index}_power_measures_{i}_power_measure_power": power_measure["power_measure_power"],
+                    f"measurements_{index}_power_measures_{i}_power_measure_pf": power_measure["power_measure_pf"],
+                })
+
+            # Add the measurement data with power measures to the final report
+            aggregated["measurements"].append(measurement_data)
 
         return aggregated
+
+        
+
 
     def create_xml_from_report(self, report_data: list[dict], file_name: str) -> Path:
         """
@@ -294,7 +317,6 @@ class ReportGenerator(BaseModel):
             return dict(items)
 
         # Step 1: Aggregate report data into a single dictionary
-        print(f"Data passed to aggregate_report_data: {report_data}")
 
         aggregated_data = self.aggregate_report_data(report_data)
 
@@ -322,6 +344,7 @@ class ReportGenerator(BaseModel):
         tree.write(xml_path, encoding="utf-8", xml_declaration=True)
         print(f"XML generated and saved to {xml_path}")
         return xml_path
+  
 
     def generate_report(self, report_id: int, use_cpp: bool = False):
         """
@@ -357,7 +380,6 @@ class ReportGenerator(BaseModel):
 
         # Step 7: Edit the Word template
         self.edit_word_document(output_file_path, xml_path)
-
     def edit_word_document(self, output_path: Path, xml_path: Path):
         """
         Edit a Word document with content controls based on the XML data.
@@ -478,76 +500,4 @@ if __name__ == "__main__":
 
     report_generator.generate_report(report_id, use_cpp=False)
 
-    # def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
-    #     """
-    #     Generate an XML file from the report data, flattening nested dictionaries.
-    #     """
-    #     def flatten_dict(data, parent_key='', sep='_'):
-    #         """
-    #         Recursively flatten a nested dictionary.
-    #         """
-    #         items = []
-    #         for k, v in data.items():
-    #             new_key = f"{parent_key}{sep}{k}" if parent_key else k
-    #             if isinstance(v, dict):
-    #                 items.extend(flatten_dict(v, new_key, sep=sep).items())
-    #             else:
-    #                 items.append((new_key, v))
-    #         return dict(items)
 
-    #     # Flatten the report data, including nested dictionaries like `settings`
-    #     flattened_data = flatten_dict(report_data)
-
-    #     # Create XML structure
-    #     root = ET.Element("TestReport")
-    #     for key, value in flattened_data.items():
-    #         child = ET.SubElement(root, key)
-    #         child.text = str(value)
-
-    #     # Write XML to file
-    #     tree = ET.ElementTree(root)
-    #     tree.write(xml_path)
-    #     print(f"XML generated and saved to {xml_path}")
-    #     return xml_path
-    # def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
-    #     """
-    #     Generate an XML file from the report data, flattening nested dictionaries.
-    #     """
-    #     def flatten_dict(data, parent_key='', sep='_'):
-    #         """
-    #         Recursively flatten a nested dictionary.
-    #         """
-    #         items = []
-    #         for k, v in data.items():
-    #             new_key = f"{parent_key}{sep}{k}" if parent_key else k
-    #             if isinstance(v, dict):
-    #                 # Recursively flatten dictionaries
-    #                 items.extend(flatten_dict(v, new_key, sep=sep).items())
-    #             elif isinstance(v, list):
-    #                 # Handle lists by indexing items
-    #                 for i, item in enumerate(v):
-    #                     indexed_key = f"{new_key}{sep}{i}"
-    #                     if isinstance(item, dict):
-    #                         items.extend(flatten_dict(item, indexed_key, sep=sep).items())
-    #                     else:
-    #                         items.append((indexed_key, item))
-    #             else:
-    #                 # Add simple key-value pairs
-    #                 items.append((new_key, v))
-    #         return dict(items)
-
-    #     # Flatten the report data, including nested dictionaries and lists
-    #     flattened_data = flatten_dict(report_data)
-
-    #     # Create XML structure
-    #     root = ET.Element("TestReport")
-    #     for key, value in flattened_data.items():
-    #         child = ET.SubElement(root, key)
-    #         # Convert non-string values to strings
-    #         child.text = str(value) if value is not None else ""
-
-    #     # Write XML to file
-    #     tree = ET.ElementTree(root)
-    #     tree.write(xml_path, encoding="utf-8", xml_declaration=True)
-    #     print(f"XML generated and saved to {xml_path}")
-    #     return xml_path
