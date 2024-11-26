@@ -239,19 +239,17 @@ class DataManager(BaseModel):
         self._validator._validate_test_report(report)
         return self._inserter.insert_test_report(report)
 
-    def get_test_report_by_report_id(self, report_id: int) -> Optional[Dict[str, Any]]:
+    def get_test_report(self, report_id: int) -> Optional[Dict[str, Any]]:
         """
-        Fetch a test report using the report ID from ReportSettings.
+        Fetch a test report using the id from TestReport Table.
         Args:
-            report_id (int): The report ID linking ReportSettings to TestReport.
+            id (int): The id from TestReport Table
         Returns:
             Optional[Dict[str, Any]]: The test report details if found, None otherwise.
         """
-        return self._fetcher.get_test_report_by_report_id(report_id)
-
-    def get_test_report(self, id: int):
-        """Retrieve a TestReport and related data from the database by TestReport table ID."""
         return self._fetcher.get_test_report(report_id)
+
+
 
     def get_latest_test_report(self):
         """Retrieve the latest TestReport and its associated data."""

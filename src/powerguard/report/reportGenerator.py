@@ -67,6 +67,29 @@ class ReportGenerator(BaseModel):
 
         return full_output_folder
 
+    def generate_file_name(self, report_data: dict) -> str:
+        """
+        Generate a file name based on client name, UPS model, date, and report ID.
+
+        Args:
+            report_data (dict): The full report data containing `client_name`, `ups_model`, and `report_id`.
+
+        Returns:
+            str: The generated file name.
+        """
+        # Adjusted to use flat keys directly
+        client_name = report_data.get("client_name", "UnknownClient")
+        ups_model = report_data.get("ups_model", "UnknownModel")
+        report_id = report_data.get("test_report_id", "0")  # Updated key for report ID
+        date_str = datetime.now().strftime("%Y%m%d")
+
+        print(
+            f"Generating filename with: client_name={client_name}, ups_model={ups_model}, report_id={report_id}"
+        )
+
+        # Create a sanitized file name
+        file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}"
+        return file_name.replace(" ", "_")
 
     def create_xml_from_report(self, report_data: dict, file_name: str) -> Path:
         """
@@ -117,13 +140,44 @@ class ReportGenerator(BaseModel):
 
         # Construct full XML file path in the output directory
         xml_path = self.output_path / file_name
-         # Ensure the parent directory exists
+        # Ensure the parent directory exists
         xml_path.parent.mkdir(parents=True, exist_ok=True)
+
+         # Check if the file exists and confirm overwrite
+        if xml_path.exists():
+         print(f"XML file already exists at {xml_path}. Overwriting.")
         # Write XML to file
         tree = ET.ElementTree(root)
         tree.write(xml_path, encoding="utf-8", xml_declaration=True)
         print(f"XML generated and saved to {xml_path}")
         return xml_path
+
+    def generate_report(self, report_id: int, use_cpp: bool = False):
+            """
+            Generate a formatted report using a template and optionally call a C++ executable.
+            """
+            # Step 1: Retrieve report data from DataManager
+            report_data = self.data_manager.get_test_report(report_id)
+
+            if not report_data:
+                raise ValueError(f"No report found for ID {report_id}")
+
+            print(f"Fetched report data for ID {report_id}: {report_data}")
+            # Step 2: Generate file name
+            file_name = self.generate_file_name(report_data)
+
+            # Step 3: Generate XML
+            xml_path = self.create_xml_from_report(report_data, f"{file_name}.xml")
+
+            # Step 4: Optionally process XML with C++
+            if use_cpp:
+                self.call_cpp_for_processing(xml_path)
+
+            # Step 5: Generate the output Word file path
+            output_file_path = self.output_path / f"{file_name}.docx"
+
+            # Step 6: Edit the Word template
+            self.edit_word_document(output_file_path, xml_path)
 
     def edit_word_document(self, output_path: Path, xml_path: Path):
         """
@@ -163,6 +217,9 @@ class ReportGenerator(BaseModel):
                         for text in content.xpath(".//w:t", namespaces=namespace):
                             text.text = data_map[tag]
 
+           # Overwrite the existing file if it exists
+        if output_path.exists():
+          print(f"Word document already exists at {output_path}. Overwriting.")
         # Write the updated XML back to the Word document
         with ZipFile(self.template_path, "r") as docx:
             with ZipFile(output_path, "w") as new_docx:
@@ -187,29 +244,6 @@ class ReportGenerator(BaseModel):
         # Call the C++ executable with the XML file as an argument
         subprocess.run([str(cpp_executable), str(xml_path)], check=True)
         print("C++ processing completed.")
-
-    def generate_file_name(self, report_data: dict) -> str:
-        """
-        Generate a file name based on client name, UPS model, date, and report ID.
-
-        Args:
-            report_data (dict): The full report data containing `client_name`, `ups_model`, and `report_id`.
-
-        Returns:
-            str: The generated file name.
-        """
-        # Adjusted to use flat keys directly
-        client_name = report_data.get("client_name", "UnknownClient")
-        ups_model = report_data.get("ups_model", "UnknownModel")
-        report_id = report_data.get("test_report_id", "0")  # Updated key for report ID
-        date_str = datetime.now().strftime("%Y%m%d")
-
-        print(f"Generating filename with: client_name={client_name}, ups_model={ups_model}, report_id={report_id}")
-
-        # Create a sanitized file name
-        file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}"
-        return file_name.replace(" ", "_")
-
 
     def generate_all_reports(self, output_dir: Path = Path("reports")):
         """
@@ -245,33 +279,6 @@ class ReportGenerator(BaseModel):
         except sqlite3.Error as e:
             raise Exception(f"Error generating reports: {e}")
 
-    def generate_report(self, report_id: int, use_cpp: bool = False):
-        """
-        Generate a formatted report using a template and optionally call a C++ executable.
-        """
-        # Step 1: Retrieve report data from DataManager
-        report_data = self.data_manager.get_test_report_by_report_id(report_id)
-
-        if not report_data:
-            raise ValueError(f"No report found for ID {report_id}")
-        
-        print(f"Fetched report data for ID {report_id}: {report_data}")
-        # Step 2: Generate file name
-        file_name = self.generate_file_name(report_data)
-
-        # Step 3: Generate XML
-        xml_path = self.create_xml_from_report(report_data, f"{file_name}.xml")
-
-        # Step 4: Optionally process XML with C++
-        if use_cpp:
-            self.call_cpp_for_processing(xml_path)
-
-        # Step 5: Generate the output Word file path
-        output_file_path = self.output_path / f"{file_name}.docx"
-
-        # Step 6: Edit the Word template
-        self.edit_word_document(output_file_path, xml_path)
-
 
 if __name__ == "__main__":
     # Initialize DataManager
@@ -285,14 +292,12 @@ if __name__ == "__main__":
     # Generate a report
     report = data_manager.generate_mock_data(112, "ABB", "maxgreen2", "FHR")
     print(f"Generated report: {report}")
-    data_manager.insert_test_report(report)
-    report_id = report.settings.report_id
+    report_id = data_manager.insert_test_report(report)
+    print(f"Got report id: {report_id}")
+
     report_generator.generate_report(report_id, use_cpp=False)
 
-
-
-
-        # def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
+    # def create_xml_from_report(self, report_data: dict, xml_path: Path = Path("report_data.xml")) -> Path:
     #     """
     #     Generate an XML file from the report data, flattening nested dictionaries.
     #     """

@@ -14,7 +14,7 @@ class Fetcher:
         self._conn = conn
         self._cursor = cursor
 
-    def get_test_report_by_report_id(self, report_id: int) -> Optional[Dict[str, Any]]:
+    def get_test_report(self, report_id: int) -> Optional[Dict[str, Any]]:
         """
         Fetch a test report using the report ID from ReportSettings.
         Args:
@@ -32,11 +32,21 @@ class Fetcher:
             ReportSettings.standard,
             ReportSettings.ups_model,
             Measurement.m_unique_id AS measurement_unique_id,
-            Measurement.name AS measurement_name
+            Measurement.name AS measurement_name,
+            Measurement.timestamp AS measurement_timestamp, 
+            Measurement.load_type AS measurement_loadtype,
+            PowerMeasure.id AS power_measure_id,
+            PowerMeasure.type AS power_measure_type,
+            PowerMeasure.name AS power_measure_name,
+            PowerMeasure.voltage AS power_measure_voltage,
+            PowerMeasure.current AS power_measure_current,
+            PowerMeasure.power AS power_measure_power,
+            PowerMeasure.pf AS power_measure_pf
         FROM TestReport
         JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
         LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
-        WHERE ReportSettings.report_id = ?
+        LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id
+        WHERE TestReport.id= ?
         """
         self._cursor.execute(query, (report_id,))
         row = self._cursor.fetchone()
@@ -47,38 +57,8 @@ class Fetcher:
 
         return None
 
-    def get_test_report(self, id: int) -> Optional[Dict[str, Any]]:
-        """
-        Fetch a test report using the id of TestReport table.
-        Args:
-            id (int): id of TestReport table.
-        Returns:
-            Optional[Dict[str, Any]]: A dictionary containing the test report details if found, None otherwise.
-        """
-        query = """
-        SELECT 
-            TestReport.id AS test_report_id,
-            TestReport.test_name,
-            TestReport.test_description,
-            TestReport.test_result,
-            ReportSettings.client_name,
-            ReportSettings.standard,
-            ReportSettings.ups_model,
-            Measurement.m_unique_id AS measurement_unique_id,
-            Measurement.name AS measurement_name
-        FROM TestReport
-        JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
-        LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
-        WHERE TestReport.id = ?
-        """
-        self._cursor.execute(query, (id,))
-        row = self._cursor.fetchone()
 
-        if row:
-            columns = [col[0] for col in self._cursor.description]
-            return dict(zip(columns, row))
 
-        return None
 
     def get_latest_report(self) -> Optional[Dict[str, Any]]:
         """

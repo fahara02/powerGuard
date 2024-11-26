@@ -489,7 +489,7 @@ class Inserter:
             self._conn.commit()
 
             # Return the ID of the TestReport
-            return test_report_id
+            return self._cursor.lastrowid
 
         except sqlite3.Error as e:
             # Rollback the transaction in case of any SQLite error
