@@ -262,10 +262,7 @@ class Inserter:
         """Insert a Measurement record and its associated PowerMeasures."""
         try:
             # Start a savepoint for this operation
-            self._conn.execute(f"SAVEPOINT {savepoint_name}")
-
-            # Validate the measurement
-            self._validator.validate_measurement(measurement)
+            self._conn.execute(f"SAVEPOINT {savepoint_name}")         
 
             # Convert measurement to row
             db_row = self.measurement_to_db_row(measurement, test_report_id)
@@ -295,7 +292,7 @@ class Inserter:
                         power_measure,
                         measurement_id,
                         power_measure_savepoint_name,
-                        False,
+                        True,
                     )
 
             # Only release savepoint here (no commit)
@@ -412,7 +409,7 @@ class Inserter:
                         )
                         self._conn.execute(f"SAVEPOINT {measurement_savepoint_name}")
                         self.insert_measurement(
-                            measurement, test_report_id, measurement_savepoint_name
+                            measurement, test_report_id, measurement_savepoint_name,True
                         )
                         self._conn.execute(
                             f"RELEASE SAVEPOINT {measurement_savepoint_name}"
