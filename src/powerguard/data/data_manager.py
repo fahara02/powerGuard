@@ -15,13 +15,16 @@ from proto.pData_pb2 import PowerMeasure, PowerMeasureType
 from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_test_pb2 import TestResult, TestType
 from proto.upsDefines_pb2 import LOAD, MODE, OverLoad, Phase, spec
-
+from powerguard.data.validator import Validator
+from powerguard.data.inserter import Inserter
 
 class DataManager(BaseModel):
     db_name: str = "test_reports.db"
     db_path: Optional[Path] = None  # Will be set after validation
     _conn: sqlite3.Connection = PrivateAttr()  # Private attribute for connection
     _cursor: sqlite3.Cursor = PrivateAttr()  # Private attribute for cursor
+    _validator:Validator=PrivateAttr()
+    _inserter:Inserter= PrivateAttr()
 
     @field_validator("db_name")
     def validate_db_name(cls, v: str):
@@ -45,6 +48,8 @@ class DataManager(BaseModel):
         self._conn = sqlite3.connect(self.db_path)
         self._cursor = self._conn.cursor()
         self._create_tables()
+        self._validator = Validator()
+        self._inserter = Inserter(self._conn, self._cursor)
 
     def __enter__(self):
         """Enable context manager for database connection."""
@@ -382,7 +387,7 @@ class DataManager(BaseModel):
 
     def insert_overload(self, overload: OverLoad):
         """Insert an OverLoad message into the database or return the existing entry if it already exists."""
-        self._validate_overload(overload)  # Validate overload details
+        self._validator._validate_overload(overload)  # Validate overload details
         try:
             # Check if the same OverLoad already exists
             query = """
@@ -422,7 +427,7 @@ class DataManager(BaseModel):
         self, power: PowerMeasure, measurement_id: int, savepoint_name: str
     ):
         """Insert a PowerMeasure message into the database."""
-        self._validate_power_measure(power)  # Ensure the power measure is valid
+        self._validator._validate_power_measure(power)  # Ensure the power measure is valid
 
         try:
             # Convert enum to string for storing in the database
