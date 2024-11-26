@@ -49,13 +49,15 @@ class Fetcher:
         WHERE TestReport.id= ?
         """
         self._cursor.execute(query, (report_id,))
-        row = self._cursor.fetchone()
+        rows = self._cursor.fetchall()
+        
+        if not rows:
+         return None
+        
+        columns = [col[0] for col in self._cursor.description]
+        return [dict(zip(columns, row)) for row in rows]
 
-        if row:
-            columns = [col[0] for col in self._cursor.description]
-            return dict(zip(columns, row))
-
-        return None
+        
 
 
 

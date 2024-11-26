@@ -91,12 +91,55 @@ class ReportGenerator(BaseModel):
         file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}"
         return file_name.replace(" ", "_")
 
-    def create_xml_from_report(self, report_data: dict, file_name: str) -> Path:
+    def aggregate_report_data(self,rows: list[dict]) -> dict:
+        """
+        Aggregate a list of rows into a single dictionary suitable for generating a report.
+
+        Args:
+            rows (list[dict]): List of rows fetched from the database.
+
+        Returns:
+            dict: Aggregated report data.
+        """
+        if not rows:
+            raise ValueError("No rows provided to aggregate.")
+
+        # Start with the first row for basic information
+        aggregated = rows[0].copy()
+
+        # Collect measurements and power measures into separate lists
+        measurements = {}
+        for row in rows:
+            measurement_id = row.get("measurement_unique_id")
+            if measurement_id not in measurements:
+                measurements[measurement_id] = {
+                    "measurement_name": row.get("measurement_name"),
+                    "measurement_timestamp": row.get("measurement_timestamp"),
+                    "measurement_loadtype": row.get("measurement_loadtype"),
+                    "power_measures": [],
+                }
+            measurements[measurement_id]["power_measures"].append(
+                {
+                    "power_measure_id": row.get("power_measure_id"),
+                    "power_measure_type": row.get("power_measure_type"),
+                    "power_measure_name": row.get("power_measure_name"),
+                    "power_measure_voltage": row.get("power_measure_voltage"),
+                    "power_measure_current": row.get("power_measure_current"),
+                    "power_measure_power": row.get("power_measure_power"),
+                    "power_measure_pf": row.get("power_measure_pf"),
+                }
+            )
+
+        # Flatten measurements into a list
+        aggregated["measurements"] = list(measurements.values())
+        return aggregated
+
+    def create_xml_from_report(self, report_data: list[dict], file_name: str) -> Path:
         """
         Generate an XML file from the report data, flattening nested dictionaries.
 
         Args:
-            report_data (dict): The data to be converted to XML.
+            report_data (list[dict]): A list of rows fetched from the database.
             file_name (str): The name of the output XML file.
 
         Returns:
@@ -128,56 +171,70 @@ class ReportGenerator(BaseModel):
                     items.append((new_key, v))
             return dict(items)
 
-        # Flatten the report data, including nested dictionaries and lists
-        flattened_data = flatten_dict(report_data)
+        # Step 1: Aggregate report data into a single dictionary
+        aggregated_data = self.aggregate_report_data(report_data)
 
-        # Create XML structure
+        # Step 2: Flatten the report data, including nested dictionaries and lists
+        flattened_data = flatten_dict(aggregated_data)
+
+        # Step 3: Create XML structure
         root = ET.Element("TestReport")
         for key, value in flattened_data.items():
             child = ET.SubElement(root, key)
             # Convert non-string values to strings
             child.text = str(value) if value is not None else ""
 
-        # Construct full XML file path in the output directory
+        # Step 4: Construct full XML file path in the output directory
         xml_path = self.output_path / file_name
         # Ensure the parent directory exists
         xml_path.parent.mkdir(parents=True, exist_ok=True)
 
-         # Check if the file exists and confirm overwrite
+        # Step 5: Check if the file exists and confirm overwrite
         if xml_path.exists():
-         print(f"XML file already exists at {xml_path}. Overwriting.")
+            print(f"XML file already exists at {xml_path}. Overwriting.")
+        
         # Write XML to file
         tree = ET.ElementTree(root)
         tree.write(xml_path, encoding="utf-8", xml_declaration=True)
         print(f"XML generated and saved to {xml_path}")
         return xml_path
 
+
     def generate_report(self, report_id: int, use_cpp: bool = False):
-            """
-            Generate a formatted report using a template and optionally call a C++ executable.
-            """
-            # Step 1: Retrieve report data from DataManager
-            report_data = self.data_manager.get_test_report(report_id)
+        """
+        Generate a formatted report using a template and optionally call a C++ executable.
 
-            if not report_data:
-                raise ValueError(f"No report found for ID {report_id}")
+        Args:
+            report_id (int): The ID of the report to generate.
+            use_cpp (bool): Whether to use the C++ backend (default: False).
+        """
+        # Step 1: Retrieve report data from DataManager
+        rows = self.data_manager.get_test_report(report_id)
 
-            print(f"Fetched report data for ID {report_id}: {report_data}")
-            # Step 2: Generate file name
-            file_name = self.generate_file_name(report_data)
+        if not rows:
+            raise ValueError(f"No report found for ID {report_id}")
 
-            # Step 3: Generate XML
-            xml_path = self.create_xml_from_report(report_data, f"{file_name}.xml")
+        print(f"Fetched report data for ID {report_id}: {rows}")
 
-            # Step 4: Optionally process XML with C++
-            if use_cpp:
-                self.call_cpp_for_processing(xml_path)
+        # Step 2: Aggregate report data into a single dictionary
+        report_data = self.aggregate_report_data(rows)
 
-            # Step 5: Generate the output Word file path
-            output_file_path = self.output_path / f"{file_name}.docx"
+        # Step 3: Generate file name
+        file_name = self.generate_file_name(report_data)
 
-            # Step 6: Edit the Word template
-            self.edit_word_document(output_file_path, xml_path)
+        # Step 4: Generate XML
+        xml_path = self.create_xml_from_report(rows, f"{file_name}.xml")
+
+        # Step 5: Optionally process XML with C++
+        if use_cpp:
+            self.call_cpp_for_processing(xml_path)
+
+        # Step 6: Generate the output Word file path
+        output_file_path = self.output_path / f"{file_name}.docx"
+
+        # Step 7: Edit the Word template
+        self.edit_word_document(output_file_path, xml_path)
+
 
     def edit_word_document(self, output_path: Path, xml_path: Path):
         """
@@ -217,9 +274,9 @@ class ReportGenerator(BaseModel):
                         for text in content.xpath(".//w:t", namespaces=namespace):
                             text.text = data_map[tag]
 
-           # Overwrite the existing file if it exists
+        # Overwrite the existing file if it exists
         if output_path.exists():
-          print(f"Word document already exists at {output_path}. Overwriting.")
+            print(f"Word document already exists at {output_path}. Overwriting.")
         # Write the updated XML back to the Word document
         with ZipFile(self.template_path, "r") as docx:
             with ZipFile(output_path, "w") as new_docx:
@@ -291,9 +348,11 @@ if __name__ == "__main__":
 
     # Generate a report
     report = data_manager.generate_mock_data(112, "ABB", "maxgreen2", "FHR")
-    print(f"Generated report: {report}")
     report_id = data_manager.insert_test_report(report)
     print(f"Got report id: {report_id}")
+    print("-------------------report object----------------------")
+    print(f"Generated report: {report}")
+    print("-------------------report object----------------------")
 
     report_generator.generate_report(report_id, use_cpp=False)
 
