@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 from zipfile import ZipFile
 
-from docx import Document
+
 from lxml import etree
 from collections import defaultdict
 from typing import List, Dict, Any
@@ -25,6 +25,7 @@ class ReportGenerator(BaseModel):
 
     data_manager: DataManager
     template_path: Path = Field(default="test_report_template.docx")
+    xml_schema_file: str = Field(default="general_schema")
     output_path: Path = Field(default=paths.get("output_dir"))
 
     @field_validator("template_path")
@@ -93,83 +94,6 @@ class ReportGenerator(BaseModel):
         file_name = f"{client_name}_{ups_model}_{report_id}_{date_str}"
         return file_name.replace(" ", "_")
 
-    # def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    #     """
-    #     Aggregates data from a list of rows into a hierarchical structure.
-    #     Args:
-    #         rows (list): List of dictionaries containing report data.
-    #     Returns:
-    #         dict: Aggregated report data.
-    #     """
-    #     if not rows:
-    #         raise ValueError("No rows provided to aggregate")
-
-    #     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
-    #         raise TypeError("Rows must be a list of dictionaries")
-
-    #     # Start with the first row
-    #     aggregated = {
-    #         "test_report_id": rows[0]["test_report_id"],
-    #         "test_name": rows[0]["test_name"],
-    #         "test_description": rows[0]["test_description"],
-    #         "test_result": rows[0]["test_result"],
-    #         "client_name": rows[0]["client_name"],
-    #         "standard": rows[0]["standard"],
-    #         "ups_model": rows[0]["ups_model"],
-    #         "measurements": [],  # This will hold the list of measurements
-    #     }
-
-    #     # Group data for measurements and power measures
-    #     measurements = defaultdict(lambda: {"power_measures": []})
-
-    #     for row in rows:
-    #         measurement_id = row["measurement_unique_id"]
-    #         measurement = measurements[measurement_id]
-
-    #         # Only update measurement details once
-    #         if not measurement.get("measurement_name"):
-    #             measurement.update(
-    #                 {
-    #                     "measurement_unique_id": row.get("measurement_unique_id"),
-    #                     "measurement_name": row.get("measurement_name"),
-    #                     "measurement_timestamp": row.get("measurement_timestamp"),
-    #                     "measurement_loadtype": row.get("measurement_loadtype"),
-    #                     "load_percentage": row.get("load_percentage", 0),  # Default to 0 if missing
-    #                     "phase_name": row.get("phase_name", "Unknown"),  # Default to "Unknown" if missing
-    #                     "step_id": row.get("step_id", 0),  # Default to 0 if missing
-    #                     "steady_state_voltage_tol": row.get("steady_state_voltage_tol", 0),  # Default to 0 if missing
-    #                     "voltage_dc_component": row.get("voltage_dc_component", 0),  # Default to 0 if missing
-    #                     "load_pf_deviation": row.get("load_pf_deviation", 0),  # Default to 0 if missing
-    #                     "switch_time_ms": row.get("switch_time_ms", 0),  # Default to 0 if missing
-    #                     "run_interval_sec": row.get("run_interval_sec", 0),  # Default to 0 if missing
-    #                     "backup_time_sec": row.get("backup_time_sec", 0),  # Default to 0 if missing
-    #                     "overload_time_sec": row.get("overload_time_sec", 0),  # Default to 0 if missing
-    #                     "temperature_1": row.get("temperature_1", 0),  # Default to 0 if missing
-    #                     "temperature_2": row.get("temperature_2", 0),  # Default to 0 if missing
-    #                 }
-    #             )
-
-    #         # Add power measures to this measurement
-    #         if row.get("power_measure_id"):
-    #             measurement["power_measures"].append(
-    #                 {
-    #                     "power_measure_id": row["power_measure_id"],
-    #                     "power_measure_type": row["power_measure_type"],
-    #                     "power_measure_name": row["power_measure_name"],
-    #                     "power_measure_voltage": row["power_measure_voltage"],
-    #                     "power_measure_current": row["power_measure_current"],
-    #                     "power_measure_power": row["power_measure_power"],
-    #                     "power_measure_pf": row["power_measure_pf"],
-    #                 }
-    #             )
-
-    #     # Convert measurements to a list and add to the report
-    #     aggregated["measurements"] = list(measurements.values())
-
-    #     return aggregated
-
-
-
     def aggregate_report_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Aggregates and sorts data from a list of rows into a hierarchical structure.
@@ -214,7 +138,9 @@ class ReportGenerator(BaseModel):
                         "load_percentage": row.get("load_percentage", 0),
                         "phase_name": row.get("phase_name", "Unknown"),
                         "step_id": row.get("step_id", 0),
-                        "steady_state_voltage_tol": row.get("steady_state_voltage_tol", 0),
+                        "steady_state_voltage_tol": row.get(
+                            "steady_state_voltage_tol", 0
+                        ),
                         "voltage_dc_component": row.get("voltage_dc_component", 0),
                         "load_pf_deviation": row.get("load_pf_deviation", 0),
                         "switch_time_ms": row.get("switch_time_ms", 0),
@@ -242,23 +168,20 @@ class ReportGenerator(BaseModel):
 
         # Sort measurements by `measurement_unique_id`
         sorted_measurements = sorted(
-            measurements.values(),
-            key=lambda m: m["measurement_unique_id"]
+            measurements.values(), key=lambda m: m["measurement_unique_id"]
         )
 
         # Ensure power measures come last in each measurement
         for measurement in sorted_measurements:
             power_measures = measurement.pop("power_measures", [])
             measurement["power_measures"] = sorted(
-                power_measures,
-                key=lambda pm: pm["power_measure_id"]
+                power_measures, key=lambda pm: pm["power_measure_id"]
             )
 
         # Add sorted measurements to the final report
         aggregated["measurements"] = sorted_measurements
 
         return aggregated
-
 
     def create_xml_from_report(self, report_data: list[dict], file_name: str) -> Path:
         """
@@ -349,8 +272,8 @@ class ReportGenerator(BaseModel):
         file_name = self.generate_file_name(report_data)
 
         # Step 4: Generate XML
-        xml_path = self.create_xml_from_report(rows, f"{file_name}.xml")
-
+        # xml_path = self.create_xml_from_report(rows, f"{file_name}.xml")
+        xml_path = self.create_xml_from_report(rows, f"{self.xml_schema_file}.xml")
         # Step 5: Optionally process XML with C++
         if use_cpp:
             self.call_cpp_for_processing(xml_path)
@@ -480,3 +403,4 @@ if __name__ == "__main__":
     print("-------------------report object----------------------")
 
     report_generator.generate_report(report_id, use_cpp=False)
+

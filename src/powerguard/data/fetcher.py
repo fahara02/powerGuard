@@ -51,12 +51,13 @@ class Fetcher:
         """
         self._cursor.execute(query, (report_id,))
         rows = self._cursor.fetchall()
-        
+
         if not rows:
-         return None
-        
+            return None
+
         columns = [col[0] for col in self._cursor.description]
         return [dict(zip(columns, row)) for row in rows]
+
     # def get_test_report(self, report_id: int) -> Optional[Dict[str, Any]]:
     #     """
     #     Fetch a test report using the report ID from ReportSettings.
@@ -66,7 +67,7 @@ class Fetcher:
     #         Optional[Dict[str, Any]]: A dictionary containing the test report details if found, None otherwise.
     #     """
     #     query = """
-    #     SELECT 
+    #     SELECT
     #         TestReport.id AS test_report_id,
     #         TestReport.test_name,
     #         TestReport.test_description,
@@ -76,7 +77,7 @@ class Fetcher:
     #         ReportSettings.ups_model,
     #         Measurement.m_unique_id AS measurement_unique_id,
     #         Measurement.name AS measurement_name,
-    #         Measurement.timestamp AS measurement_timestamp, 
+    #         Measurement.timestamp AS measurement_timestamp,
     #         Measurement.load_type AS measurement_loadtype,
     #         PowerMeasure.id AS power_measure_id,
     #         PowerMeasure.type AS power_measure_type,
@@ -140,10 +141,6 @@ class Fetcher:
     #     # Add measurements to the report
     #     report["measurements"] = list(measurements.values())
     #     return report
-        
-
-
-
 
     def get_latest_report(self) -> Optional[Dict[str, Any]]:
         """

@@ -18,28 +18,24 @@ class Inserter:
         )
 
         return (
-            int(measurement.m_unique_id),  # Ensure it's an integer
+            int(measurement.m_unique_id),
             time_stamp_str,  # ISO 8601 format
             str(measurement.name),  # Convert to string
-            MODE.Name(
-                measurement.mode
-            ),  # Convert enum to string (if SQLite expects text)
+            MODE.Name(measurement.mode),  # Convert enum to string
             str(measurement.phase_name),  # Convert to string
-            LOAD.Name(
-                measurement.load_type
-            ),  # Convert enum to string (if SQLite expects text)
-            int(measurement.step_id),  # Ensure it's an integer
-            int(measurement.load_percentage),  # Ensure it's an integer
-            int(measurement.steady_state_voltage_tol),  # Ensure it's an integer
-            int(measurement.voltage_dc_component),  # Ensure it's an integer
-            int(measurement.load_pf_deviation),  # Ensure it's an integer
-            int(measurement.switch_time_ms),  # Ensure it's an integer
-            int(measurement.run_interval_sec),  # Ensure it's an integer
-            int(measurement.backup_time_sec),  # Ensure it's an integer
-            int(measurement.overload_time_sec),  # Ensure it's an integer
-            int(measurement.temperature_1),  # Ensure it's an integer
-            int(measurement.temperature_2),  # Ensure it's an integer
-            int(test_report_id),  # Ensure it's an integer (foreign key)
+            LOAD.Name(measurement.load_type),
+            int(measurement.step_id),
+            int(measurement.load_percentage),
+            int(measurement.steady_state_voltage_tol),
+            int(measurement.voltage_dc_component),
+            int(measurement.load_pf_deviation),
+            int(measurement.switch_time_ms),
+            int(measurement.run_interval_sec),
+            int(measurement.backup_time_sec),
+            int(measurement.overload_time_sec),
+            int(measurement.temperature_1),
+            int(measurement.temperature_2),
+            int(test_report_id),
         )
 
     def insert_overload(
@@ -252,60 +248,6 @@ class Inserter:
             # Catch any other unexpected exceptions
             raise Exception(f"Unexpected error inserting ReportSettings: {e}")
 
-    # def insert_measurement(
-    #     self,
-    #     measurement,
-    #     test_report_id,
-    #     savepoint_name: str,
-    #     no_commit: bool = False,
-    # ):
-    #     """Insert a Measurement record and its associated PowerMeasures."""
-    #     try:
-    #         # Start a savepoint for this operation
-    #         self._conn.execute(f"SAVEPOINT {savepoint_name}")
-
-    #         # Convert measurement to row
-    #         db_row = self.measurement_to_db_row(measurement, test_report_id)
-
-    #         # Insert Measurement into the database
-    #         self._cursor.execute(
-    #             """
-    #             INSERT INTO Measurement (
-    #                 m_unique_id, timestamp, name, mode, phase_name, load_type,
-    #                 step_id, load_percentage, steady_state_voltage_tol, voltage_dc_component,
-    #                 load_pf_deviation, switch_time_ms, run_interval_sec, backup_time_sec,
-    #                 overload_time_sec, temperature_1, temperature_2, test_report_id
-    #             )
-    #             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    #             """,
-    #             db_row,
-    #         )
-    #         measurement_id = self._cursor.lastrowid  # Get the new ID
-
-    #         # Insert associated PowerMeasures
-    #         if measurement.power_measures:
-    #             for power_measure in measurement.power_measures:
-    #                 power_measure_savepoint_name = (
-    #                     f"{savepoint_name}_power_measure_{power_measure.name}"
-    #                 )
-    #                 self.insert_power_measure(
-    #                     power_measure,
-    #                     measurement_id,
-    #                     power_measure_savepoint_name,
-    #                     True,
-    #                 )
-
-    #         # Only release savepoint here (no commit)
-    #         self._conn.execute(f"RELEASE SAVEPOINT {savepoint_name}")
-    #         if no_commit:
-    #             logging.debug(f"Exiting without commit ")
-    #         else:
-    #             self._conn.commit()
-
-    #     except sqlite3.Error as e:
-    #         # Rollback to the savepoint on error
-    #         self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
-    #         raise Exception(f"Error inserting Measurement: {e}")
     def insert_measurement(
         self, measurement, test_report_id, savepoint_name: str, no_commit: bool = False
     ):
@@ -367,7 +309,6 @@ class Inserter:
             logging.error(f"Unexpected error inserting Measurement: {e}")
             raise
 
-
     def insert_test_report(self, report: TestReport):
         """Insert or update a TestReport message in the database."""
         logging.debug(
@@ -393,7 +334,9 @@ class Inserter:
             if report_settings_row:
                 # Existing report_id: reuse settings_id and update TestReport
                 settings_id = report_settings_row[0]
-                logging.debug("ReportSettings with report_id %d found.", report.settings.report_id)
+                logging.debug(
+                    "ReportSettings with report_id %d found.", report.settings.report_id
+                )
 
                 # Check if TestReport exists for this settings_id
                 query_test_report = "SELECT id FROM TestReport WHERE settings_id = ?"
@@ -423,7 +366,10 @@ class Inserter:
                     )
                 else:
                     # Insert a new TestReport for existing settings_id
-                    logging.debug("Inserting new TestReport for existing settings_id %d.", settings_id)
+                    logging.debug(
+                        "Inserting new TestReport for existing settings_id %d.",
+                        settings_id,
+                    )
                     self._cursor.execute(
                         """
                         INSERT INTO TestReport (
@@ -441,10 +387,15 @@ class Inserter:
                     test_report_id = self._cursor.lastrowid
             else:
                 # New report_id: insert ReportSettings and TestReport
-                logging.debug("Creating new ReportSettings for report_id %d.", report.settings.report_id)
+                logging.debug(
+                    "Creating new ReportSettings for report_id %d.",
+                    report.settings.report_id,
+                )
                 settings_id = self.insert_report_settings(report.settings)
 
-                logging.debug("Inserting new TestReport for new settings_id %d.", settings_id)
+                logging.debug(
+                    "Inserting new TestReport for new settings_id %d.", settings_id
+                )
                 self._cursor.execute(
                     """
                     INSERT INTO TestReport (
@@ -468,7 +419,9 @@ class Inserter:
                 )
                 for measurement in report.measurements:
                     try:
-                        measurement_savepoint_name = f"measurement_{measurement.m_unique_id}"
+                        measurement_savepoint_name = (
+                            f"measurement_{measurement.m_unique_id}"
+                        )
                         self._conn.execute(f"SAVEPOINT {measurement_savepoint_name}")
                         self.insert_measurement(
                             measurement,
@@ -476,10 +429,14 @@ class Inserter:
                             measurement_savepoint_name,
                             True,
                         )
-                        self._conn.execute(f"RELEASE SAVEPOINT {measurement_savepoint_name}")
+                        self._conn.execute(
+                            f"RELEASE SAVEPOINT {measurement_savepoint_name}"
+                        )
                     except Exception as e:
                         logging.error(f"Error inserting measurement: {e}")
-                        self._conn.execute(f"ROLLBACK TO SAVEPOINT {measurement_savepoint_name}")
+                        self._conn.execute(
+                            f"ROLLBACK TO SAVEPOINT {measurement_savepoint_name}"
+                        )
                         raise
 
             # Commit the transaction to save changes

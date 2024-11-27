@@ -16,18 +16,37 @@ class Validator:
     @staticmethod
     def _validate_non_negative(value: Any, field_name: str, types: tuple):
         """Generic validation for non-negative numbers."""
-        if not isinstance(value, types) or value < 0:
+        if not isinstance(value, types):
+            try:
+                value = types[0](value)  # Attempt to cast to the first type
+            except (ValueError, TypeError):
+                raise TypeError(
+                    f"'{field_name}' must be of type {', '.join(t.__name__ for t in types)}, got {type(value)}"
+                )
+        if value < 0:
             raise ValueError(
-                f"{field_name} must be a non-negative {', '.join(t.__name__ for t in types)}."
+                f"'{field_name}' must be a non-negative value, got {value}."
             )
 
     @staticmethod
-    def _validate_range(
-        value: Any, field_name: str, min_val: float, max_val: float, types: tuple
-    ):
-        """Generic validation for values within a range."""
-        if not isinstance(value, types) or not (min_val <= value <= max_val):
-            raise ValueError(f"{field_name} must be between {min_val} and {max_val}.")
+    def _validate_range(value, field_name, min_val=None, max_val=None, types=(int,)):
+        """
+        Validate that a value is within a specified range and of a valid type.
+        """
+        # Attempt to cast the value if it's not already the correct type
+        if not isinstance(value, types):
+            try:
+                value = types[0](value)  # Convert to the first expected type
+            except (ValueError, TypeError):
+                raise TypeError(
+                    f"'{field_name}' must be of type {types}, got {type(value)}"
+                )
+
+        # Check the range if min_val and max_val are provided
+        if min_val is not None and value < min_val:
+            raise ValueError(f"'{field_name}' must be >= {min_val}, got {value}")
+        if max_val is not None and value > max_val:
+            raise ValueError(f"'{field_name}' must be <= {max_val}, got {value}")
 
     @staticmethod
     def _validate_pf(pf: Any):
@@ -75,32 +94,49 @@ class Validator:
         ]:
             self._validate_overload(overload)
 
+    def _validate_report_settings(self, report_settings: ReportSettings):
+        """Validate ReportSettings object."""
+        # Validate required fields
+        required_fields = [
+            ("report_id", report_settings.report_id),
+            ("standard", report_settings.standard),
+            ("ups_model", report_settings.ups_model),
+        ]
+        for field_name, value in required_fields:
+            if value is None:
+                raise ValueError(f"'{field_name}' is required and cannot be None.")
+
+        # Validate optional fields (if provided)
+        optional_text_fields = [
+            ("client_name", report_settings.client_name),
+            ("brand_name", report_settings.brand_name),
+            ("test_engineer_name", report_settings.test_engineer_name),
+            ("test_approval_name", report_settings.test_approval_name),
+        ]
+        for field_name, value in optional_text_fields:
+            if value is not None and not isinstance(value, str):
+                raise TypeError(
+                    f"'{field_name}' must be of type str, got {type(value)}."
+                )
+
+        # Validate spec_id (if provided)
+        if report_settings.report_id is not None:
+            self._validate_non_negative(report_settings.report_id, "report_id", (int,))
+
     def validate_measurement(self, measurement: Measurement):
         """Validate a Measurement object to ensure data integrity."""
+        # Fields that are always mandatory
         required_fields = [
             "m_unique_id",
             "time_stamp",
             "name",
-            "mode",
-            "phase_name",
-            "load_type",
-            "step_id",
-            "load_percentage",
-            "steady_state_voltage_tol",
-            "voltage_dc_component",
-            "load_pf_deviation",
-            "switch_time_ms",
-            "run_interval_sec",
-            "backup_time_sec",
-            "overload_time_sec",
-            "temperature_1",
-            "temperature_2",
         ]
 
         for field in required_fields:
             if getattr(measurement, field, None) is None:
                 raise ValueError(f"Field '{field}' is required and cannot be None.")
 
+        # Validate time_stamp
         if not isinstance(measurement.time_stamp, Timestamp):
             raise TypeError(
                 f"time_stamp must be a google.protobuf.Timestamp, got {type(measurement.time_stamp)}"
@@ -110,24 +146,30 @@ class Validator:
         if not isinstance(time_stamp_dt, datetime):
             raise ValueError("time_stamp conversion to datetime failed")
 
-        self._validate_range(
-            measurement.load_percentage, "load_percentage", 0, 100, (int,)
-        )
+        # Validate optional numeric fields if provided
+        optional_numeric_fields = [
+            ("load_percentage", 0, 100, (int,)),
+            ("steady_state_voltage_tol", 0, None, (int,)),
+            ("voltage_dc_component", 0, None, (int,)),
+            ("load_pf_deviation", 0, None, (int,)),
+            ("switch_time_ms", 0, None, (int,)),
+            ("run_interval_sec", 0, None, (int,)),
+            ("backup_time_sec", 0, None, (int,)),
+            ("overload_time_sec", 0, None, (int,)),
+        ]
 
-        for field, name in [
-            (measurement.steady_state_voltage_tol, "steady_state_voltage_tol"),
-            (measurement.voltage_dc_component, "voltage_dc_component"),
-            (measurement.load_pf_deviation, "load_pf_deviation"),
-            (measurement.switch_time_ms, "switch_time_ms"),
-            (measurement.run_interval_sec, "run_interval_sec"),
-            (measurement.backup_time_sec, "backup_time_sec"),
-            (measurement.overload_time_sec, "overload_time_sec"),
-        ]:
-            self._validate_non_negative(field, name, (int,))
+        for field, min_value, max_value, types in optional_numeric_fields:
+            value = getattr(measurement, field, None)
+            if value is not None:
+                self._validate_range(value, field, min_value, max_value, types)
 
-        if measurement.temperature_1 < -273 or measurement.temperature_2 < -273:
-            raise ValueError("Temperature values cannot be below absolute zero.")
+        # Validate temperatures if provided
+        if measurement.temperature_1 is not None and measurement.temperature_1 < -273:
+            raise ValueError("temperature_1 cannot be below absolute zero.")
+        if measurement.temperature_2 is not None and measurement.temperature_2 < -273:
+            raise ValueError("temperature_2 cannot be below absolute zero.")
 
+        # Validate power measures if provided
         if measurement.power_measures:
             for power_measure in measurement.power_measures:
                 self._validate_power_measure(power_measure)
@@ -151,10 +193,6 @@ class Validator:
         ):
             raise ValueError("report_id must be a non-negative integer.")
 
-        #     # Validate testName as an enum
-        # if not isinstance(report.testName, TestProto.TestType):  # Adjusted for enum type
-        #     raise ValueError("testName must be a valid TestType enum value.")
-
         # Validate testDescription and test_result as strings
         for field, name in [
             (report.testDescription, "testDescription"),
@@ -163,7 +201,9 @@ class Validator:
                 raise ValueError(f"{name} must be a non-empty string.")
 
         if report.settings:
-            self._validate_spec(report.settings.spec)
+            self._validate_report_settings(report.settings)
+            if report.settings.spec:
+                self._validate_spec(report.settings.spec)
         if report.measurements:
             for measurement in report.measurements:
                 self.validate_measurement(measurement)

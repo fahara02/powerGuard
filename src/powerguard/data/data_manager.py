@@ -80,13 +80,13 @@ class DataManager(BaseModel):
             """
             CREATE TABLE IF NOT EXISTS PowerMeasure (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                measurement_id INTEGER NOT NULL, -- FK linking to Measurement table   
-                type TEXT NOT NULL,             
+                measurement_id INTEGER NOT NULL, -- FK linking to Measurement table
+                type TEXT NOT NULL,
                 name TEXT NOT NULL,
-                voltage REAL NOT NULL,
-                current REAL NOT NULL,
-                power REAL NOT NULL,
-                pf REAL NOT NULL,
+                voltage REAL,
+                current REAL,
+                power REAL,
+                pf REAL,
                 FOREIGN KEY (measurement_id) REFERENCES Measurement (id) ON DELETE CASCADE
             )
             """,
@@ -94,31 +94,31 @@ class DataManager(BaseModel):
             """
             CREATE TABLE IF NOT EXISTS OverLoad (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                load_percentage INTEGER NOT NULL,
-                overload_time_min INTEGER NOT NULL
+                load_percentage INTEGER,
+                overload_time_min INTEGER
             )
             """,
             # spec table
             """
             CREATE TABLE IF NOT EXISTS spec (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                phase TEXT NOT NULL,
-                rating_va INTEGER NOT NULL,
-                rated_voltage INTEGER NOT NULL,
-                rated_current INTEGER NOT NULL,
-                min_input_voltage INTEGER NOT NULL,
-                max_input_voltage INTEGER NOT NULL,
-                pf_rated_current INTEGER NOT NULL,
-                max_continous_amp INTEGER NOT NULL,
-                overload_amp INTEGER NOT NULL,
-                overload_long_id INTEGER NOT NULL,
-                overload_medium_id INTEGER NOT NULL,
-                overload_short_id INTEGER NOT NULL,
-                avg_switch_time_ms INTEGER NOT NULL,
-                avg_backup_time_ms INTEGER NOT NULL,
-                FOREIGN KEY (overload_long_id) REFERENCES OverLoad (id) ,
-                FOREIGN KEY (overload_medium_id) REFERENCES OverLoad (id) ,
-                FOREIGN KEY (overload_short_id) REFERENCES OverLoad (id) 
+                phase TEXT,
+                rating_va INTEGER,
+                rated_voltage INTEGER,
+                rated_current INTEGER,
+                min_input_voltage INTEGER,
+                max_input_voltage INTEGER,
+                pf_rated_current INTEGER,
+                max_continous_amp INTEGER,
+                overload_amp INTEGER,
+                overload_long_id INTEGER,
+                overload_medium_id INTEGER,
+                overload_short_id INTEGER,
+                avg_switch_time_ms INTEGER,
+                avg_backup_time_ms INTEGER,
+                FOREIGN KEY (overload_long_id) REFERENCES OverLoad (id),
+                FOREIGN KEY (overload_medium_id) REFERENCES OverLoad (id),
+                FOREIGN KEY (overload_short_id) REFERENCES OverLoad (id)
             )
             """,
             # ReportSettings table
@@ -128,51 +128,50 @@ class DataManager(BaseModel):
                 report_id INTEGER NOT NULL UNIQUE,
                 standard TEXT NOT NULL,
                 ups_model INTEGER NOT NULL,
-                client_name TEXT NOT NULL,
-                brand_name TEXT NOT NULL,
-                test_engineer_name TEXT NOT NULL,
-                test_approval_name TEXT NOT NULL,
-                spec_id INTEGER NOT NULL,
-                FOREIGN KEY (spec_id) REFERENCES spec (id) 
+                client_name TEXT,
+                brand_name TEXT,
+                test_engineer_name TEXT,
+                test_approval_name TEXT,
+                spec_id INTEGER,
+                FOREIGN KEY (spec_id) REFERENCES spec (id)
             )
             """,
             # Measurement table
             """
             CREATE TABLE IF NOT EXISTS Measurement (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                m_unique_id INTEGER NOT NULL , -- Unique proto ID                
+                m_unique_id INTEGER NOT NULL, -- Unique proto ID
                 timestamp DATETIME NOT NULL,
                 name TEXT NOT NULL,
-                mode TEXT NOT NULL,
-                phase_name TEXT NOT NULL,
-                load_type TEXT NOT NULL,
-                step_id INTEGER NOT NULL,
-                load_percentage INTEGER NOT NULL,                
-                steady_state_voltage_tol INTEGER NOT NULL,
-                voltage_dc_component INTEGER NOT NULL,
-                load_pf_deviation INTEGER NOT NULL,
-                switch_time_ms INTEGER NOT NULL,
-                run_interval_sec INTEGER NOT NULL,
-                backup_time_sec INTEGER NOT NULL,
-                overload_time_sec INTEGER NOT NULL,
-                temperature_1 INTEGER NOT NULL,
-                temperature_2 INTEGER NOT NULL,
-                test_report_id INTEGER NOT NULL,     -- Links to TestReport               
-                FOREIGN KEY (test_report_id) REFERENCES TestReport (id) ON DELETE CASCADE                
+                mode TEXT,
+                phase_name TEXT,
+                load_type TEXT,
+                step_id INTEGER,
+                load_percentage INTEGER,
+                steady_state_voltage_tol INTEGER,
+                voltage_dc_component INTEGER,
+                load_pf_deviation INTEGER,
+                switch_time_ms INTEGER,
+                run_interval_sec INTEGER,
+                backup_time_sec INTEGER,
+                overload_time_sec INTEGER,
+                temperature_1 INTEGER,
+                temperature_2 INTEGER,
+                test_report_id INTEGER NOT NULL, -- Links to TestReport
+                FOREIGN KEY (test_report_id) REFERENCES TestReport (id) ON DELETE CASCADE
             )
             """,
             # TestReport table
             """
-        CREATE TABLE IF NOT EXISTS TestReport (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            settings_id INTEGER NOT NULL,
-            test_name TEXT NOT NULL,
-            test_description TEXT NOT NULL,
-            test_result TEXT NOT NULL,           
-            FOREIGN KEY (settings_id) REFERENCES ReportSettings (id) ON DELETE CASCADE
-           
-        )
-        """,
+            CREATE TABLE IF NOT EXISTS TestReport (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                settings_id INTEGER NOT NULL,
+                test_name TEXT NOT NULL,
+                test_description TEXT,
+                test_result TEXT,
+                FOREIGN KEY (settings_id) REFERENCES ReportSettings (id) ON DELETE CASCADE
+            )
+            """,
         ]
         try:
             for query in schema_queries:
@@ -248,8 +247,6 @@ class DataManager(BaseModel):
             Optional[Dict[str, Any]]: The test report details if found, None otherwise.
         """
         return self._fetcher.get_test_report(report_id)
-
-
 
     def get_latest_test_report(self):
         """Retrieve the latest TestReport and its associated data."""
@@ -625,7 +622,7 @@ class DataManager(BaseModel):
             temperature_1=25,
             temperature_2=30,
         )
-        measurements=[measurement1,measurement2]
+        measurements = [measurement1, measurement2]
         # Create the TestReport object
         test_report = TestReport(
             settings=report_settings,
