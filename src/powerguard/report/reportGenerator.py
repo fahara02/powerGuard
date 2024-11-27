@@ -188,7 +188,7 @@ class ReportGenerator(BaseModel):
 
         return aggregated
 
-    def create_xml_from_report(self, report_data: list[dict], file_name: str) -> Path:
+    def create_xml_from_report(self, report_data: list[dict], file_name: str,flatten:bool =True) -> Path:
         """
         Generate an XML file from the report data, flattening nested dictionaries.
 
@@ -232,10 +232,13 @@ class ReportGenerator(BaseModel):
 
         # Step 2: Flatten the report data, including nested dictionaries and lists
         flattened_data = flatten_dict(aggregated_data)
-
+        if flatten:
+            xml_data=flattened_data 
+        else:
+            xml_data= aggregated_data    
         # Step 3: Create XML structure
         root = ET.Element("TestReport")
-        for key, value in flattened_data.items():
+        for key, value in xml_data.items():
             child = ET.SubElement(root, key)
             # Convert non-string values to strings
             child.text = str(value) if value is not None else ""
@@ -532,7 +535,7 @@ class ReportGenerator(BaseModel):
         aggregated_data = self.aggregate_report_data(rows)
 
         # Step 3: Generate XML (For future use)
-        xml_path = self.create_xml_from_report(rows, f"{self.xml_schema_file}.xml")
+        xml_path = self.create_xml_from_report(rows, f"{self.xml_schema_file}.xml",False)
         self.sanitize_xml_file(xml_path)
 
         # Step 4: Optionally process XML with C++
