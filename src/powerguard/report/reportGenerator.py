@@ -3,13 +3,18 @@ import sqlite3
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+from lxml import etree
+from docxtpl import DocxTemplate
+from docx import Document
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from zipfile import ZipFile
+import shutil
+
+import pprint
 
 
-from lxml import etree
 from collections import defaultdict
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field, field_validator
@@ -24,7 +29,7 @@ class ReportGenerator(BaseModel):
     """
 
     data_manager: DataManager
-    template_path: Path = Field(default="test_report_template.docx")
+    template_path: Path = Field(default="Report_Template.docx")
     xml_schema_file: str = Field(default="general_schema")
     output_path: Path = Field(default=paths.get("output_dir"))
 
@@ -40,7 +45,7 @@ class ReportGenerator(BaseModel):
 
         # If no template_path was provided, set it to the default in the template folder
         if not value:
-            value = template_folder / "test_report_template.docx"
+            value = template_folder / "Report_Template.docx"
 
         # Full path to the template file
         full_template_path = template_folder / value
@@ -223,6 +228,7 @@ class ReportGenerator(BaseModel):
         # Step 1: Aggregate report data into a single dictionary
 
         aggregated_data = self.aggregate_report_data(report_data)
+        pprint.pprint(f"context data dictionary is { aggregated_data }")
 
         # Step 2: Flatten the report data, including nested dictionaries and lists
         flattened_data = flatten_dict(aggregated_data)
@@ -249,93 +255,52 @@ class ReportGenerator(BaseModel):
         print(f"XML generated and saved to {xml_path}")
         return xml_path
 
-    def generate_report(self, report_id: int, use_cpp: bool = False):
-        """
-        Generate a formatted report using a template and optionally call a C++ executable.
+    # def generate_report(self, report_id: int, use_cpp: bool = False):
+    #     """
+    #     Generate a formatted report using a template and optionally call a C++ executable.
 
-        Args:
-            report_id (int): The ID of the report to generate.
-            use_cpp (bool): Whether to use the C++ backend (default: False).
-        """
-        # Step 1: Retrieve report data from DataManager
-        rows = self.data_manager.get_test_report(report_id)
+    #     Args:
+    #         report_id (int): The ID of the report to generate.
+    #         use_cpp (bool): Whether to use the C++ backend (default: False).
+    #     """
+    #     # Step 1: Retrieve report data from DataManager
+    #     rows = self.data_manager.get_test_report(report_id)
 
-        if not rows:
-            raise ValueError(f"No report found for ID {report_id}")
+    #     if not rows:
+    #         raise ValueError(f"No report found for ID {report_id}")
 
-        print(f"Fetched report data for ID {report_id}: {rows}")
+    #     # print(f"Fetched report data for ID {report_id}: {rows}")
 
-        # Step 2: Aggregate report data into a single dictionary
-        report_data = self.aggregate_report_data(rows)
+    #     # Step 2: Aggregate report data into a single dictionary
+    #     report_data = self.aggregate_report_data(rows)
 
-        # Step 3: Generate file name
-        file_name = self.generate_file_name(report_data)
+    #     # Step 3: Generate file name
+    #     file_name = self.generate_file_name(report_data)
 
-        # Step 4: Generate XML
-        # xml_path = self.create_xml_from_report(rows, f"{file_name}.xml")
-        xml_path = self.create_xml_from_report(rows, f"{self.xml_schema_file}.xml")
-        # Step 5: Optionally process XML with C++
-        if use_cpp:
-            self.call_cpp_for_processing(xml_path)
+    #     # Step 4: Generate XML
+    #     # xml_path = self.create_xml_from_report(rows, f"{file_name}.xml")
+    #     xml_path = self.create_xml_from_report(rows, f"{self.xml_schema_file}.xml")
+    #     # Step 5: Optionally process XML with C++
+    #     if use_cpp:
+    #         self.call_cpp_for_processing(xml_path)
 
-        # Step 6: Generate the output Word file path
-        output_file_path = self.output_path / f"{file_name}.docx"
+    #     # Step 6: Generate the output Word file path
+    #     output_file_path = self.output_path / f"{file_name}.docx"
 
-        # Step 7: Edit the Word template
-        self.edit_word_document(output_file_path, xml_path)
+    #     # Step 8: Edit the Word template
+    #     self.edit_word_document(output_file_path, xml_path)
 
-    def edit_word_document(self, output_path: Path, xml_path: Path):
-        """
-        Edit a Word document with content controls based on the XML data.
-        """
-        # Parse the XML to get data
-        tree = ET.parse(xml_path)
-        root = tree.getroot()
-        data_map = {
-            child.tag: child.text for child in root
-        }  # Create a dictionary of XML data
+    def sanitize_xml_file(self, xml_path):
+        # Read the file with encoding that tolerates BOM
+        with open(xml_path, "r", encoding="utf-8-sig") as f:
+            content = f.read()
 
-        # Open the Word document as a zip file
-        with ZipFile(self.template_path, "r") as docx:
-            # Extract the XML for the main document
-            document_xml = docx.read("word/document.xml")
+        # Strip unnecessary whitespace and extra newlines
+        sanitized_content = content.strip()
 
-        # Parse the XML
-        doc_tree = etree.fromstring(document_xml)
-
-        # Replace content controls (w:sdt and w:sdtContent) with corresponding data
-        namespace = {
-            "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-        }
-        content_controls = doc_tree.xpath("//w:sdt", namespaces=namespace)
-
-        for control in content_controls:
-            tag_element = control.find(".//w:tag", namespaces=namespace)
-            if tag_element is not None:
-                tag = tag_element.attrib.get(
-                    f"{{{namespace['w']}}}val"
-                )  # Get the tag value
-                if tag in data_map:  # If there's data for this tag
-                    content = control.find(".//w:sdtContent", namespaces=namespace)
-                    if content is not None:
-                        # Replace text inside the content control
-                        for text in content.xpath(".//w:t", namespaces=namespace):
-                            text.text = data_map[tag]
-
-        # Overwrite the existing file if it exists
-        if output_path.exists():
-            print(f"Word document already exists at {output_path}. Overwriting.")
-        # Write the updated XML back to the Word document
-        with ZipFile(self.template_path, "r") as docx:
-            with ZipFile(output_path, "w") as new_docx:
-                for file in docx.filelist:
-                    if file.filename != "word/document.xml":
-                        new_docx.writestr(file.filename, docx.read(file.filename))
-                new_docx.writestr(
-                    "word/document.xml", etree.tostring(doc_tree, pretty_print=True)
-                )
-
-        print(f"Word document updated and saved to {output_path}")
+        # Overwrite the file with cleaned content
+        with open(xml_path, "w", encoding="utf-8") as f:
+            f.write(sanitized_content)
 
     def call_cpp_for_processing(
         self, xml_path: Path, cpp_executable: Path = Path("process_report")
@@ -350,39 +315,254 @@ class ReportGenerator(BaseModel):
         subprocess.run([str(cpp_executable), str(xml_path)], check=True)
         print("C++ processing completed.")
 
-    def generate_all_reports(self, output_dir: Path = Path("reports")):
+    # def generate_all_reports(self, output_dir: Path = Path("reports")):
+    #     """
+    #     Generate XML reports for all test reports in the database.
+
+    #     Args:
+    #         output_dir (Path): The directory where the reports will be saved.
+    #     """
+    #     try:
+    #         # Ensure the output directory exists
+    #         output_dir.mkdir(parents=True, exist_ok=True)
+
+    #         # Retrieve all TestReport IDs and their test names
+    #         reports = self.get_all_report_id_testName()
+
+    #         # Generate XML reports for each entry
+    #         for report in reports:
+    #             report_id = report["report_id"]
+
+    #             # Fetch the full report data for this report_id
+    #             report_data = self.get_test_report(report_id)
+    #             if not report_data:
+    #                 print(f"Skipping report_id {report_id}: No data found.")
+    #                 continue
+
+    #             # Generate the file name
+    #             file_name = self.generate_file_name(report_data)
+
+    #             # Generate the XML report
+    #             xml_file_path = output_dir / file_name
+    #             self.create_xml_from_report(report_data, xml_file_path)
+    #             print(f"Report generated: {xml_file_path}")
+    #     except sqlite3.Error as e:
+    #         raise Exception(f"Error generating reports: {e}")
+
+    # def generate_report(self, report_id: int, use_cpp: bool = False) -> Path:
+    #     """
+    #     Generates a test report from aggregated data and saves it as a Word document.
+
+    #     Args:
+    #         rows (List[Dict[str, Any]]): List of dictionaries containing report data.
+
+    #     Returns:
+    #         Path: Path to the generated Word report.
+    #     """
+    #     # Step 1: Retrieve report data from DataManager
+    #     rows = self.data_manager.get_test_report(report_id)
+
+    #     if not rows:
+    #         raise ValueError(f"No report found for ID {report_id}")
+
+    #     # print(f"Fetched report data for ID {report_id}: {rows}")
+
+    #     # Step 2: Aggregate report data into a single dictionary
+
+    #     aggregated_data = self.aggregate_report_data(rows)
+
+    #     # Step 3: Generate XML(For future use)
+
+    #     xml_path = self.create_xml_from_report(rows, f"{self.xml_schema_file}.xml")
+    #     self.sanitize_xml_file(xml_path)
+    #     # Step 4: Optionally process XML with C++
+    #     if use_cpp:
+    #         self.call_cpp_for_processing(xml_path)
+    #     # Step 5:Finally generate the docx
+    #     # Ensure output directory exists
+    #     self.output_path.mkdir(parents=True, exist_ok=True)
+
+    #     # Generate a base file name
+    #     base_file_name = self.generate_file_name(aggregated_data)
+
+    #     # Determine final file name, avoiding duplicates
+    #     counter = 1
+    #     output_file = self.output_path / f"{base_file_name}.docx"
+    #     while output_file.exists():
+    #         output_file = self.output_path / f"{base_file_name}({counter}).docx"
+    #         counter += 1
+
+    #     # Load the template
+    #     template = DocxTemplate(self.template_path)
+
+    #     # Render the template with the aggregated data
+    #     template.render(aggregated_data)
+
+    #     # Save the generated report
+    #     template.save(output_file)
+
+    #     return output_file
+    # def generate_template(self, report_id: str) -> None:
+    #     """
+    #     Generates a Jinja2-compatible Word template for the report.
+    #     """
+    #     rows = self.data_manager.get_test_report(report_id)
+    #     aggregated_data = self.aggregate_report_data(rows)
+
+    #     doc = Document()
+    #     doc.add_heading("Template Document", level=1)
+    #     doc.add_paragraph("High-Level Fields:")
+
+    #     for key in aggregated_data:
+    #         if key == "measurements":
+    #             continue
+    #         doc.add_paragraph(f"{{{{ {key} }}}}")
+
+    #     doc.add_heading("Measurements:", level=2)
+    #     doc.add_paragraph("{% for measurement in measurements %}")
+    #     for m_key in aggregated_data["measurements"][0]:
+    #         if m_key == "power_measures":
+    #             continue
+    #         doc.add_paragraph(f"    {{{{ measurement.{m_key} }}}}")
+
+    #     doc.add_paragraph("    {% for power_measure in measurement.power_measures %}")
+    #     for p_key in aggregated_data["measurements"][0]["power_measures"][0]:
+    #         doc.add_paragraph(f"        {{{{ power_measure.{p_key} }}}}")
+    #     doc.add_paragraph("    {% endfor %}")
+    #     doc.add_paragraph("{% endfor %}")
+
+    #     doc.save(self.template_path)
+    #     print(f"Template saved to {self.template_path}")
+   
+
+    def generate_template(self, report_id: str) -> None:
         """
-        Generate XML reports for all test reports in the database.
+        Generates a Word template dynamically for test report data.
+        """
+        # Fetch and aggregate report data
+        rows = self.data_manager.get_test_report(report_id)
+        aggregated_data = self.aggregate_report_data(rows)
+
+        # Initialize the document
+        doc = Document()
+
+        # Add metadata section with placeholders
+        doc.add_heading("Test Report", level=1)
+        doc.add_paragraph("Report ID: {{ test_report_id }}")
+        doc.add_paragraph("Test Name: {{ test_name }}")
+        doc.add_paragraph("Description: {{ test_description }}")
+        doc.add_paragraph("Result: {{ test_result }}")
+        doc.add_paragraph("Client: {{ client_name }}")
+        doc.add_paragraph("Standard: {{ standard }}")
+        doc.add_paragraph("UPS Model: {{ ups_model }}")
+
+        # Add measurements section with placeholder for looping
+        doc.add_heading("Measurements", level=2)
+        doc.add_paragraph("{% for measurement in measurements %}")
+
+        # Add measurement details
+        doc.add_paragraph("Measurement Details:")
+        table = doc.add_table(rows=1, cols=6)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = "Measurement ID"
+        hdr_cells[1].text = "Name"
+        hdr_cells[2].text = "Timestamp"
+        hdr_cells[3].text = "Load Type"
+        hdr_cells[4].text = "Load (%)"
+        hdr_cells[5].text = "Phase"
+
+        # Loop over measurements to add rows
+        doc.add_paragraph("{% for measurement in measurements %}")
+        row = table.add_row().cells
+        row[0].text = "{{ measurement.measurement_unique_id }}"
+        row[1].text = "{{ measurement.measurement_name }}"
+        row[2].text = "{{ measurement.measurement_timestamp }}"
+        row[3].text = "{{ measurement.measurement_loadtype }}"
+        row[4].text = "{{ measurement.load_percentage }}"
+        row[5].text = "{{ measurement.phase_name }}"
+        doc.add_paragraph("{% endfor %}")  # Close the first loop for measurements
+
+        # Add power measures section with placeholders for each measurement
+        doc.add_paragraph("Power Measures:")
+        doc.add_paragraph("{% for measurement in measurements %}")
+
+        power_table = doc.add_table(rows=1, cols=5)
+        power_hdr_cells = power_table.rows[0].cells
+        power_hdr_cells[0].text = "Power Measure ID"
+        power_hdr_cells[1].text = "Type"
+        power_hdr_cells[2].text = "Name"
+        power_hdr_cells[3].text = "Voltage (V)"
+        power_hdr_cells[4].text = "Current (A)"
+
+        # Loop over power measures for each measurement
+        doc.add_paragraph("{% for power_measure in measurement.power_measures %}")
+        power_row = power_table.add_row().cells
+        power_row[0].text = "{{ power_measure.power_measure_id }}"
+        power_row[1].text = "{{ power_measure.power_measure_type }}"
+        power_row[2].text = "{{ power_measure.power_measure_name }}"
+        power_row[3].text = "{{ power_measure.power_measure_voltage }}"
+        power_row[4].text = "{{ power_measure.power_measure_current }}"
+        doc.add_paragraph("{% endfor %}")  # Close the second loop for power measures
+
+        doc.add_paragraph("{% endfor %}")  # Close the outer loop for measurements
+
+        # Save the template
+        doc.save(self.template_path)
+        print(f"Template successfully saved to: {self.template_path}")
+
+    def generate_report(self, report_id: int, use_cpp: bool = False) -> Path:
+        """
+        Generates a test report from aggregated data and saves it as a Word document.
 
         Args:
-            output_dir (Path): The directory where the reports will be saved.
+            report_id (int): The ID of the test report to generate.
+            use_cpp (bool): Whether to process XML with a C++ tool.
+
+        Returns:
+            Path: Path to the generated Word report.
         """
-        try:
-            # Ensure the output directory exists
-            output_dir.mkdir(parents=True, exist_ok=True)
+        # Step 1: Retrieve report data from DataManager
+        
+        rows = self.data_manager.get_test_report(report_id)
 
-            # Retrieve all TestReport IDs and their test names
-            reports = self.get_all_report_id_testName()
+        if not rows:
+            raise ValueError(f"No report found for ID {report_id}")
 
-            # Generate XML reports for each entry
-            for report in reports:
-                report_id = report["report_id"]
+        # Step 2: Aggregate report data into a single dictionary
+        aggregated_data = self.aggregate_report_data(rows)
 
-                # Fetch the full report data for this report_id
-                report_data = self.get_test_report(report_id)
-                if not report_data:
-                    print(f"Skipping report_id {report_id}: No data found.")
-                    continue
+        # Step 3: Generate XML (For future use)
+        xml_path = self.create_xml_from_report(rows, f"{self.xml_schema_file}.xml")
+        self.sanitize_xml_file(xml_path)
 
-                # Generate the file name
-                file_name = self.generate_file_name(report_data)
+        # Step 4: Optionally process XML with C++
+        if use_cpp:
+            self.call_cpp_for_processing(xml_path)
 
-                # Generate the XML report
-                xml_file_path = output_dir / file_name
-                self.create_xml_from_report(report_data, xml_file_path)
-                print(f"Report generated: {xml_file_path}")
-        except sqlite3.Error as e:
-            raise Exception(f"Error generating reports: {e}")
+        # Step 5: Ensure output directory exists
+        self.output_path.mkdir(parents=True, exist_ok=True)
+
+        # Step 6: Generate the file name
+        base_file_name = self.generate_file_name(aggregated_data)
+
+        # Construct the full output file path
+        output_file = self.output_path / f"{base_file_name}.docx"
+
+        # Step 7: Load the template
+        template = DocxTemplate(self.template_path)
+
+        # Render the template with the aggregated data
+        template.render(aggregated_data)
+
+        # Step 8: Save the report, overwriting if it already exists
+        if output_file.exists():
+            print(f"Updating existing report: {output_file}")
+        else:
+            print(f"Creating new report: {output_file}")
+
+        template.save(output_file)
+
+        return output_file
 
 
 if __name__ == "__main__":
@@ -391,16 +571,15 @@ if __name__ == "__main__":
 
     # Initialize ReportGenerator with Pydantic
     report_generator = ReportGenerator(
-        data_manager=data_manager, template_path=Path("test_report_template.docx")
+        data_manager=data_manager, template_path=Path("Report_Template.docx")
     )
 
     # Generate a report
     report = data_manager.generate_mock_data(112, "ABB", "maxgreen2", "FHR")
     report_id = data_manager.insert_test_report(report)
-    print(f"Got report id: {report_id}")
-    print("-------------------report object----------------------")
-    print(f"Generated report: {report}")
-    print("-------------------report object----------------------")
+    # print(f"Got report id: {report_id}")
+    # print("-------------------report object----------------------")
+    # print(f"Generated report: {report}")
+    # print("-------------------report object----------------------")
 
     report_generator.generate_report(report_id, use_cpp=False)
-
