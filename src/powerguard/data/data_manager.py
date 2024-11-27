@@ -535,7 +535,7 @@ class DataManager(BaseModel):
         )
 
         # Create PowerMeasure objects
-        input_power = PowerMeasure(
+        input_power1 = PowerMeasure(
             type=PowerMeasureType.UPS_INPUT,
             name="input_power",
             voltage=230.0,
@@ -543,7 +543,7 @@ class DataManager(BaseModel):
             power=2300.0,
             pf=0.98,
         )
-        output_power = PowerMeasure(
+        output_power1 = PowerMeasure(
             type=PowerMeasureType.UPS_OUTPUT,
             name="output_power",
             voltage=220.0,
@@ -567,8 +567,76 @@ class DataManager(BaseModel):
             power=2360.0,
             pf=0.97,
         )
-        pMeasures1 = [input_power, output_power]
+        input_power3 = PowerMeasure(
+            type=PowerMeasureType.UPS_INPUT,
+            name="input_power",
+            voltage=230.0,
+            current=10.0,
+            power=2300.0,
+            pf=0.98,
+        )
+        output_power3 = PowerMeasure(
+            type=PowerMeasureType.UPS_OUTPUT,
+            name="output_power",
+            voltage=220.0,
+            current=10.5,
+            power=2310.0,
+            pf=0.97,
+        )
+        input_power4 = PowerMeasure(
+            type=PowerMeasureType.UPS_INPUT,
+            name="input_power",
+            voltage=231.0,
+            current=11.0,
+            power=2350.0,
+            pf=0.98,
+        )
+        output_power4 = PowerMeasure(
+            type=PowerMeasureType.UPS_OUTPUT,
+            name="output_power",
+            voltage=220.0,
+            current=11.5,
+            power=2350.0,
+            pf=0.97,
+        )
+        input_power5 = PowerMeasure(
+            type=PowerMeasureType.UPS_INPUT,
+            name="input_power",
+            voltage=251.0,
+            current=7,
+            power=2350.0,
+            pf=0.98,
+        )
+        output_power5 = PowerMeasure(
+            type=PowerMeasureType.UPS_OUTPUT,
+            name="output_power",
+            voltage=240.0,
+            current=0,
+            power=2350.0,
+            pf=0.97,
+        )
+        input_power6 = PowerMeasure(
+            type=PowerMeasureType.UPS_INPUT,
+            name="input_power",
+            voltage=264.0,
+            current=8,
+            power=2350.0,
+            pf=0.98,
+        )
+        output_power6 = PowerMeasure(
+            type=PowerMeasureType.UPS_OUTPUT,
+            name="output_power",
+            voltage=275.0,
+            current=2350.0,
+            power=2370,
+            pf=0.97,
+        )
+        pMeasures1 = [input_power1, output_power1]
         pMeasures2 = [input_power2, output_power2]
+        pMeasures3 = [input_power3, output_power3]
+        pMeasures4 = [input_power4, output_power4]
+        pMeasures5 = [input_power5, output_power5]
+        pMeasures6 = [input_power6, output_power6]
         # Create a ReportSettings object
         report_settings = ReportSettings(
             report_id=report_id,
@@ -585,7 +653,7 @@ class DataManager(BaseModel):
         measurement1 = Measurement(
             m_unique_id=1136,  # Example unique ID
             time_stamp=timestamp_proto,  # Example UNIX timestamp
-            name="Full Load Test",
+            name="LIGHT_LOAD_AND_FUNCTION_TEST",
             mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
             phase_name="Phase 1",
             load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
@@ -605,8 +673,8 @@ class DataManager(BaseModel):
         measurement2 = Measurement(
             m_unique_id=1137,  # Example unique ID
             time_stamp=timestamp_proto,  # Example UNIX timestamp
-            name="Full Load Test",
-            mode=MODE.STORAGE_MODE,  # NORMAL_MODE from enum MODE
+            name="LIGHT_LOAD_AND_FUNCTION_TEST",
+            mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
             phase_name="Phase 1",
             load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
             step_id=1,
@@ -622,12 +690,92 @@ class DataManager(BaseModel):
             temperature_1=25,
             temperature_2=30,
         )
-        measurements = [measurement1, measurement2]
+        measurement3 = Measurement(
+            m_unique_id=1138,  # Example unique ID
+            time_stamp=timestamp_proto,  # Example UNIX timestamp
+            name="LIGHT_LOAD_AND_FUNCTION_TEST",
+            mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
+            phase_name="Phase 1",
+            load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
+            step_id=1,
+            load_percentage=100,
+            power_measures=pMeasures3,
+            steady_state_voltage_tol=5,
+            voltage_dc_component=0,
+            load_pf_deviation=2,
+            switch_time_ms=500,
+            run_interval_sec=3600,
+            backup_time_sec=1800,
+            overload_time_sec=300,
+            temperature_1=25,
+            temperature_2=30,
+        )
+        measurement4 = Measurement(
+            m_unique_id=1139,  # Example unique ID
+            time_stamp=timestamp_proto,  # Example UNIX timestamp
+            name="LIGHT_LOAD_AND_FUNCTION_TEST",
+            mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
+            phase_name="Phase 1",
+            load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
+            step_id=1,
+            load_percentage=100,
+            power_measures=pMeasures4,
+            steady_state_voltage_tol=5,
+            voltage_dc_component=0,
+            load_pf_deviation=2,
+            switch_time_ms=500,
+            run_interval_sec=3600,
+            backup_time_sec=1800,
+            overload_time_sec=300,
+            temperature_1=25,
+            temperature_2=30,
+        )
+        measurement5 = Measurement(
+            m_unique_id=1140,  # Example unique ID
+            time_stamp=timestamp_proto,  # Example UNIX timestamp
+            name="LIGHT_LOAD_AND_FUNCTION_TEST",
+            mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
+            phase_name="Phase 1",
+            load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
+            step_id=1,
+            load_percentage=100,
+            power_measures=pMeasures5,
+            steady_state_voltage_tol=5,
+            voltage_dc_component=0,
+            load_pf_deviation=2,
+            switch_time_ms=500,
+            run_interval_sec=3600,
+            backup_time_sec=1800,
+            overload_time_sec=300,
+            temperature_1=25,
+            temperature_2=30,
+        )
+        measurement6 = Measurement(
+            m_unique_id=1141,  # Example unique ID
+            time_stamp=timestamp_proto,  # Example UNIX timestamp
+            name="LIGHT_LOAD_AND_FUNCTION_TEST",
+            mode=MODE.NORMAL_MODE,  # NORMAL_MODE from enum MODE
+            phase_name="Phase 1",
+            load_type=LOAD.LINEAR,  # LINEAR from enum LOAD
+            step_id=1,
+            load_percentage=100,
+            power_measures=pMeasures6,
+            steady_state_voltage_tol=5,
+            voltage_dc_component=0,
+            load_pf_deviation=2,
+            switch_time_ms=500,
+            run_interval_sec=3600,
+            backup_time_sec=1800,
+            overload_time_sec=300,
+            temperature_1=25,
+            temperature_2=30,
+        )
+        measurements = [measurement1, measurement2,measurement3, measurement3,measurement4, measurement5,measurement6]
         # Create the TestReport object
         test_report = TestReport(
             settings=report_settings,
-            test_name=TestType.FULL_LOAD_TEST,
-            test_description="Full load test for the UPS system",
+            test_name=TestType.LIGHT_LOAD_AND_FUNCTION_TEST,
+            test_description="Normal opration in rated load with varying input voltage",
             measurements=measurements,
             test_result=TestResult.TEST_SUCCESSFUL,  # TEST_SUCCESSFUL from enum TestResult
         )

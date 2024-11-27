@@ -160,7 +160,7 @@ class Inserter:
                 ups_spec.max_input_voltage,
                 ups_spec.pf_rated_current,
                 ups_spec.max_continous_amp,
-                ups_spec.overload_Amp,
+                ups_spec.overload_amp,
                 overload_ids["long"],
                 overload_ids["medium"],
                 overload_ids["short"],

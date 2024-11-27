@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-message SensorData {
-  int32 id = 1;
-  string name = 2;
-  float value = 3;
-}
