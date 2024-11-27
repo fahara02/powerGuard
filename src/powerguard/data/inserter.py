@@ -255,6 +255,15 @@ class Inserter:
         try:
             # Start a savepoint for this operation
             self._conn.execute(f"SAVEPOINT {savepoint_name}")
+            query = "SELECT m_unique_id FROM Measurement WHERE m_unique_id = ?"
+            self._cursor.execute(query, (measurement.m_unique_id,))
+            existing_row = self._cursor.fetchone()
+            if existing_row:
+                logging.debug(
+                    "Measurements with m_unique_id %s already exists.",
+                    measurement.m_unique_id,
+                )
+                return existing_row[0]
 
             # Convert measurement to row
             db_row = self.measurement_to_db_row(measurement, test_report_id)
