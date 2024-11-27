@@ -188,32 +188,100 @@ class ReportGenerator(BaseModel):
 
         return aggregated
 
+    # def create_xml_from_report(
+    #     self, report_data: list[dict], file_name: str, flatten: bool = True
+    # ) -> Path:
+    #     """
+    #     Generate an XML file from the report data, flattening nested dictionaries.
+
+    #     Args:
+    #         report_data (list[dict]): A list of rows fetched from the database.
+    #         file_name (str): The name of the output XML file.
+
+    #     Returns:
+    #         Path: The path to the saved XML file.
+    #     """
+
+    #     def flatten_dict(data, parent_key="", sep="_"):
+    #         """
+    #         Recursively flatten a nested dictionary.
+    #         """
+    #         items = []
+    #         for k, v in data.items():
+    #             new_key = f"{parent_key}{sep}{k}" if parent_key else k
+    #             if isinstance(v, dict):
+    #                 # Recursively flatten dictionaries
+    #                 items.extend(flatten_dict(v, new_key, sep=sep).items())
+    #             elif isinstance(v, list):
+    #                 # Handle lists by indexing items
+    #                 for i, item in enumerate(v):
+    #                     indexed_key = f"{new_key}{sep}{i}"
+    #                     if isinstance(item, dict):
+    #                         items.extend(
+    #                             flatten_dict(item, indexed_key, sep=sep).items()
+    #                         )
+    #                     else:
+    #                         items.append((indexed_key, item))
+    #             else:
+    #                 # Add simple key-value pairs
+    #                 items.append((new_key, v))
+    #         return dict(items)
+
+    #     # Step 1: Aggregate report data into a single dictionary
+
+    #     aggregated_data = self.aggregate_report_data(report_data)
+    #     pprint.pprint(f"context data dictionary is { aggregated_data }")
+
+    #     # Step 2: Flatten the report data, including nested dictionaries and lists
+    #     flattened_data = flatten_dict(aggregated_data)
+    #     if flatten:
+    #         xml_data = flattened_data
+    #     else:
+    #         xml_data = aggregated_data
+    #     # Step 3: Create XML structure
+    #     root = ET.Element("TestReport")
+    #     for key, value in xml_data.items():
+    #         child = ET.SubElement(root, key)
+    #         # Convert non-string values to strings
+    #         child.text = str(value) if value is not None else ""
+
+    #     # Step 4: Construct full XML file path in the output directory
+    #     xml_path = self.output_path / file_name
+    #     # Ensure the parent directory exists
+    #     xml_path.parent.mkdir(parents=True, exist_ok=True)
+
+    #     # Step 5: Check if the file exists and confirm overwrite
+    #     if xml_path.exists():
+    #         print(f"XML file already exists at {xml_path}. Overwriting.")
+
+    #     # Write XML to file
+    #     tree = ET.ElementTree(root)
+    #     tree.write(xml_path, encoding="utf-8", xml_declaration=True)
+    #     print(f"XML generated and saved to {xml_path}")
+    #     return xml_path
     def create_xml_from_report(
         self, report_data: list[dict], file_name: str, flatten: bool = True
     ) -> Path:
         """
-        Generate an XML file from the report data, flattening nested dictionaries.
+        Generate an XML file from the report data, with optional flattening.
 
         Args:
             report_data (list[dict]): A list of rows fetched from the database.
             file_name (str): The name of the output XML file.
+            flatten (bool): Whether to flatten nested dictionaries (default: True).
 
         Returns:
             Path: The path to the saved XML file.
         """
 
         def flatten_dict(data, parent_key="", sep="_"):
-            """
-            Recursively flatten a nested dictionary.
-            """
+            """Recursively flatten a nested dictionary."""
             items = []
             for k, v in data.items():
                 new_key = f"{parent_key}{sep}{k}" if parent_key else k
                 if isinstance(v, dict):
-                    # Recursively flatten dictionaries
                     items.extend(flatten_dict(v, new_key, sep=sep).items())
                 elif isinstance(v, list):
-                    # Handle lists by indexing items
                     for i, item in enumerate(v):
                         indexed_key = f"{new_key}{sep}{i}"
                         if isinstance(item, dict):
@@ -223,31 +291,40 @@ class ReportGenerator(BaseModel):
                         else:
                             items.append((indexed_key, item))
                 else:
-                    # Add simple key-value pairs
                     items.append((new_key, v))
             return dict(items)
 
+        def create_nested_xml(element, data):
+            """Recursively create XML elements for nested structures."""
+            if isinstance(data, dict):
+                for key, value in data.items():
+                    child = ET.SubElement(element, key)
+                    create_nested_xml(child, value)
+            elif isinstance(data, list):
+                for item in data:
+                    item_element = ET.SubElement(element, "Item")
+                    create_nested_xml(item_element, item)
+            else:
+                element.text = str(data) if data is not None else ""
+
         # Step 1: Aggregate report data into a single dictionary
-
         aggregated_data = self.aggregate_report_data(report_data)
-        pprint.pprint(f"context data dictionary is { aggregated_data }")
+        pprint.pprint(f"context data dictionary is {aggregated_data}")
 
-        # Step 2: Flatten the report data, including nested dictionaries and lists
-        flattened_data = flatten_dict(aggregated_data)
-        if flatten:
-            xml_data = flattened_data
-        else:
-            xml_data = aggregated_data
+        # Step 2: Flatten or preserve nested structure based on the flag
+        xml_data = flatten_dict(aggregated_data) if flatten else aggregated_data
+
         # Step 3: Create XML structure
         root = ET.Element("TestReport")
-        for key, value in xml_data.items():
-            child = ET.SubElement(root, key)
-            # Convert non-string values to strings
-            child.text = str(value) if value is not None else ""
+        if flatten:
+            for key, value in xml_data.items():
+                child = ET.SubElement(root, key)
+                child.text = str(value) if value is not None else ""
+        else:
+            create_nested_xml(root, xml_data)
 
         # Step 4: Construct full XML file path in the output directory
         xml_path = self.output_path / file_name
-        # Ensure the parent directory exists
         xml_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Step 5: Check if the file exists and confirm overwrite
@@ -261,7 +338,7 @@ class ReportGenerator(BaseModel):
         return xml_path
 
     def generate_report(
-        self, report_id: int, use_cpp: bool = False, use_xml: bool = False
+        self, report_id: int, use_cpp: bool = False, use_xml: bool = False, use_flatten:bool=True
     ) -> Path:
         """
         Generates a test report from aggregated data and saves it as a Word document.
@@ -282,7 +359,7 @@ class ReportGenerator(BaseModel):
         aggregated_data = self.aggregate_report_data(rows)
 
         xml_path = self.create_xml_from_report(
-            rows, f"{self.xml_schema_file}.xml", True
+            rows, f"{self.xml_schema_file}.xml", use_flatten
         )
         self.sanitize_xml_file(xml_path)
 
@@ -404,4 +481,4 @@ if __name__ == "__main__":
     # print(f"Generated report: {report}")
     # print("-------------------report object----------------------")
 
-    report_generator.generate_report(report_id, use_cpp=False, use_xml=True)
+    report_generator.generate_report(report_id, use_cpp=False, use_xml=False,use_flatten=False)
