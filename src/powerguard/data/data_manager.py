@@ -15,7 +15,7 @@ from google.protobuf.timestamp_pb2 import Timestamp
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
 from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_test_pb2 import TestResult, TestType
-from proto.upsDefines_pb2 import LOAD, MODE, OverLoad, Phase, spec
+from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 
 from powerguard.data.validator import Validator
 from powerguard.data.inserter import Inserter
@@ -519,19 +519,19 @@ class DataManager(BaseModel):
         # Create the spec object
         ups_spec = spec(
             phase=Phase.SINGLE_PHASE,  # SINGLE_PHASE from enum Phase
-            Rating_va=5000,
-            RatedVoltage_volt=230,
-            RatedCurrent_amp=21,
-            MinInputVoltage_volt=200,
-            MaxInputVoltage_volt=240,
+            rated_va=5000,
+            rated_voltage=230,
+            rated_current=21,
+            min_input_voltage=200,
+            max_input_voltage=240,
             pf_rated_current=100,  # 1.0 PF represented as 100 for simplicity
-            Max_Continous_Amp=25,
-            overload_Amp=30,
+            max_continous_amp=25,
+            overload_amp=30,
             overload_long=overload_long,
             overload_medium=overload_medium,
             overload_short=overload_short,
-            AvgSwitchTime_ms=500,
-            AvgBackupTime_ms=120000,
+            avg_switch_time_ms=500,
+            avg_backup_time_ms=120000,
         )
 
         # Create PowerMeasure objects
@@ -626,8 +626,8 @@ class DataManager(BaseModel):
         # Create the TestReport object
         test_report = TestReport(
             settings=report_settings,
-            testName=TestType.FULL_LOAD_TEST,
-            testDescription="Full load test for the UPS system",
+            test_name=TestType.FULL_LOAD_TEST,
+            test_description="Full load test for the UPS system",
             measurements=measurements,
             test_result=TestResult.TEST_SUCCESSFUL,  # TEST_SUCCESSFUL from enum TestResult
         )

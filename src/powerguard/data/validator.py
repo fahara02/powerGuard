@@ -9,7 +9,7 @@ from proto.pData_pb2 import PowerMeasure, PowerMeasureType
 from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 
 from proto.ups_test_pb2 import TestResult, TestType
-from proto.upsDefines_pb2 import LOAD, MODE, OverLoad, Phase, spec
+from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 
 
 class Validator:
@@ -72,16 +72,16 @@ class Validator:
     def _validate_spec(self, ups_spec: spec):
         """Validate spec object."""
         non_negative_fields = [
-            ("Rating_va", ups_spec.Rating_va),
-            ("RatedVoltage_volt", ups_spec.RatedVoltage_volt),
-            ("RatedCurrent_amp", ups_spec.RatedCurrent_amp),
-            ("MinInputVoltage_volt", ups_spec.MinInputVoltage_volt),
-            ("MaxInputVoltage_volt", ups_spec.MaxInputVoltage_volt),
+            ("rated_va", ups_spec.rated_va),
+            ("rated_voltage", ups_spec.rated_voltage),
+            ("rated_current", ups_spec.rated_current),
+            ("min_input_voltage", ups_spec.min_input_voltage),
+            ("max_input_voltage", ups_spec.max_input_voltage),
             ("pf_rated_current", ups_spec.pf_rated_current),
-            ("Max_Continous_Amp", ups_spec.Max_Continous_Amp),
-            ("overload_Amp", ups_spec.overload_Amp),
-            ("AvgSwitchTime_ms", ups_spec.AvgSwitchTime_ms),
-            ("AvgBackupTime_ms", ups_spec.AvgBackupTime_ms),
+            ("max_continous_amp", ups_spec.max_continous_amp),
+            ("overload_Amp", ups_spec.overload_amp),
+            ("avg_switch_time_ms", ups_spec.avg_switch_time_ms),
+            ("avg_backup_time_ms", ups_spec.avg_backup_time_ms),
         ]
 
         for name, value in non_negative_fields:
@@ -178,8 +178,8 @@ class Validator:
         """Validate TestReport object."""
         required_fields = [
             "settings",
-            "testName",
-            "testDescription",
+            "test_name",
+            "test_description",
             "test_result",
         ]
 
@@ -195,7 +195,7 @@ class Validator:
 
         # Validate testDescription and test_result as strings
         for field, name in [
-            (report.testDescription, "testDescription"),
+            (report.test_description, "test_description"),
         ]:
             if not isinstance(field, str) or not field.strip():
                 raise ValueError(f"{name} must be a non-empty string.")

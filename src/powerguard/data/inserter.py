@@ -3,7 +3,7 @@ import sqlite3
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
 from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_test_pb2 import TestResult, TestType
-from proto.upsDefines_pb2 import LOAD, MODE, OverLoad, Phase, spec
+from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 
 
 class Inserter:
@@ -153,19 +153,19 @@ class Inserter:
             """
             params = (
                 Phase.Name(ups_spec.phase),  # Enum converted to string
-                ups_spec.Rating_va,
-                ups_spec.RatedVoltage_volt,
-                ups_spec.RatedCurrent_amp,
-                ups_spec.MinInputVoltage_volt,
-                ups_spec.MaxInputVoltage_volt,
+                ups_spec.rated_va,
+                ups_spec.rated_voltage,
+                ups_spec.rated_current,
+                ups_spec.min_input_voltage,
+                ups_spec.max_input_voltage,
                 ups_spec.pf_rated_current,
-                ups_spec.Max_Continous_Amp,
+                ups_spec.max_continous_amp,
                 ups_spec.overload_Amp,
                 overload_ids["long"],
                 overload_ids["medium"],
                 overload_ids["short"],
-                ups_spec.AvgSwitchTime_ms,
-                ups_spec.AvgBackupTime_ms,
+                ups_spec.avg_switch_time_ms,
+                ups_spec.avg_backup_time_ms,
             )
 
             self._cursor.execute(query, params)
@@ -328,7 +328,7 @@ class Inserter:
 
         try:
             # Convert TestType enum to its string name
-            test_name = TestType.Name(report.testName)
+            test_name = TestType.Name(report.test_name)
             savepoint_name = f"test_report_{report.settings.report_id}"
 
             # Start transaction and set savepoint
@@ -368,7 +368,7 @@ class Inserter:
                         """,
                         (
                             test_name,
-                            report.testDescription,
+                            report.test_description,
                             TestResult.Name(report.test_result),
                             test_report_id,
                         ),
@@ -389,7 +389,7 @@ class Inserter:
                         (
                             settings_id,
                             test_name,
-                            report.testDescription,
+                            report.test_description,
                             TestResult.Name(report.test_result),
                         ),
                     )
@@ -415,7 +415,7 @@ class Inserter:
                     (
                         settings_id,
                         test_name,
-                        report.testDescription,
+                        report.test_description,
                         TestResult.Name(report.test_result),
                     ),
                 )

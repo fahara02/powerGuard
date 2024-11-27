@@ -21,17 +21,17 @@ message OverLoad{
 }
 message spec{
 	Phase phase=1;
-	uint32 Rating_va = 2;
-	uint32 RatedVoltage_volt = 3;
-	uint32 RatedCurrent_amp =4;
-	uint32  MinInputVoltage_volt = 5;
-	uint32  MaxInputVoltage_volt = 6;
+	uint32 rated_va = 2;
+	uint32 rated_voltage = 3;
+	uint32 rated_current =4;
+	uint32  min_input_voltage = 5;
+	uint32  max_input_voltage = 6;
 	uint32 pf_rated_current=7;
-	uint32 Max_Continous_Amp=8;
-	uint32 overload_Amp=9;
+	uint32 max_continous_amp=8;
+	uint32 overload_amp=9;
     OverLoad overload_long=10;
     OverLoad overload_medium=11;
     OverLoad overload_short=12;
-	uint64 AvgSwitchTime_ms = 20;
-	uint64 AvgBackupTime_ms = 21;
+	uint64 avg_switch_time_ms = 20;
+	uint64 avg_backup_time_ms = 21;
 }

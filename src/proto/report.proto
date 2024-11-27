@@ -2,7 +2,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 import "pData.proto";
 import "ups_test.proto";
-import "upsDefines.proto";
+import "ups_defines.proto";
 
 enum TestStandard{
      IEC_62040_1=0;
@@ -45,8 +45,8 @@ message Measurement{
 
 message TestReport{
 	ReportSettings settings=1;
-	Test.TestType testName=2; 
-	string testDescription=3;
+	Test.TestType test_name=2; 
+	string test_description=3;
     repeated Measurement  measurements=4;
 	Test.TestResult test_result=5;
 }
