@@ -172,7 +172,7 @@
         "z": "e6613618b3405f10",
         "name": "",
         "start": "src/proto",
-        "pattern": "*.*",
+        "pattern": "*.proto*",
         "folders": "*",
         "hidden": true,
         "lstype": "files",
@@ -185,7 +185,8 @@
         "y": 60,
         "wires": [
             [
-                "df71034f668f9cb5"
+                "df71034f668f9cb5",
+                "a2aade93aa0c3b38"
             ]
         ]
     },
@@ -210,12 +211,113 @@
         "type": "encode",
         "z": "e6613618b3405f10",
         "name": "",
-        "protofile": "",
-        "protoType": "",
-        "x": 400,
+        "protofile": "fcaa87c16afbdfcd",
+        "protoType": "PowerMeasure",
+        "x": 380,
+        "y": 320,
+        "wires": [
+            [
+                "d7f2f78d77a4908e"
+            ]
+        ]
+    },
+    {
+        "id": "d7f2f78d77a4908e",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
         "y": 280,
+        "wires": []
+    },
+    {
+        "id": "a2aade93aa0c3b38",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "all_protos",
+        "func": "// Convert the input array in msg.payload to a comma-separated string\nmsg.payload = msg.payload.join(',');\n\n// Return the modified message object\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 220,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "269441a7ba5f862a",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "dea6212759a9d76b",
+        "type": "inject",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 360,
+        "wires": [
+            [
+                "f5f64a1ecdcb57f7"
+            ]
+        ]
+    },
+    {
+        "id": "f5f64a1ecdcb57f7",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "TEST_PROTO",
+        "func": "msg.payload = {\n    \"type\": 1,  // 1 corresponds to UPS_OUTPUT in the PowerMeasureType enum\n    \"name\": \"UPS Main Output\",\n    \"voltage\": 230.5,\n    \"current\": 10.2,\n    \"power\": 2354.1,\n    \"pf\": 0.98\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 420,
+        "wires": [
+            [
+                "f8ea56e6ef8f2e3f"
+            ]
         ]
     },
     {
@@ -231,6 +333,13 @@
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
+    },
+    {
+        "id": "fcaa87c16afbdfcd",
+        "type": "protobuf-file",
+        "protopath": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\src\\proto\\pData.proto",
+        "watchFile": false,
+        "keepCase": true
     },
     {
         "id": "cb5e987bd157d173",
