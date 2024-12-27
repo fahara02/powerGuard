@@ -1,0 +1,952 @@
+[
+    {
+        "id": "c0c5d3d48807a804",
+        "type": "subflow",
+        "name": "get_output",
+        "info": "",
+        "category": "",
+        "in": [],
+        "out": [
+            {
+                "x": 480,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "72b353c0ac1dcc72",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 480,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "d1e43871407afb36",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 480,
+                "y": 160,
+                "wires": [
+                    {
+                        "id": "38fb4992c1a440b2",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 480,
+                "y": 200,
+                "wires": [
+                    {
+                        "id": "966c30caa57f365d",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 480,
+                "y": 240,
+                "wires": [
+                    {
+                        "id": "c68acec97eaba8e4",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "38fb4992c1a440b2",
+        "type": "change",
+        "z": "c0c5d3d48807a804",
+        "name": "power",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "output_power",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 330,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "72b353c0ac1dcc72",
+        "type": "change",
+        "z": "c0c5d3d48807a804",
+        "name": "volt",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "output_voltage",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 330,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d1e43871407afb36",
+        "type": "change",
+        "z": "c0c5d3d48807a804",
+        "name": "current",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "output_current",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 340,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "768648440dd2200e",
+        "type": "inject",
+        "z": "c0c5d3d48807a804",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "0.1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "72b353c0ac1dcc72",
+                "d1e43871407afb36",
+                "38fb4992c1a440b2",
+                "966c30caa57f365d",
+                "c68acec97eaba8e4"
+            ]
+        ]
+    },
+    {
+        "id": "966c30caa57f365d",
+        "type": "change",
+        "z": "c0c5d3d48807a804",
+        "name": "pf",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "output_pf",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 330,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c68acec97eaba8e4",
+        "type": "change",
+        "z": "c0c5d3d48807a804",
+        "name": "frequency",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "output_frequency",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 340,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "46413099658d8708",
+        "type": "tab",
+        "label": "BACKUP_TEST",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2713a1bbfe818e9f",
+        "type": "link in",
+        "z": "46413099658d8708",
+        "name": "link in 4",
+        "links": [],
+        "x": 115,
+        "y": 80,
+        "wires": [
+            [
+                "861182f42f524856"
+            ]
+        ]
+    },
+    {
+        "id": "c56a55c172434941",
+        "type": "inject",
+        "z": "46413099658d8708",
+        "name": "Load ON",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 200,
+        "y": 180,
+        "wires": [
+            [
+                "e21eabdbd2089aec"
+            ]
+        ]
+    },
+    {
+        "id": "a778c08c14117d94",
+        "type": "inject",
+        "z": "46413099658d8708",
+        "name": "Load OFF",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 200,
+        "y": 230,
+        "wires": [
+            [
+                "e21eabdbd2089aec"
+            ]
+        ]
+    },
+    {
+        "id": "e21eabdbd2089aec",
+        "type": "switch",
+        "z": "46413099658d8708",
+        "name": "ON/OFF Switch",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 400,
+        "y": 205,
+        "wires": [
+            [
+                "f8627685fb8c49fc"
+            ],
+            [
+                "24f979030a0c8b2f"
+            ]
+        ]
+    },
+    {
+        "id": "f8627685fb8c49fc",
+        "type": "function",
+        "z": "46413099658d8708",
+        "name": "Start Timer",
+        "func": "const isRunning=true;\nflow.set('isRunning', isRunning);\n\nflow.set('startTime', new Date());\nif(isRunning){\nnode.status({ fill: 'green', shape: 'dot', text: 'Timer started...' });\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "24f979030a0c8b2f",
+        "type": "function",
+        "z": "46413099658d8708",
+        "name": "Stop Timer",
+        "func": "flow.set('isRunning', false);\nflow.set('startTime', null);\n\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 230,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4f85d1f669cb7fe3",
+        "type": "inject",
+        "z": "46413099658d8708",
+        "name": "1 Second Interval",
+        "props": [],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 200,
+        "y": 280,
+        "wires": [
+            [
+                "f852a80f22bfea7d"
+            ]
+        ]
+    },
+    {
+        "id": "f852a80f22bfea7d",
+        "type": "function",
+        "z": "46413099658d8708",
+        "name": "Update Timer",
+        "func": "// Read context values\nconst isRunning = flow.get('isRunning') === true;\nconst startTime = flow.get('startTime'); // Expect an ISO string or timestamp\n\nif (isRunning && startTime) {\n    // Parse startTime into a Date object\n    const start = new Date(startTime);\n    if (isNaN(start.getTime())) {\n        // Handle invalid startTime\n        node.status({ fill: 'red', shape: 'ring', text: 'Invalid start time' });\n        return null;\n    }\n\n    // Calculate elapsed time\n    const now = new Date();\n    const elapsedMs = now.getTime() - start.getTime();\n\n    // Convert elapsed time to hours, minutes, and seconds\n    const totalSeconds = Math.floor(elapsedMs / 1000);\n    const hours = Math.floor(totalSeconds / 3600);\n    const minutes = Math.floor((totalSeconds % 3600) / 60);\n    const seconds = totalSeconds % 60;\n\n    // Format as HH:MM:SS\n    const formattedTime = [\n        hours.toString().padStart(2, '0'),\n        minutes.toString().padStart(2, '0'),\n        seconds.toString().padStart(2, '0'),\n    ].join(':');\n\n    // Update payload and node status\n    msg.payload = formattedTime;\n    node.status({ fill: 'green', shape: 'dot', text: formattedTime });\n    return msg;\n} else if (!isRunning) {\n    // Timer is stopped\n    node.status({ fill: 'red', shape: 'ring', text: 'Timer Stopped' });\n    return null;\n} else {\n    // Handle edge case: startTime is missing\n    node.status({ fill: 'red', shape: 'ring', text: 'Missing start time' });\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 280,
+        "wires": [
+            [
+                "7af965e537ef84fa"
+            ]
+        ]
+    },
+    {
+        "id": "7af965e537ef84fa",
+        "type": "debug",
+        "z": "46413099658d8708",
+        "name": "Elapsed Time",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "8e85192e8ffe247b",
+        "type": "ui-text",
+        "z": "46413099658d8708",
+        "group": "ac18f679c10f1fd0",
+        "order": 2,
+        "width": 3,
+        "height": 0,
+        "name": "",
+        "label": "BACKUP TIME",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": true,
+        "font": "Georgia,Georgia,serif",
+        "fontSize": 16,
+        "color": "#121212",
+        "wrapText": false,
+        "className": "",
+        "x": 460,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "861182f42f524856",
+        "type": "function",
+        "z": "46413099658d8708",
+        "name": "BUFFER",
+        "func": "let previousValue = flow.get('previousValue') || 0;\n\nif (msg.payload === 1 && previousValue !== 1) {\n    // First 1 received; send it\n    flow.set('previousValue', 1);\n    return msg; // Forward the message\n} else if (msg.payload === 0 && previousValue !== 0) {\n    // First 0 received; send it\n    flow.set('previousValue', 0);\n    return msg; // Forward the message\n} else {\n    // Repeated 1s or 0s, do nothing\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 220,
+        "y": 120,
+        "wires": [
+            [
+                "e21eabdbd2089aec"
+            ]
+        ]
+    },
+    {
+        "id": "518691ee2b8704be",
+        "type": "function",
+        "z": "46413099658d8708",
+        "name": "BACKUP_TEST",
+        "func": "// Helper function for delay\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Main async function\n(async () => {\n    if (msg.payload === true) {\n        // Set a flag to indicate the backup test is running\n        global.set('backupTestRunning', true);\n        node.warn('Backup test started');\n\n        try {\n            // Step 1: Trigger start alarm\n            global.set('alarm_status', 1);\n            node.warn('Start alarm triggered');\n            await delay(2000); // 2 seconds delay\n            if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n            global.set('alarm_status', 0);\n            node.warn('Start alarm stopped');\n\n            // Step 2: Turn off mains input\n            global.set('cmd_mains_input', 0);\n            node.warn('Turning off mains input...');\n\n            // Step 3: Wait for mains input to be confirmed as off\n            while (global.get('sense_mains_input') !== 0) {\n                if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n                node.warn('Waiting for sense_mains_input to confirm 0...');\n                await delay(100); // Check every 100ms\n            }\n            node.warn('Mains input confirmed off');\n\n            // Step 4: Wait for UPS output to be detected as 1\n            while (global.get('sense_ups_output') !== 1) {\n                if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n                node.warn('Waiting for sense_ups_output to confirm 1...');\n                await delay(100); // Check every 100ms\n            }\n            node.warn('UPS output detected as 1');\n\n            // Step 5: Start the backup timer\n            let backupTime = 0;\n            const interval = 1000; // 1-second interval\n\n            node.warn('Measuring backup time...');\n            while (global.get('sense_ups_output') === 1) {\n                if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n                await delay(interval); // Wait 1 second\n                backupTime++; // Increment backup timer\n                global.set('BackupTime', backupTime);\n                node.warn(`Backup time: ${backupTime} seconds`);\n            }\n\n            // Step 6: Stop backup test and log results\n            node.warn('UPS output dropped to 0. Backup test stopped');\n            global.set('BackupTime', backupTime);\n            node.warn(`Total backup time: ${backupTime} seconds`);\n\n        } catch (error) {\n            // Handle process stop\n            node.warn(error.message);\n        } finally {\n            // Reset backupTestRunning flag\n            global.set('backupTestRunning', false);\n            node.warn('Backup test process ended');\n        }\n\n    } else if (msg.payload === false) {\n        // Stop the backup test\n        node.warn('Stopping backup test...');\n        global.set('backupTestRunning', false);\n        global.set('alarm_status', 0);\n        global.set('cmd_mains_input', 1); // Assuming 1 is the default or safe state\n        node.warn('Backup test stopped and reset');\n    }\n\n    return null;\n})();\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b97b4bf05380867d",
+        "type": "ui-gauge",
+        "z": "46413099658d8708",
+        "name": "OUTPUT_CURRENT",
+        "group": "eaf9e02b16206474",
+        "order": 2,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Output Current",
+        "units": "amp",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d45cd6"
+            },
+            {
+                "from": "18",
+                "color": "#2bff00"
+            },
+            {
+                "from": "23",
+                "color": "#53ea80"
+            },
+            {
+                "from": "28",
+                "color": "#c22e2e"
+            }
+        ],
+        "min": 0,
+        "max": "30",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 300,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "9c7f46da21c2c262",
+        "type": "ui-gauge",
+        "z": "46413099658d8708",
+        "name": "OUTPUT_POWER",
+        "group": "eaf9e02b16206474",
+        "order": 5,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Output Power",
+        "units": "watt",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d45cd6"
+            },
+            {
+                "from": "1000",
+                "color": "#2bff00"
+            },
+            {
+                "from": "4000",
+                "color": "#53ea80"
+            },
+            {
+                "from": "4800",
+                "color": "#c22e2e"
+            }
+        ],
+        "min": 0,
+        "max": "5000",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 290,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "06ec5b2d0bcde3d7",
+        "type": "subflow:c0c5d3d48807a804",
+        "z": "46413099658d8708",
+        "name": "",
+        "x": 80,
+        "y": 420,
+        "wires": [
+            [
+                "04467546f3220eb1"
+            ],
+            [
+                "b97b4bf05380867d"
+            ],
+            [
+                "9c7f46da21c2c262"
+            ],
+            [
+                "610276145f478d06"
+            ],
+            [
+                "2550b98f2b222612"
+            ]
+        ]
+    },
+    {
+        "id": "28a534038cc22b3c",
+        "type": "inject",
+        "z": "46413099658d8708",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "0.1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 90,
+        "y": 680,
+        "wires": [
+            [
+                "c909ad4f0537c120"
+            ]
+        ]
+    },
+    {
+        "id": "c909ad4f0537c120",
+        "type": "change",
+        "z": "46413099658d8708",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "BackupTime",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 260,
+        "y": 680,
+        "wires": [
+            [
+                "8e85192e8ffe247b"
+            ]
+        ]
+    },
+    {
+        "id": "04467546f3220eb1",
+        "type": "ui-gauge-classic",
+        "z": "46413099658d8708",
+        "name": "voltage",
+        "group": "eaf9e02b16206474",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "min": 0,
+        "max": "300",
+        "sectors": [
+            {
+                "start": "0",
+                "color": "red"
+            },
+            {
+                "start": "180",
+                "color": "green"
+            },
+            {
+                "start": "240",
+                "color": "green"
+            },
+            {
+                "start": "241",
+                "color": "red"
+            }
+        ],
+        "major_division": "100",
+        "minor_division": "10",
+        "value_decimal_places": 1,
+        "scale_decimal_places": 0,
+        "label": "",
+        "measurement": "voltage",
+        "units": "v",
+        "needles": [
+            {
+                "topic": "",
+                "color": "black",
+                "lengthPercent": "100"
+            }
+        ],
+        "sweep_angle": 250,
+        "myclass": "",
+        "x": 280,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "20b478891d72398b",
+        "type": "ui-switch",
+        "z": "46413099658d8708",
+        "name": "",
+        "label": "BackupTest",
+        "group": "ac18f679c10f1fd0",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": false,
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "className": "",
+        "layout": "row-left",
+        "clickableArea": "switch",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 210,
+        "y": 40,
+        "wires": [
+            [
+                "518691ee2b8704be"
+            ]
+        ]
+    },
+    {
+        "id": "2550b98f2b222612",
+        "type": "ui-gauge",
+        "z": "46413099658d8708",
+        "name": "OUTPUT_FREQUENCY",
+        "group": "eaf9e02b16206474",
+        "order": 3,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Output Frequency",
+        "units": "Hz",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d45cd6"
+            },
+            {
+                "from": "48",
+                "color": "#2bff00"
+            },
+            {
+                "from": "52",
+                "color": "#53ea80"
+            },
+            {
+                "from": "60",
+                "color": "#c22e2e"
+            }
+        ],
+        "min": 0,
+        "max": "60",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 310,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "610276145f478d06",
+        "type": "ui-gauge",
+        "z": "46413099658d8708",
+        "name": "OUTPUT_PF",
+        "group": "eaf9e02b16206474",
+        "order": 4,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Output PF",
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d45cd6"
+            },
+            {
+                "from": "0.7",
+                "color": "#2bff00"
+            },
+            {
+                "from": "0.98",
+                "color": "#53ea80"
+            },
+            {
+                "from": "1",
+                "color": "#c22e2e"
+            }
+        ],
+        "min": 0,
+        "max": "1",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 270,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "ddde2940ca2fe7fe",
+        "type": "ui-template",
+        "z": "46413099658d8708",
+        "group": "ac18f679c10f1fd0",
+        "page": "",
+        "ui": "",
+        "name": "",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Circular Voltage Gauge -->\n    <div class=\"meter-border\">\n      <div class=\"meter-display\">\n        <h3>Voltage</h3>\n        <h1>{{ voltage }} V</h1>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\n  export default {\n  data() {\n    return {\n      voltage: 0, // Default voltage\n      maxVoltage: 30, // Maximum voltage the gauge can display\n    };\n  },\n  computed: {\n    // Calculate the gauge's percentage value\n    gaugeValue() {\n      return (this.voltage / this.maxVoltage) * 100;\n    },\n  },\n  mounted() {\n    // Simulate voltage updates for demonstration purposes\n    setInterval(() => {\n      this.voltage = Math.floor(Math.random() * (this.maxVoltage + 1));\n    }, 1000);\n  },\n};\n</script>\n\n<style scoped>\n  /* Outer Meter Container */\n  .meter-container {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    height: 300px;\n    width: 300px;\n    background-color: #111;\n    /* Dark retro background */\n    border-radius: 50%;\n    border: 15px solid #666;\n    /* Thick grey boundary */\n    box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 0.6), 0px 4px 8px rgba(0, 0, 0, 0.8);\n    /* 3D retro look */\n    position: relative;\n  }\n\n  /* Inner Meter Display */\n  .meter-display {\n    background-color: #000;\n    /* Inner dark display */\n    color: #fff;\n    /* White text for readability */\n    border-radius: 50%;\n    width: 80%;\n    height: 80%;\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: center;\n    font-family: \"Courier New\", Courier, monospace;\n    /* Retro font */\n    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.8);\n  }\n\n  /* Text Styling */\n  .meter-display h3 {\n    font-size: 1.2rem;\n    margin: 0;\n    color: #bbb;\n    /* Slightly dimmed text for labels */\n  }\n\n  .meter-display h1 {\n    font-size: 2.5rem;\n    margin: 0;\n  }\n\n  /* Outer Border Styling */\n  .meter-border {\n    width: 100%;\n    height: 100%;\n    border-radius: 50%;\n    position: relative;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n  }\n</style>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 460,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ac18f679c10f1fd0",
+        "type": "ui-group",
+        "name": "UPS_STATUS",
+        "page": "7d0f53039d1540b1",
+        "width": 3,
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "eaf9e02b16206474",
+        "type": "ui-group",
+        "name": "OUTPUT_DATA",
+        "page": "7d0f53039d1540b1",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "7d0f53039d1540b1",
+        "type": "ui-page",
+        "name": "BACKUP_TEST",
+        "ui": "6bb6879aa70631ea",
+        "path": "/backup_test",
+        "icon": "battery-clock",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
+    },
+    {
+        "id": "f51f9a07212ff54b",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#d1479f",
+            "primary": "#0094ce",
+            "bgPage": "#ededed",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    }
+]

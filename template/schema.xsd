@@ -1,0 +1,63 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="TestReport">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element type="xs:byte" name="test_report_id"/>
+                <xs:element type="xs:string" name="test_name"/>
+                <xs:element type="xs:string" name="test_description"/>
+                <xs:element type="xs:string" name="test_result"/>
+                <xs:element type="xs:string" name="client_name"/>
+                <xs:element type="xs:string" name="standard"/>
+                <xs:element type="xs:byte" name="ups_model"/>
+                <xs:element name="measurements">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Item" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element type="xs:short" name="measurement_unique_id"/>
+                                        <xs:element type="xs:string" name="measurement_name"/>
+                                        <xs:element type="xs:string" name="measurement_timestamp"/>
+                                        <xs:element type="xs:string" name="measurement_loadtype"/>
+                                        <xs:element type="xs:byte" name="load_percentage"/>
+                                        <xs:element type="xs:string" name="phase_name"/>
+                                        <xs:element type="xs:byte" name="step_id"/>
+                                        <xs:element type="xs:byte" name="steady_state_voltage_tol"/>
+                                        <xs:element type="xs:byte" name="voltage_dc_component"/>
+                                        <xs:element type="xs:byte" name="load_pf_deviation"/>
+                                        <xs:element type="xs:byte" name="switch_time_ms"/>
+                                        <xs:element type="xs:byte" name="run_interval_sec"/>
+                                        <xs:element type="xs:byte" name="backup_time_sec"/>
+                                        <xs:element type="xs:byte" name="overload_time_sec"/>
+                                        <xs:element type="xs:byte" name="temperature_1"/>
+                                        <xs:element type="xs:byte" name="temperature_2"/>
+                                        <xs:element name="power_measures">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="Item" maxOccurs="unbounded" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element type="xs:byte" name="power_measure_id"/>
+                                                                <xs:element type="xs:string" name="power_measure_type"/>
+                                                                <xs:element type="xs:string" name="power_measure_name"/>
+                                                                <xs:element type="xs:float" name="power_measure_voltage"/>
+                                                                <xs:element type="xs:float" name="power_measure_current"/>
+                                                                <xs:element type="xs:float" name="power_measure_power"/>
+                                                                <xs:element type="xs:float" name="power_measure_pf"/>
+                                                            </xs:sequence>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

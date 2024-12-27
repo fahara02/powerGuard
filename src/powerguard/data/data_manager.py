@@ -770,7 +770,15 @@ class DataManager(BaseModel):
             temperature_1=25,
             temperature_2=30,
         )
-        measurements = [measurement1, measurement2,measurement3, measurement3,measurement4, measurement5,measurement6]
+        measurements = [
+            measurement1,
+            measurement2,
+            measurement3,
+            measurement3,
+            measurement4,
+            measurement5,
+            measurement6,
+        ]
         # Create the TestReport object
         test_report = TestReport(
             settings=report_settings,

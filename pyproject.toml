@@ -17,6 +17,7 @@ dependencies = [
     "pyside6>=6.6.3.1",
     "python-docx>=1.1.2",
     "requests>=2.32.3",
+    "xmlschema>=3.4.3",
 ]
 
 [dependency-groups]

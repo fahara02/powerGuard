@@ -10,7 +10,7 @@ import requests
 
 
 class NodeRedServer:
-    def __init__(self, node_red_dir: Path, flows_file: Path):
+    def __init__(self, node_red_dir: Path, flows_dir: Path):
         """
         Initialize the Node-RED server instance.
 
@@ -19,7 +19,7 @@ class NodeRedServer:
             flows_file (Path): Path to the flows configuration file.
         """
         self.node_red_dir = node_red_dir
-        self.flows_file = flows_file
+        self.flows_dir= flows_dir
 
         # Ensure the directory and file paths are valid
         self._validate_paths()
@@ -31,8 +31,8 @@ class NodeRedServer:
                 f"Node-RED directory not found: {self.node_red_dir}"
             )
 
-        if not self.flows_file.exists():
-            raise FileNotFoundError(f"Flows file not found: {self.flows_file}")
+        if not self.flows_dir.exists():
+            raise FileNotFoundError(f"Flows file not found: {self.flows_dir}")
 
     def get_ip_address(self):
         """Fetch the local IP address of the machine (non-loopback)."""
@@ -85,7 +85,8 @@ class NodeRedServer:
         palettes = [
             "@flowfuse/node-red-dashboard",
             "node-red-contrib-modbus",
-            "node-red-contrib-modbus-flex-server",
+            "@flowfuse/node-red-dashboard-2-ui-led",
+            "@colinl/node-red-dashboard-2-ui-gauge-classic",
         ]
         try:
             is_windows = platform.system().lower() == "windows"
@@ -143,19 +144,28 @@ class NodeRedServer:
         return False
 
     def import_flows(self):
-        """Import flows into Node-RED."""
+        """Import all flows from the flows directory into Node-RED."""
         try:
-            with open(self.flows_file, "r") as file:
-                flow_data = json.load(file)
+            flow_data_combined = []
+            # Load all JSON files in the flows directory
+            for flow_file in self.flows_dir.glob("*.json"):
+                print(f"Loading flow file: {flow_file}")
+                with open(flow_file, "r") as file:
+                    flow_data = json.load(file)
+                    flow_data_combined.extend(flow_data)
 
+            if not flow_data_combined:
+                print("No valid flow files found in the directory.")
+                return
+
+            # Send combined flow data to Node-RED
             node_red_url = f"http://{self.get_ip_address()}:1880/flows"
-            response = requests.post(node_red_url, json=flow_data)
+            response = requests.post(node_red_url, json=flow_data_combined)
             response.raise_for_status()
 
             if response.status_code == 204:
-                print("Flows imported and deployed successfully.")
+                print("All flows imported and deployed successfully.")
             else:
                 print(f"Failed to import flows: {response.status_code}")
         except Exception as e:
-            print(f"Error importing flows: {e}")
             print(f"Error importing flows: {e}")

@@ -16,11 +16,11 @@ for name, path in paths.items():
 
 data_manager = DataManager()
 server_config = ServerConfig(
-    host="0.0.0.0",
-    port=12345,
-    node_red_dir="node-red",
-    flows_file="flows_modbus.json",
-)
+        host="0.0.0.0",
+        port=12345,
+        node_red_folder="node-red",
+        flows_folder="flows",
+    )
 server = Server(server_config, data_manager)
 report_generator = ReportGenerator(data_manager=data_manager)
 test_manager = TestManager()

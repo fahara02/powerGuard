@@ -1,0 +1,1977 @@
+[
+    {
+        "id": "f63587bd397db4fd",
+        "type": "tab",
+        "label": "MODBUS_SERVER",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "5b96693662133869",
+        "type": "link in",
+        "z": "f63587bd397db4fd",
+        "name": "link in 1",
+        "links": [
+            "99bfe34bc8c82356"
+        ],
+        "x": 795,
+        "y": 660,
+        "wires": [
+            [
+                "7227b8ddcc0d49a3"
+            ]
+        ]
+    },
+    {
+        "id": "13005baaeec5db7e",
+        "type": "link in",
+        "z": "f63587bd397db4fd",
+        "name": "link in 2",
+        "links": [
+            "5759539c31815e27"
+        ],
+        "x": 795,
+        "y": 720,
+        "wires": [
+            [
+                "763b8a6d784351c9"
+            ]
+        ]
+    },
+    {
+        "id": "7227b8ddcc0d49a3",
+        "type": "ui-number-input",
+        "z": "f63587bd397db4fd",
+        "group": "0282c4d64488b8ca",
+        "name": "V_CF",
+        "label": "Calbration-IN VOLT",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "1",
+        "max": "1000",
+        "step": 1,
+        "tooltip": "",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 910,
+        "y": 660,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "763b8a6d784351c9",
+        "type": "ui-number-input",
+        "z": "f63587bd397db4fd",
+        "group": "0282c4d64488b8ca",
+        "name": "C_CF",
+        "label": "Calbration-IN AMPS",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "1",
+        "max": "1000",
+        "step": 1,
+        "tooltip": "",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 910,
+        "y": 720,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d40e471b585a6f0b",
+        "type": "ui-button-group",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "group": "25b4840ae2beec11",
+        "order": 1,
+        "width": 3,
+        "height": 1,
+        "label": "MAINS INPUT",
+        "className": "",
+        "rounded": true,
+        "useThemeColors": true,
+        "passthru": false,
+        "options": [
+            {
+                "label": "OFF",
+                "icon": "lightbulb-off",
+                "value": "0",
+                "valueType": "num",
+                "color": "#009933"
+            },
+            {
+                "label": "ON",
+                "icon": "lightbulb-on",
+                "value": "1",
+                "valueType": "num",
+                "color": "#999999"
+            }
+        ],
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 120,
+        "y": 520,
+        "wires": [
+            [
+                "10142d9d3cc8d80a"
+            ]
+        ]
+    },
+    {
+        "id": "53211e885def2e77",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "parse_di",
+        "func": "// Check if the payload contains the expected array of boolean values\nif (!Array.isArray(msg.payload) || msg.payload.length < 4) {\n    node.error(\"Invalid Modbus data format. Expected an array of booleans.\");\n    return null;\n}\n\n// Extract the first four boolean values\nlet outputs = [];\nfor (let i = 0; i < 4; i++) {\n    outputs.push({ payload: msg.payload[i] });\n}\n\n// Return each boolean as a separate output\nreturn [outputs[0], outputs[1], outputs[2], outputs[3]];\n",
+        "outputs": 4,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 120,
+        "y": 900,
+        "wires": [
+            [
+                "351e4b854e13256b",
+                "2a2e4e31ebf2ce53",
+                "99bb121fd4486c8f"
+            ],
+            [
+                "5117120efa5b1764",
+                "b9b46ac75acb9df4",
+                "b2b74b0e76d6d841"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "fbc1a67f8088a4d9",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "UPS_OUT",
+        "mode": "link",
+        "links": [
+            "9bee7769430de542"
+        ],
+        "x": 615,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "5117120efa5b1764",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "boolean to value",
+        "func": "msg.payload = msg.payload === true ? 1 : 0;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 960,
+        "wires": [
+            [
+                "fbc1a67f8088a4d9"
+            ]
+        ]
+    },
+    {
+        "id": "b9b46ac75acb9df4",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "UPS_OUTPUT",
+        "group": "ac18f679c10f1fd0",
+        "order": 2,
+        "width": 2,
+        "height": 0,
+        "label": "UPS OUTPUT",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#fbf4f4"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#e1094a"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 440,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "351e4b854e13256b",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "MAINS_INPUT",
+        "group": "ac18f679c10f1fd0",
+        "order": 3,
+        "width": 2,
+        "height": 0,
+        "label": "MAINS INPUT",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#f5f0f0"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#eb1435"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": false,
+        "x": 440,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "2a2e4e31ebf2ce53",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "MAINS INPUT",
+        "group": "694524e4e14fe2fb",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "MAINS INPUT",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#302c2c"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#e01a24"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 600,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "b2b74b0e76d6d841",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "UPS_OUTPUT",
+        "group": "694524e4e14fe2fb",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "UPS OUTPUT",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#f7eeee"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#e2181b"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 600,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "1671e19a5e66f655",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "LOAD BANK1",
+        "group": "694524e4e14fe2fb",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "LOAD BANK1",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "0",
+                "valueType": "num",
+                "color": "#f9f1f1"
+            },
+            {
+                "value": "1",
+                "valueType": "num",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 440,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "b6030f1b24bcd31e",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "LOAD BANK2",
+        "group": "694524e4e14fe2fb",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "LOAD BANK2",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "0",
+                "valueType": "num",
+                "color": "#f6f4f4"
+            },
+            {
+                "value": "1",
+                "valueType": "num",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 440,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "a11320e615ab1dc7",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "LOAD BANK3",
+        "group": "694524e4e14fe2fb",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "label": "LOAD BANK2",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "0",
+                "valueType": "num",
+                "color": "#f8f7f7"
+            },
+            {
+                "value": "1",
+                "valueType": "num",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 440,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "10142d9d3cc8d80a",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "btn_mains_input",
+        "mode": "link",
+        "links": [
+            "0dcca1ca9bdc21cd"
+        ],
+        "x": 305,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "3e33c2322f370e73",
+        "type": "ui-button-group",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "group": "25b4840ae2beec11",
+        "order": 2,
+        "width": 3,
+        "height": 1,
+        "label": "LOAD BANK1 ",
+        "className": "",
+        "rounded": true,
+        "useThemeColors": true,
+        "passthru": false,
+        "options": [
+            {
+                "label": "OFF",
+                "icon": "lightbulb-off",
+                "value": "0",
+                "valueType": "num",
+                "color": "#009933"
+            },
+            {
+                "label": "ON",
+                "icon": "lightbulb-on",
+                "value": "1",
+                "valueType": "num",
+                "color": "#999999"
+            }
+        ],
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 120,
+        "y": 600,
+        "wires": [
+            [
+                "935e37cdfae7fe48",
+                "1671e19a5e66f655"
+            ]
+        ]
+    },
+    {
+        "id": "935e37cdfae7fe48",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "btn_load_bank_1",
+        "mode": "link",
+        "links": [
+            "5e4b35fd3cd43ff4"
+        ],
+        "x": 295,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "220c6b044f93e1df",
+        "type": "ui-button-group",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "group": "25b4840ae2beec11",
+        "order": 3,
+        "width": 3,
+        "height": 1,
+        "label": "LOAD BANK2",
+        "className": "",
+        "rounded": true,
+        "useThemeColors": true,
+        "passthru": false,
+        "options": [
+            {
+                "label": "OFF",
+                "icon": "lightbulb-off",
+                "value": "0",
+                "valueType": "num",
+                "color": "#009933"
+            },
+            {
+                "label": "ON",
+                "icon": "lightbulb-on",
+                "value": "1",
+                "valueType": "num",
+                "color": "#999999"
+            }
+        ],
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 120,
+        "y": 660,
+        "wires": [
+            [
+                "aa2f0b5d403b73be",
+                "b6030f1b24bcd31e"
+            ]
+        ]
+    },
+    {
+        "id": "aa2f0b5d403b73be",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "btn_load_bank_2",
+        "mode": "link",
+        "links": [],
+        "x": 295,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "18530d0796d78a16",
+        "type": "ui-button-group",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "group": "25b4840ae2beec11",
+        "order": 4,
+        "width": 3,
+        "height": 1,
+        "label": "LOAD BANK3",
+        "className": "",
+        "rounded": true,
+        "useThemeColors": true,
+        "passthru": false,
+        "options": [
+            {
+                "label": "OFF",
+                "icon": "lightbulb-off",
+                "value": "0",
+                "valueType": "num",
+                "color": "#009933"
+            },
+            {
+                "label": "ON",
+                "icon": "lightbulb-on",
+                "value": "1",
+                "valueType": "num",
+                "color": "#999999"
+            }
+        ],
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 120,
+        "y": 720,
+        "wires": [
+            [
+                "27f54e557290e626",
+                "a11320e615ab1dc7"
+            ]
+        ]
+    },
+    {
+        "id": "952c3c97dde96b1c",
+        "type": "ui-button-group",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "group": "25b4840ae2beec11",
+        "order": 5,
+        "width": 3,
+        "height": 1,
+        "label": "ALARM",
+        "className": "",
+        "rounded": true,
+        "useThemeColors": true,
+        "passthru": false,
+        "options": [
+            {
+                "label": "OFF",
+                "icon": "lightbulb-off",
+                "value": "0",
+                "valueType": "num",
+                "color": "#009933"
+            },
+            {
+                "label": "ON",
+                "icon": "lightbulb-on",
+                "value": "1",
+                "valueType": "num",
+                "color": "#999999"
+            }
+        ],
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 100,
+        "y": 780,
+        "wires": [
+            [
+                "706e406ae479f458",
+                "2a2bc9032f6f372f"
+            ]
+        ]
+    },
+    {
+        "id": "27f54e557290e626",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "btn_load_bank_3",
+        "mode": "link",
+        "links": [
+            "8b72759a15471fc6"
+        ],
+        "x": 295,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "706e406ae479f458",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "btn_alarm",
+        "mode": "link",
+        "links": [
+            "354c6544dce4f77e"
+        ],
+        "x": 285,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "2a2bc9032f6f372f",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "UPDATE",
+        "group": "694524e4e14fe2fb",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "label": "UPDATE",
+        "labelPlacement": "left",
+        "labelAlignment": "flex-start",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 420,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "d595d70dd04b6987",
+        "type": "modbus-response",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "registerShowMax": "1",
+        "x": 490,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "aef111f737a8e51c",
+        "type": "link in",
+        "z": "f63587bd397db4fd",
+        "name": "SERVER_WRITE",
+        "links": [
+            "0408a72eb20db0cb"
+        ],
+        "x": 55,
+        "y": 40,
+        "wires": [
+            [
+                "67996d9083641303"
+            ]
+        ]
+    },
+    {
+        "id": "6a79a8f65826fe3a",
+        "type": "debug",
+        "z": "f63587bd397db4fd",
+        "name": "FC05",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 450,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "67996d9083641303",
+        "type": "modbus-flex-write",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "server": "1b9a4f1511420284",
+        "emptyMsgOnFail": true,
+        "keepMsgProperties": true,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 210,
+        "y": 40,
+        "wires": [
+            [
+                "6a79a8f65826fe3a"
+            ],
+            [
+                "d595d70dd04b6987"
+            ]
+        ]
+    },
+    {
+        "id": "80b7719cb64dbb32",
+        "type": "inject",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 200,
+        "wires": [
+            [
+                "99810ef8bbae2895"
+            ]
+        ]
+    },
+    {
+        "id": "99810ef8bbae2895",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "read Inputs",
+        "func": "var id =1;\nvar fc = 2;\nvar sa = 0;\nvar addresses = 4;\nvar slave_ip = msg.payload.slave_ip;\nmsg.slave_ip = \"192.168.0.160\";\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': sa, 'quantity': addresses };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 200,
+        "wires": [
+            [
+                "9ab013d7457d0829"
+            ]
+        ]
+    },
+    {
+        "id": "189ce58c39021a24",
+        "type": "modbus-response",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "registerShowMax": "38",
+        "x": 890,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "9ab013d7457d0829",
+        "type": "modbus-flex-getter",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "logIOActivities": false,
+        "server": "684c0f89cf9c160f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": true,
+        "keepMsgProperties": true,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 610,
+        "y": 200,
+        "wires": [
+            [
+                "843edce64ff657ef",
+                "2257c2f003378a36"
+            ],
+            [
+                "189ce58c39021a24"
+            ]
+        ]
+    },
+    {
+        "id": "843edce64ff657ef",
+        "type": "debug",
+        "z": "f63587bd397db4fd",
+        "name": "FC02",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "2257c2f003378a36",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "FC02_OUT",
+        "mode": "link",
+        "links": [
+            "5a1b8ba847967e01"
+        ],
+        "x": 805,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "5a1b8ba847967e01",
+        "type": "link in",
+        "z": "f63587bd397db4fd",
+        "name": "link in 6",
+        "links": [
+            "2257c2f003378a36"
+        ],
+        "x": 25,
+        "y": 900,
+        "wires": [
+            [
+                "53211e885def2e77"
+            ]
+        ]
+    },
+    {
+        "id": "8fbbdefac7b9d763",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "read power",
+        "func": "var id =1;\nvar fc = 3;\nvar sa = 0;\nvar addresses = 21;\nvar slave_ip = msg.payload.slave_ip;\nmsg.slave_ip = \"192.168.0.172\";\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': sa, 'quantity': addresses };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 340,
+        "wires": [
+            [
+                "b6583eb8e0b74433"
+            ]
+        ]
+    },
+    {
+        "id": "975f5a25aa9a015a",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "parse_modbus_message",
+        "func": "// Input data (replace with msg.payload or modify accordingly)\nconst inputArray = msg.payload; // Assume payload is the array you provided.\n\n// Initialize parsing index\nlet index = 0;\n\n// Helper function to convert two 16-bit registers into a float\nfunction parseFloat16(high, low) {\n    const intBits = (high << 16) | low;\n    return new Float32Array(new Uint32Array([intBits]).buffer)[0];\n}\n\n// Helper function to parse 64-bit integers from four 16-bit registers\nfunction parseInt64(highHigh, highLow, lowHigh, lowLow) {\n    const high = (highHigh << 16) | highLow;\n    const low = (lowHigh << 16) | lowLow;\n    return (BigInt(high) << 32n) | BigInt(low);  // Convert to BigInt to handle 64-bit values\n}\n\n// Parse NamePlate information\nconst parsedData = {};\n\nparsedData.id = inputArray[index++];\nparsedData.type = inputArray[index++];\n\n\n// Parse Voltage, Current, Power, Energy, Frequency, Power Factor, Alarm Status\nparsedData.voltage = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.current = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.power = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.energy = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.frequency = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.powerFactor = parseFloat16(inputArray[index++], inputArray[index++]);\nparsedData.isValid=Boolean(inputArray[index++]);\nparsedData.voltage_cf=inputArray[index++];\nparsedData.current_cf=inputArray[index++];\nparsedData.power_cf=inputArray[index++];\nparsedData.energy_cf=inputArray[index++];\nparsedData.pf_cf=inputArray[index++];\nparsedData.frq_cf=inputArray[index++];\n\n\n\n// Output parsed data\nmsg.payload = parsedData;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 320,
+        "wires": [
+            [
+                "545ec6cdd6a71676"
+            ]
+        ]
+    },
+    {
+        "id": "b6583eb8e0b74433",
+        "type": "modbus-flex-getter",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "logIOActivities": false,
+        "server": "1b9a4f1511420284",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": true,
+        "keepMsgProperties": true,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 490,
+        "y": 360,
+        "wires": [
+            [
+                "975f5a25aa9a015a"
+            ],
+            [
+                "17ef72ab38e44a76"
+            ]
+        ]
+    },
+    {
+        "id": "545ec6cdd6a71676",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "parse_modbus",
+        "mode": "link",
+        "links": [
+            "92d189154b131b50"
+        ],
+        "x": 945,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "12ec7556a30ca129",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "read power",
+        "func": "var id =2;\nvar fc = 3;\nvar sa = 0;\nvar addresses = 21;\nvar slave_ip = msg.payload.slave_ip;\nmsg.slave_ip = \"192.168.0.172\";\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': sa, 'quantity': addresses };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 420,
+        "wires": [
+            [
+                "b6583eb8e0b74433"
+            ]
+        ]
+    },
+    {
+        "id": "17ef72ab38e44a76",
+        "type": "modbus-response",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "registerShowMax": "38",
+        "x": 730,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "2823986f2377d87c",
+        "type": "inject",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 380,
+        "wires": [
+            [
+                "8fbbdefac7b9d763",
+                "12ec7556a30ca129"
+            ]
+        ]
+    },
+    {
+        "id": "92d189154b131b50",
+        "type": "link in",
+        "z": "f63587bd397db4fd",
+        "name": "link in 5",
+        "links": [
+            "545ec6cdd6a71676"
+        ],
+        "x": 55,
+        "y": 1280,
+        "wires": [
+            [
+                "28b711217778c7ce"
+            ]
+        ]
+    },
+    {
+        "id": "28b711217778c7ce",
+        "type": "switch",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "property": "payload.id",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "39",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "43",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 170,
+        "y": 1280,
+        "wires": [
+            [
+                "f54c34302e14930e"
+            ],
+            [
+                "eb01d8a547251e62"
+            ]
+        ]
+    },
+    {
+        "id": "f54c34302e14930e",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "INPUT_POWER",
+        "func": "const parsedData = msg.payload;\n\n// Set global variables for input power data\nglobal.set('input_voltage', Math.round(parsedData.voltage * 1000) / 1000);\nglobal.set('input_current', Math.round(parsedData.current * 1000) / 1000);\nglobal.set('input_power', Math.round(parsedData.power * 1000) / 1000);\nglobal.set('input_energy', Math.round(parsedData.energy * 1000) / 1000); // Assuming energy was omitted in the global list earlier\nglobal.set('input_frequency', Math.round(parsedData.frequency * 1000) / 1000);\nglobal.set('input_pf', Math.round(parsedData.powerFactor * 1000) / 1000);\n\n// Prepare outputs\nconst outputs = [\n    { payload: parsedData.id },\n    { payload: parsedData.type },\n    { payload: global.get('input_voltage') },\n    { payload: global.get('input_current') },\n    { payload: global.get('input_power') },\n    { payload: global.get('input_energy') },\n    { payload: global.get('input_frequency') },\n    { payload: global.get('input_pf') },\n    { payload: parsedData.isValid },\n    { payload: parsedData.voltage_cf },\n    { payload: parsedData.current_cf },\n    { payload: parsedData.power_cf },\n    { payload: parsedData.energy_cf },\n    { payload: parsedData.pf_cf },\n    { payload: parsedData.frq_cf },\n];\n\nreturn outputs;\n",
+        "outputs": 15,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 1160,
+        "wires": [
+            [],
+            [],
+            [
+                "e78900a38f0465c4"
+            ],
+            [
+                "b47f785ea5775e47"
+            ],
+            [
+                "b126125a7e1d030d"
+            ],
+            [],
+            [
+                "f6ef5ed7574a4b81"
+            ],
+            [
+                "48ee54f35f52d3bc"
+            ],
+            [],
+            [
+                "99bfe34bc8c82356"
+            ],
+            [
+                "5759539c31815e27"
+            ],
+            [],
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "eb01d8a547251e62",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "OUTPUT_POWER",
+        "func": "const parsedData=msg.payload;\nglobal.set('output_voltage', Math.round(parsedData.output_voltage * 1000) / 1000);\nglobal.set('output_current', Math.round(parsedData.output_current * 1000) / 1000);\nglobal.set('output_power', Math.round(parsedData.output_power * 1000) / 1000);\nglobal.set('output_energy', Math.round(parsedData.output_energy * 1000) / 1000); // Assuming energy is part of output\nglobal.set('output_frequency', Math.round(parsedData.output_frequency * 1000) / 1000);\nglobal.set('output_pf', Math.round(parsedData.output_pf * 1000) / 1000);\nconst outputs = [\n    { payload: parsedData.id  },\n    { payload: parsedData.type  },\n    { payload: global.get('output_voltage') },\n    { payload: global.get('output_current') },\n    { payload: global.get('output_power') },\n    { payload: global.get('output_energy') },\n    { payload: global.get('output_frequency') },\n    { payload: global.get('output_pf') },\n    { payload:  parsedData.isValid  },\n    { payload:  parsedData.voltage_cf  },\n    { payload:  parsedData.current_cf  },\n    { payload: parsedData.power_cf },\n    { payload:  parsedData.energy_cf  },\n    { payload:parsedData.pf_cf  },\n    { payload:  parsedData.frq_cf  },\n];\nreturn outputs;",
+        "outputs": 15,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 1400,
+        "wires": [
+            [],
+            [],
+            [
+                "9ce928176da5efa4"
+            ],
+            [
+                "e43c7bc16b7a9c0d"
+            ],
+            [
+                "a02c8bc3158b88c4"
+            ],
+            [],
+            [
+                "91186b8eb51b1047"
+            ],
+            [
+                "577df906386ed8df"
+            ],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "e78900a38f0465c4",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "voltage",
+        "group": "965c3c29c8a0702d",
+        "order": 1,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Input Voltage",
+        "units": "volt",
+        "icon": "flash-triangle",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "180",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "245",
+                "color": "#1edc67"
+            },
+            {
+                "from": "231",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "300",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 600,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "b47f785ea5775e47",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "current",
+        "group": "965c3c29c8a0702d",
+        "order": 2,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Input Current",
+        "units": "amp",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "1",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "28",
+                "color": "#1edc67"
+            },
+            {
+                "from": "30",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "30",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 600,
+        "y": 1080,
+        "wires": []
+    },
+    {
+        "id": "b126125a7e1d030d",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "power",
+        "group": "965c3c29c8a0702d",
+        "order": 3,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-34",
+        "gstyle": "needle",
+        "title": "Input Power",
+        "units": "watt",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "1000",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "2800",
+                "color": "#1edc67"
+            },
+            {
+                "from": "4000",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "5000",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 590,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "f6ef5ed7574a4b81",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "frequency",
+        "group": "965c3c29c8a0702d",
+        "order": 4,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-34",
+        "gstyle": "needle",
+        "title": "Input Frequency",
+        "units": "Hz",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "40",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "50",
+                "color": "#1edc67"
+            },
+            {
+                "from": "60",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "60",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 600,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "48ee54f35f52d3bc",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "pf",
+        "group": "965c3c29c8a0702d",
+        "order": 5,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-34",
+        "gstyle": "needle",
+        "title": "Input PowerFactor",
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "0.8",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "0.9",
+                "color": "#1edc67"
+            },
+            {
+                "from": "1",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "1",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 590,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "99bfe34bc8c82356",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "v_cf",
+        "mode": "link",
+        "links": [
+            "5b96693662133869"
+        ],
+        "x": 735,
+        "y": 1240,
+        "wires": []
+    },
+    {
+        "id": "5759539c31815e27",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "c_cf",
+        "mode": "link",
+        "links": [
+            "13005baaeec5db7e"
+        ],
+        "x": 735,
+        "y": 1280,
+        "wires": []
+    },
+    {
+        "id": "9ce928176da5efa4",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "voltage",
+        "group": "defddbc9224eb150",
+        "order": 1,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Output Voltage",
+        "units": "volt",
+        "icon": "flash-triangle",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "180",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "245",
+                "color": "#1edc67"
+            },
+            {
+                "from": "231",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "300",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 600,
+        "y": 1320,
+        "wires": []
+    },
+    {
+        "id": "e43c7bc16b7a9c0d",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "current",
+        "group": "defddbc9224eb150",
+        "order": 2,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Output Current",
+        "units": "amp",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "1",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "28",
+                "color": "#1edc67"
+            },
+            {
+                "from": "30",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "30",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 600,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "a02c8bc3158b88c4",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "power",
+        "group": "defddbc9224eb150",
+        "order": 3,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-34",
+        "gstyle": "needle",
+        "title": "Output Power",
+        "units": "watt",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "1000",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "2800",
+                "color": "#1edc67"
+            },
+            {
+                "from": "4000",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "5000",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 590,
+        "y": 1400,
+        "wires": []
+    },
+    {
+        "id": "91186b8eb51b1047",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "frequency",
+        "group": "defddbc9224eb150",
+        "order": 4,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-34",
+        "gstyle": "needle",
+        "title": "Output Frequency",
+        "units": "Hz",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "40",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "50",
+                "color": "#1edc67"
+            },
+            {
+                "from": "60",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "60",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 600,
+        "y": 1440,
+        "wires": []
+    },
+    {
+        "id": "577df906386ed8df",
+        "type": "ui-gauge",
+        "z": "f63587bd397db4fd",
+        "name": "pf",
+        "group": "defddbc9224eb150",
+        "order": 5,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-34",
+        "gstyle": "needle",
+        "title": "Output PowerFactor",
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#d65cd2"
+            },
+            {
+                "from": "0.8",
+                "color": "#48cd2d"
+            },
+            {
+                "from": "0.9",
+                "color": "#1edc67"
+            },
+            {
+                "from": "1",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "1",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 590,
+        "y": 1480,
+        "wires": []
+    },
+    {
+        "id": "c9275b65a66fa577",
+        "type": "link out",
+        "z": "f63587bd397db4fd",
+        "name": "link out 9",
+        "mode": "link",
+        "links": [
+            "512d3cfd1e4b238d"
+        ],
+        "x": 615,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "99bb121fd4486c8f",
+        "type": "function",
+        "z": "f63587bd397db4fd",
+        "name": "boolean to value",
+        "func": "msg.payload = msg.payload === true ? 1 : 0;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 840,
+        "wires": [
+            [
+                "c9275b65a66fa577"
+            ]
+        ]
+    },
+    {
+        "id": "0282c4d64488b8ca",
+        "type": "ui-group",
+        "name": "CALIBRATION",
+        "page": "e09b1870023f93f6",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "25b4840ae2beec11",
+        "type": "ui-group",
+        "name": "COMMANDS",
+        "page": "8ac92c3234460b73",
+        "width": 4,
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "ac18f679c10f1fd0",
+        "type": "ui-group",
+        "name": "UPS_STATUS",
+        "page": "7d0f53039d1540b1",
+        "width": 3,
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "694524e4e14fe2fb",
+        "type": "ui-group",
+        "name": "STATUS",
+        "page": "8ac92c3234460b73",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "1b9a4f1511420284",
+        "type": "modbus-client",
+        "name": "PZEM_172",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "192.168.0.172",
+        "tcpPort": "502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "2000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "684c0f89cf9c160f",
+        "type": "modbus-client",
+        "name": "INPUT_SERVER_160",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "192.168.0.160",
+        "tcpPort": "502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "2000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "965c3c29c8a0702d",
+        "type": "ui-group",
+        "name": "INPUT_POWER",
+        "page": "8ac92c3234460b73",
+        "width": "6",
+        "height": "1",
+        "order": 4,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "defddbc9224eb150",
+        "type": "ui-group",
+        "name": "OUTPUT_POWER",
+        "page": "8ac92c3234460b73",
+        "width": "6",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "e09b1870023f93f6",
+        "type": "ui-page",
+        "name": "CALIBRATION",
+        "ui": "6bb6879aa70631ea",
+        "path": "/calibration",
+        "icon": "knob",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 3,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "8ac92c3234460b73",
+        "type": "ui-page",
+        "name": "LIVE VIEW",
+        "ui": "6bb6879aa70631ea",
+        "path": "/home",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "7d0f53039d1540b1",
+        "type": "ui-page",
+        "name": "BACKUP_TEST",
+        "ui": "6bb6879aa70631ea",
+        "path": "/backup_test",
+        "icon": "battery-clock",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
+    },
+    {
+        "id": "f51f9a07212ff54b",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#d1479f",
+            "primary": "#0094ce",
+            "bgPage": "#ededed",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    }
+]

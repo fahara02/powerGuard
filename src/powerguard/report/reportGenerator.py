@@ -1,22 +1,22 @@
 import os
+import pprint
+import shutil
 import sqlite3
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
-from lxml import etree
-from docxtpl import DocxTemplate
-from docx import Document
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from zipfile import ZipFile
-import shutil
 
-import pprint
-
-
-from collections import defaultdict
-from typing import List, Dict, Any
+import xmlschema
+from docx import Document
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
+from docxtpl import DocxTemplate
+from lxml import etree
 from pydantic import BaseModel, Field, field_validator
 
 from powerguard.bootstrap import paths
@@ -30,20 +30,20 @@ class ReportGenerator(BaseModel):
 
     data_manager: DataManager
     template_path: Path = Field(default="Report_Template.docx")
-    xml_schema_file: str = Field(default="general_schema")
+    schema_path: Path = Field(default="schema.xsd")
     output_path: Path = Field(default=paths.get("output_dir"))
+    xml_schema_file: str = Field(default="general_schema")
 
     @field_validator("template_path")
     def validate_template_path(cls, value: Path) -> Path:
         """
         Ensure the template path exists and is a file.
         """
-        # Get the template directory from paths
+
         template_folder = paths.get("template_dir")
-        # Make sure the folder exists, create it if it doesn't
+
         template_folder.mkdir(parents=True, exist_ok=True)
 
-        # If no template_path was provided, set it to the default in the template folder
         if not value:
             value = template_folder / "Report_Template.docx"
 
@@ -56,6 +56,28 @@ class ReportGenerator(BaseModel):
 
         return full_template_path
 
+    @field_validator("schema_path")
+    def validate_schema_path(cls, value: Path) -> Path:
+        """
+        Ensure the schema path exists and is a file.
+        """
+
+        template_folder = paths.get("template_dir")
+
+        template_folder.mkdir(parents=True, exist_ok=True)
+
+        if not value:
+            value = template_folder / "schema.xsd"
+
+        # Full path to the template file
+        full_schema_path = template_folder / value
+
+        # Validate if the template file exists and is a file
+        if not full_schema_path.exists() or not full_schema_path.is_file():
+            raise ValueError(f"Template file not found: {full_schema_path}")
+
+        return full_schema_path
+
     @field_validator("output_path")
     def validate_output_path(cls, value: Path) -> Path:
         """
@@ -66,10 +88,8 @@ class ReportGenerator(BaseModel):
 
         output_folder.mkdir(parents=True, exist_ok=True)
 
-        # Full path to the template file
         full_output_folder = output_folder
 
-        # Validate if the template file exists and is a file
         if not full_output_folder.exists() or not full_output_folder.is_dir():
             raise ValueError(f"Output Folder not found: {full_output_folder}")
 
@@ -192,28 +212,25 @@ class ReportGenerator(BaseModel):
     #     self, report_data: list[dict], file_name: str, flatten: bool = True
     # ) -> Path:
     #     """
-    #     Generate an XML file from the report data, flattening nested dictionaries.
+    #     Generate an XML file from the report data, with optional flattening.
 
     #     Args:
     #         report_data (list[dict]): A list of rows fetched from the database.
     #         file_name (str): The name of the output XML file.
+    #         flatten (bool): Whether to flatten nested dictionaries (default: True).
 
     #     Returns:
     #         Path: The path to the saved XML file.
     #     """
 
     #     def flatten_dict(data, parent_key="", sep="_"):
-    #         """
-    #         Recursively flatten a nested dictionary.
-    #         """
+    #         """Recursively flatten a nested dictionary."""
     #         items = []
     #         for k, v in data.items():
     #             new_key = f"{parent_key}{sep}{k}" if parent_key else k
     #             if isinstance(v, dict):
-    #                 # Recursively flatten dictionaries
     #                 items.extend(flatten_dict(v, new_key, sep=sep).items())
     #             elif isinstance(v, list):
-    #                 # Handle lists by indexing items
     #                 for i, item in enumerate(v):
     #                     indexed_key = f"{new_key}{sep}{i}"
     #                     if isinstance(item, dict):
@@ -223,31 +240,40 @@ class ReportGenerator(BaseModel):
     #                     else:
     #                         items.append((indexed_key, item))
     #             else:
-    #                 # Add simple key-value pairs
     #                 items.append((new_key, v))
     #         return dict(items)
 
+    #     def create_nested_xml(element, data):
+    #         """Recursively create XML elements for nested structures."""
+    #         if isinstance(data, dict):
+    #             for key, value in data.items():
+    #                 child = ET.SubElement(element, key)
+    #                 create_nested_xml(child, value)
+    #         elif isinstance(data, list):
+    #             for item in data:
+    #                 item_element = ET.SubElement(element, "Item")
+    #                 create_nested_xml(item_element, item)
+    #         else:
+    #             element.text = str(data) if data is not None else ""
+
     #     # Step 1: Aggregate report data into a single dictionary
-
     #     aggregated_data = self.aggregate_report_data(report_data)
-    #     pprint.pprint(f"context data dictionary is { aggregated_data }")
+    #     pprint.pprint(f"context data dictionary is {aggregated_data}")
 
-    #     # Step 2: Flatten the report data, including nested dictionaries and lists
-    #     flattened_data = flatten_dict(aggregated_data)
-    #     if flatten:
-    #         xml_data = flattened_data
-    #     else:
-    #         xml_data = aggregated_data
+    #     # Step 2: Flatten or preserve nested structure based on the flag
+    #     xml_data = flatten_dict(aggregated_data) if flatten else aggregated_data
+
     #     # Step 3: Create XML structure
     #     root = ET.Element("TestReport")
-    #     for key, value in xml_data.items():
-    #         child = ET.SubElement(root, key)
-    #         # Convert non-string values to strings
-    #         child.text = str(value) if value is not None else ""
+    #     if flatten:
+    #         for key, value in xml_data.items():
+    #             child = ET.SubElement(root, key)
+    #             child.text = str(value) if value is not None else ""
+    #     else:
+    #         create_nested_xml(root, xml_data)
 
     #     # Step 4: Construct full XML file path in the output directory
     #     xml_path = self.output_path / file_name
-    #     # Ensure the parent directory exists
     #     xml_path.parent.mkdir(parents=True, exist_ok=True)
 
     #     # Step 5: Check if the file exists and confirm overwrite
@@ -259,9 +285,7 @@ class ReportGenerator(BaseModel):
     #     tree.write(xml_path, encoding="utf-8", xml_declaration=True)
     #     print(f"XML generated and saved to {xml_path}")
     #     return xml_path
-    def create_xml_from_report(
-        self, report_data: list[dict], file_name: str, flatten: bool = True
-    ) -> Path:
+    def create_xml_from_report(self, report_data: list[dict], file_name: str, flatten: bool = True) -> Path:
         """
         Generate an XML file from the report data, with optional flattening.
 
@@ -272,6 +296,10 @@ class ReportGenerator(BaseModel):
 
         Returns:
             Path: The path to the saved XML file.
+
+        Raises:
+            ValueError: If `report_data` is not a list of dictionaries or `file_name` is not a string.
+            IOError: If unable to write the XML file to disk.
         """
 
         def flatten_dict(data, parent_key="", sep="_"):
@@ -285,9 +313,7 @@ class ReportGenerator(BaseModel):
                     for i, item in enumerate(v):
                         indexed_key = f"{new_key}{sep}{i}"
                         if isinstance(item, dict):
-                            items.extend(
-                                flatten_dict(item, indexed_key, sep=sep).items()
-                            )
+                            items.extend(flatten_dict(item, indexed_key, sep=sep).items())
                         else:
                             items.append((indexed_key, item))
                 else:
@@ -296,20 +322,30 @@ class ReportGenerator(BaseModel):
 
         def create_nested_xml(element, data):
             """Recursively create XML elements for nested structures."""
+            # Check if the parent element is 'measurements' or 'power_measures' to determine the tag name
+            parent_tag = element.tag
             if isinstance(data, dict):
                 for key, value in data.items():
-                    child = ET.SubElement(element, key)
+                    child_tag = "measurement" if parent_tag == "measurements" else "power_measure" if parent_tag == "power_measures" else key
+                    child = ET.SubElement(element, child_tag)
                     create_nested_xml(child, value)
             elif isinstance(data, list):
                 for item in data:
-                    item_element = ET.SubElement(element, "Item")
+                    item_element_tag = "measurement" if parent_tag == "measurements" else "power_measure" if parent_tag == "power_measures" else "Item"
+                    item_element = ET.SubElement(element, item_element_tag)
                     create_nested_xml(item_element, item)
             else:
                 element.text = str(data) if data is not None else ""
 
+        # Validate input types
+        if not isinstance(report_data, list) or not all(isinstance(row, dict) for row in report_data):
+            raise ValueError("report_data must be a list of dictionaries.")
+        if not isinstance(file_name, str):
+            raise ValueError("file_name must be a string.")
+
         # Step 1: Aggregate report data into a single dictionary
         aggregated_data = self.aggregate_report_data(report_data)
-        pprint.pprint(f"context data dictionary is {aggregated_data}")
+       # pprint.pprint(f"Aggregated data: {aggregated_data}")
 
         # Step 2: Flatten or preserve nested structure based on the flag
         xml_data = flatten_dict(aggregated_data) if flatten else aggregated_data
@@ -331,14 +367,44 @@ class ReportGenerator(BaseModel):
         if xml_path.exists():
             print(f"XML file already exists at {xml_path}. Overwriting.")
 
-        # Write XML to file
-        tree = ET.ElementTree(root)
-        tree.write(xml_path, encoding="utf-8", xml_declaration=True)
-        print(f"XML generated and saved to {xml_path}")
-        return xml_path
+        try:
+            # Write XML to file
+            tree = ET.ElementTree(root)
+            tree.write(xml_path, encoding="utf-8", xml_declaration=True)
+            print(f"XML generated and saved to {xml_path}")
+        except Exception as e:
+            raise IOError(f"Failed to write XML file: {e}")
 
+        return xml_path
+    def parse_schema(self):
+        """
+        Parse the XSD schema to extract elements with hierarchy.
+        """
+        full_schema_path=self.validate_schema_path(self.schema_path)
+        tree = etree.parse(full_schema_path)
+        ns = {"xs": "http://www.w3.org/2001/XMLSchema"}
+        elements = []
+
+        def extract_elements(parent, depth=1):
+            for element in parent.xpath("./xs:element", namespaces=ns):
+                name = element.get("name")
+                if name:
+                    elements.append((name, depth))
+                complex_type = element.find("./xs:complexType", namespaces=ns)
+                if complex_type:
+                    sequence = complex_type.find("./xs:sequence", namespaces=ns)
+                    if sequence is not None:
+                        extract_elements(sequence, depth + 1)
+
+        extract_elements(tree.getroot())
+        return elements
+    
     def generate_report(
-        self, report_id: int, use_cpp: bool = False, use_xml: bool = False, use_flatten:bool=True
+        self,
+        report_id: int,
+        use_cpp: bool = False,
+        use_xml: bool = False,
+        use_flatten: bool = True,
     ) -> Path:
         """
         Generates a test report from aggregated data and saves it as a Word document.
@@ -350,7 +416,7 @@ class ReportGenerator(BaseModel):
         Returns:
             Path: Path to the generated Word report.
         """
-
+        
         rows = self.data_manager.get_test_report(report_id)
 
         if not rows:
@@ -367,22 +433,38 @@ class ReportGenerator(BaseModel):
             self.call_cpp_for_processing(xml_path)
 
         self.output_path.mkdir(parents=True, exist_ok=True)
+        template_full_path=self.validate_template_path(self.template_path)
 
         base_file_name = self.generate_file_name(aggregated_data)
 
         output_file_path = self.output_path / f"{base_file_name}.docx"
-
-        if use_xml:
-            self.edit_word_document(output_file_path, xml_path)
-        else:
-            template = DocxTemplate(self.template_path)
-            template.render(aggregated_data)
-            if output_file_path.exists():
+        if output_file_path.exists():
                 print(f"Updating existing report: {output_file_path}")
-            else:
+
+                if use_xml:
+                   
+                    if use_flatten:
+                     self.fill_word_with_flatten_xml_data(output_file_path, xml_path)
+                    else: 
+                     self.fill_word_with_nested_xml_data(output_file_path,template_full_path, xml_path)
+                else:
+                    template = DocxTemplate(self.template_path)
+                    template.render(aggregated_data)      
+                    template.save(output_file_path)
+        else:
                 print(f"Creating new report: {output_file_path}")
 
-            template.save(output_file_path)
+                if use_xml:
+                    doc=Document()
+                    doc.save(output_file_path)
+                    if use_flatten:
+                     self.fill_word_with_flatten_xml_data(output_file_path, xml_path)
+                    else: 
+                     self.fill_word_with_nested_xml_data(output_file_path,template_full_path, xml_path)
+                else:
+                    template = DocxTemplate(self.template_path)
+                    template.render(aggregated_data)      
+                    template.save(output_file_path)
         return output_file_path
 
     def sanitize_xml_file(self, xml_path):
@@ -410,7 +492,7 @@ class ReportGenerator(BaseModel):
         subprocess.run([str(cpp_executable), str(xml_path)], check=True)
         print("C++ processing completed.")
 
-    def edit_word_document(self, output_path: Path, xml_path: Path):
+    def fill_word_with_flatten_xml_data(self, output_path: Path, xml_path: Path):
         """
         Edit a Word document with content controls based on the XML data.
         """
@@ -462,6 +544,101 @@ class ReportGenerator(BaseModel):
                 )
 
         print(f"Word document updated and saved to {output_path}")
+    
+   
+
+    def fill_word_with_nested_xml_data(self, output_path: Path, template_path: Path, xml_path: Path):
+     
+        """
+        Fills a Word document template with data from a nested XML file using content controls.
+
+        :param xml_path: Path to the XML file with the data.
+        """
+        # Parse the XML data
+        xml_tree = etree.parse(str(xml_path))
+        xml_root = xml_tree.getroot()
+        namespace = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+
+        # Open the Word document as a zip file
+        with ZipFile(template_path, "r") as docx:
+            # Extract the XML for the main document
+            document_xml = docx.read("word/document.xml")
+        doc_tree = etree.fromstring(document_xml)
+
+        # Find all content controls in the document
+        content_controls = doc_tree.xpath("//w:sdt", namespaces=namespace)
+
+        # Map XML data to Word content controls
+        for control in content_controls:
+            tag_element = control.find(".//w:tag", namespaces=namespace)
+            value_element = control.find(".//w:t", namespaces=namespace)
+            if tag_element is not None:
+                tag_name = tag_element.get(f"{{{namespace['w']}}}val")
+                if tag_name == "measurements":
+                    self.process_repeated_measurements(control, xml_root, namespace)
+                elif tag_name.startswith("power_measure"):
+                    self.process_power_measures(control, xml_root, namespace)
+
+        # Write the updated XML back to the Word document
+        with ZipFile(template_path, "r") as docx:
+            with ZipFile(output_path, "w") as new_docx:
+                for file in docx.filelist:
+                    if file.filename != "word/document.xml":
+                        new_docx.writestr(file.filename, docx.read(file.filename))
+                new_docx.writestr(
+                    "word/document.xml",
+                    etree.tostring(doc_tree, pretty_print=True, xml_declaration=True, encoding="UTF-8"),
+                )
+
+    def process_repeated_measurements(self, control, xml_root, namespace):
+        """
+        Handle repeated measurements and populate them dynamically in the Word document.
+        :param control: The content control to clone and fill.
+        :param xml_root: The root of the XML tree.
+        :param namespace: Namespace for WordprocessingML elements.
+        """
+        measurements = xml_root.findall("measurements/Measurement")
+        if not measurements:
+            return
+
+        parent = control.getparent()
+        for measurement in measurements:
+            # Clone the control for each measurement
+            new_control = etree.Element(control.tag, attrib=control.attrib)
+            for key, value in measurement.attrib.items():
+                field_tag = f".//w:tag[@w:val='{key}']"
+                tag = new_control.find(field_tag, namespaces=namespace)
+                if tag is not None:
+                    text_elem = tag.getparent().find(".//w:t", namespaces=namespace)
+                    if text_elem is not None:
+                        text_elem.text = value
+            parent.append(new_control)
+        parent.remove(control)
+
+    def process_power_measures(self, control, xml_root, namespace):
+        """
+        Handle nested power measures and populate them dynamically in the Word document.
+        :param control: The content control to clone and fill.
+        :param xml_root: The root of the XML tree.
+        :param namespace: Namespace for WordprocessingML elements.
+        """
+        power_measures = xml_root.findall(".//power_measures/PowerMeasure")
+        if not power_measures:
+            return
+
+        parent = control.getparent()
+        for power_measure in power_measures:
+            new_control = etree.Element(control.tag, attrib=control.attrib)
+            for field in power_measure:
+                field_tag = f".//w:tag[@w:val='{field.tag}']"
+                tag = new_control.find(field_tag, namespaces=namespace)
+                if tag is not None:
+                    text_elem = tag.getparent().find(".//w:t", namespaces=namespace)
+                    if text_elem is not None:
+                        text_elem.text = field.text
+            parent.append(new_control)
+        parent.remove(control)
+ 
 
 
 if __name__ == "__main__":
@@ -470,7 +647,7 @@ if __name__ == "__main__":
 
     # Initialize ReportGenerator with Pydantic
     report_generator = ReportGenerator(
-        data_manager=data_manager, template_path=Path("Report_Template.docx")
+        data_manager=data_manager, template_path=Path("test_report_template.docx")
     )
 
     # Generate a report
@@ -481,4 +658,6 @@ if __name__ == "__main__":
     # print(f"Generated report: {report}")
     # print("-------------------report object----------------------")
 
-    report_generator.generate_report(report_id, use_cpp=False, use_xml=False,use_flatten=False)
+    report_generator.generate_report(
+        report_id, use_cpp=False, use_xml=True, use_flatten=False
+    )

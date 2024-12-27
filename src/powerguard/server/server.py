@@ -21,9 +21,7 @@ class ServerConfig(BaseModel):
     node_red_folder: str = Field(
         default="node-red", description="Node-RED directory path"
     )
-    flows_file_name: str = Field(
-        default="flows_modbus.json", description="Flows file name"
-    )
+    flows_folder: str = Field(default="flows", description="Flows directory path")
 
     @field_validator("host")
     def validate_host(cls, v):
@@ -44,7 +42,7 @@ class Server(BaseModel):
     config: ServerConfig  # This is the Pydantic model containing configuration
     data_manager: DataManager  # Expecting a DataManager instance
     node_red_path: Optional[Path] = None
-    flows_file_path: Optional[Path] = None
+    flows_dir_path: Optional[Path] = None
     node_red: NodeRedServer = None
     server_socket: socket.socket = None
 
@@ -66,10 +64,10 @@ class Server(BaseModel):
         flows_dir = paths.get("flows_dir")
 
         # Set the flows file path if not provided
-        if not self.flows_file_path:
-            self.flows_file_path = flows_dir / self.config.flows_file_name
+        if not self.flows_dir_path:
+            self.flows_dir_path = flows_dir
 
-        self.node_red = NodeRedServer(self.node_red_path, self.flows_file_path)
+        self.node_red = NodeRedServer(self.node_red_path, self.flows_dir_path)
         self.install_node_red_if_needed()
 
     def is_node_red_installed(self):
@@ -160,8 +158,8 @@ if __name__ == "__main__":
     server_config = ServerConfig(
         host="0.0.0.0",
         port=12345,
-        node_red_dir="node-red",
-        flows_file="flows/flows_modbus.json",
+        node_red_folder="node-red",
+        flows_folder="flows",
     )
 
     # Now create and start the server, passing in the ServerConfig and DataManager instances

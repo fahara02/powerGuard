@@ -1,0 +1,819 @@
+[
+    {
+        "id": "6906193139893272",
+        "type": "tab",
+        "label": "GLOBAL_UPS_VARIABLES",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "e74de8334138f510",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "global variable",
+        "func": "return msg",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\nconst cmd_mains_input = 0;\nconst sense_mains_input = 0;\nconst sense_ups_output = 0;\n\nconst cmd_load1_connect = 0;\nconst cmd_load2_connect = 0;\nconst cmd_load3_connect = 0;\nconst alarm_status = 0;\nconst BackupTime = 0;\n\n// Input and output power data\nconst input_voltage = 0;\nconst input_current = 0;\nconst input_power = 0;\nconst input_pf = 0;\nconst input_frequency = 0;\n\nconst output_voltage = 0;\nconst output_current = 0;\nconst output_power = 0;\nconst output_pf = 0;\nconst output_frequency = 0;\n\n// Set global variables\nglobal.set('cmd_mains_input', cmd_mains_input);\nglobal.set('sense_mains_input', sense_mains_input);\nglobal.set('sense_ups_output', sense_ups_output);\nglobal.set('cmd_load1_connect', cmd_load1_connect);\nglobal.set('cmd_load2_connect', cmd_load2_connect);\nglobal.set('cmd_load3_connect', cmd_load3_connect);\nglobal.set('alarm_status', alarm_status);\nglobal.set('BackupTime', BackupTime);\n\n// Set global variables for input power data\nglobal.set('input_voltage', input_voltage);\nglobal.set('input_current', input_current);\nglobal.set('input_power', input_power);\nglobal.set('input_pf', input_pf);\nglobal.set('input_frequency', input_frequency);\n\n// Set global variables for output power data\nglobal.set('output_voltage', output_voltage);\nglobal.set('output_current', output_current);\nglobal.set('output_power', output_power);\nglobal.set('output_pf', output_pf);\nglobal.set('output_frequency', output_frequency);\n\n\n",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4813659990240dc1",
+        "type": "inject",
+        "z": "6906193139893272",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 40,
+        "wires": [
+            [
+                "e74de8334138f510"
+            ]
+        ]
+    },
+    {
+        "id": "09e9c95529e223b1",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_MAINS_IN",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_mains_input', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "054dad1c6f423385",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_LOAD1",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_load1_connect', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0dcca1ca9bdc21cd",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_MAINS_INPUT",
+        "links": [
+            "10142d9d3cc8d80a"
+        ],
+        "x": 45,
+        "y": 100,
+        "wires": [
+            [
+                "09e9c95529e223b1"
+            ]
+        ]
+    },
+    {
+        "id": "5e4b35fd3cd43ff4",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_LOAD1",
+        "links": [],
+        "x": 45,
+        "y": 140,
+        "wires": [
+            [
+                "054dad1c6f423385"
+            ]
+        ]
+    },
+    {
+        "id": "a4bdfff88de16c02",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_LOAD2",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_load2_connect', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1215662ccc8745ad",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_LOAD2",
+        "links": [],
+        "x": 45,
+        "y": 180,
+        "wires": [
+            [
+                "a4bdfff88de16c02"
+            ]
+        ]
+    },
+    {
+        "id": "f3583acd7152b8d1",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_LOAD3",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_load3_connect', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2ad22c35e0d0df01",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_ALARM",
+        "func": "let value = msg.payload;\n\nglobal.set('alarm_status', value);\nmsg.payload = value;\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8b72759a15471fc6",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_LOAD3",
+        "links": [],
+        "x": 45,
+        "y": 220,
+        "wires": [
+            [
+                "f3583acd7152b8d1"
+            ]
+        ]
+    },
+    {
+        "id": "354c6544dce4f77e",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_ALARM_STATUS",
+        "links": [],
+        "x": 45,
+        "y": 260,
+        "wires": [
+            [
+                "2ad22c35e0d0df01"
+            ]
+        ]
+    },
+    {
+        "id": "63854bad87fdeb31",
+        "type": "change",
+        "z": "6906193139893272",
+        "name": "mains_input",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "cmd_mains_input",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 270,
+        "y": 360,
+        "wires": [
+            [
+                "8fc7da861e181632"
+            ]
+        ]
+    },
+    {
+        "id": "08960619487ec931",
+        "type": "inject",
+        "z": "6906193139893272",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "0.1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 90,
+        "y": 560,
+        "wires": [
+            [
+                "63854bad87fdeb31",
+                "7c291ac3576beb86",
+                "35337adc544cb646",
+                "55d3ac7916c489a1",
+                "2a393f826aefd75a"
+            ]
+        ]
+    },
+    {
+        "id": "8fc7da861e181632",
+        "type": "switch",
+        "z": "6906193139893272",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "mains_input",
+                "vt": "global"
+            },
+            {
+                "t": "eq",
+                "v": "load1_status",
+                "vt": "global"
+            },
+            {
+                "t": "eq",
+                "v": "load2_status",
+                "vt": "global"
+            },
+            {
+                "t": "eq",
+                "v": "load3_status",
+                "vt": "global"
+            },
+            {
+                "t": "eq",
+                "v": "alarm_status",
+                "vt": "global"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 5,
+        "x": 470,
+        "y": 420,
+        "wires": [
+            [
+                "9169becffe20fa6a"
+            ],
+            [
+                "54cddc2b122c96ed"
+            ],
+            [
+                "f5ad525cf69b0261"
+            ],
+            [
+                "3065f9625ee200a3"
+            ],
+            [
+                "911f6ec954112ac9"
+            ]
+        ]
+    },
+    {
+        "id": "7c291ac3576beb86",
+        "type": "change",
+        "z": "6906193139893272",
+        "name": "load1_status",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "cmd_load1_connect",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 270,
+        "y": 400,
+        "wires": [
+            [
+                "8fc7da861e181632"
+            ]
+        ]
+    },
+    {
+        "id": "35337adc544cb646",
+        "type": "change",
+        "z": "6906193139893272",
+        "name": "load2_status",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "cmd_load2_connect",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 270,
+        "y": 440,
+        "wires": [
+            [
+                "8fc7da861e181632"
+            ]
+        ]
+    },
+    {
+        "id": "55d3ac7916c489a1",
+        "type": "change",
+        "z": "6906193139893272",
+        "name": "load3_status",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "cmd_load3_connect",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 270,
+        "y": 480,
+        "wires": [
+            [
+                "8fc7da861e181632"
+            ]
+        ]
+    },
+    {
+        "id": "2a393f826aefd75a",
+        "type": "change",
+        "z": "6906193139893272",
+        "name": "alarm_status",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "alarm_status",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 270,
+        "y": 520,
+        "wires": [
+            [
+                "8fc7da861e181632"
+            ]
+        ]
+    },
+    {
+        "id": "9169becffe20fa6a",
+        "type": "rbe",
+        "z": "6906193139893272",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 610,
+        "y": 280,
+        "wires": [
+            [
+                "10468a2ed19505e8"
+            ]
+        ]
+    },
+    {
+        "id": "54cddc2b122c96ed",
+        "type": "rbe",
+        "z": "6906193139893272",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 610,
+        "y": 320,
+        "wires": [
+            [
+                "2bc70b4e0652cc67"
+            ]
+        ]
+    },
+    {
+        "id": "f5ad525cf69b0261",
+        "type": "rbe",
+        "z": "6906193139893272",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 610,
+        "y": 360,
+        "wires": [
+            [
+                "a1b5cb0f9eadce98"
+            ]
+        ]
+    },
+    {
+        "id": "3065f9625ee200a3",
+        "type": "rbe",
+        "z": "6906193139893272",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 610,
+        "y": 420,
+        "wires": [
+            [
+                "7e0e369a26cc6874"
+            ]
+        ]
+    },
+    {
+        "id": "911f6ec954112ac9",
+        "type": "rbe",
+        "z": "6906193139893272",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 610,
+        "y": 460,
+        "wires": [
+            [
+                "c10d2fe109dbc98f"
+            ]
+        ]
+    },
+    {
+        "id": "10468a2ed19505e8",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "reg0",
+        "func": "msg.reg_addr=0;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 280,
+        "wires": [
+            [
+                "81b114ab45452817"
+            ]
+        ]
+    },
+    {
+        "id": "2bc70b4e0652cc67",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "reg1",
+        "func": "msg.reg_addr= 1;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 320,
+        "wires": [
+            [
+                "81b114ab45452817"
+            ]
+        ]
+    },
+    {
+        "id": "a1b5cb0f9eadce98",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "reg2",
+        "func": "msg.reg_addr= 2;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 360,
+        "wires": [
+            [
+                "81b114ab45452817"
+            ]
+        ]
+    },
+    {
+        "id": "7e0e369a26cc6874",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "reg3",
+        "func": "msg.reg_addr= 3;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 420,
+        "wires": [
+            [
+                "81b114ab45452817"
+            ]
+        ]
+    },
+    {
+        "id": "c10d2fe109dbc98f",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "reg4",
+        "func": "msg.reg_addr= 4;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 460,
+        "wires": [
+            [
+                "81b114ab45452817"
+            ]
+        ]
+    },
+    {
+        "id": "81b114ab45452817",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "FC05",
+        "func": "var id =3;\nvar fc = 5;\nvar reg_addr = msg.reg_addr;\nvar qty = 1;\nmsg.slave_ip = \"192.168.0.172\";\nvar slave_ip = msg.payload.slave_ip;\n\n\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': reg_addr, 'quantity': qty };\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 380,
+        "wires": [
+            [
+                "c2845af5f67ceb47",
+                "0408a72eb20db0cb"
+            ]
+        ]
+    },
+    {
+        "id": "c2845af5f67ceb47",
+        "type": "debug",
+        "z": "6906193139893272",
+        "name": "FC05",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "0408a72eb20db0cb",
+        "type": "link out",
+        "z": "6906193139893272",
+        "name": "link out 3",
+        "mode": "link",
+        "links": [],
+        "x": 1125,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "d3bc04bcfec75ab8",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_SENSE_MAINS_IN",
+        "func": "let value=msg.payload;\n\nglobal.set('sense_mains_input', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e6eb508467f378fa",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_SENSE_UPS_OUT",
+        "func": "let value=msg.payload;\n\nglobal.set('sense_ups_output', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "512d3cfd1e4b238d",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SENSE_MAINS_INPUT",
+        "links": [
+            "c9275b65a66fa577"
+        ],
+        "x": 425,
+        "y": 80,
+        "wires": [
+            [
+                "d3bc04bcfec75ab8"
+            ]
+        ]
+    },
+    {
+        "id": "9bee7769430de542",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SENSE_UPS_OUTPUT",
+        "links": [
+            "fbc1a67f8088a4d9"
+        ],
+        "x": 425,
+        "y": 120,
+        "wires": [
+            [
+                "e6eb508467f378fa"
+            ]
+        ]
+    },
+    {
+        "id": "f5d6aa6f34b6f2f8",
+        "type": "inject",
+        "z": "6906193139893272",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 430,
+        "y": 240,
+        "wires": [
+            [
+                "e6eb508467f378fa"
+            ]
+        ]
+    },
+    {
+        "id": "b1c09507cc9d72c0",
+        "type": "inject",
+        "z": "6906193139893272",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 410,
+        "y": 280,
+        "wires": [
+            [
+                "e6eb508467f378fa"
+            ]
+        ]
+    }
+]
