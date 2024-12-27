@@ -87,6 +87,9 @@ class NodeRedServer:
             "node-red-contrib-modbus",
             "@flowfuse/node-red-dashboard-2-ui-led",
             "@colinl/node-red-dashboard-2-ui-gauge-classic",
+            "node-red-contrib-protobuf",
+            "node-red-contrib-fs",
+            "node-red-node-sqlite",
         ]
         try:
             is_windows = platform.system().lower() == "windows"

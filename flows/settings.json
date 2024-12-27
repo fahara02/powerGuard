@@ -1,0 +1,309 @@
+[
+    {
+        "id": "e6613618b3405f10",
+        "type": "tab",
+        "label": "SETTINGS",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c22fcd60c631ef02",
+        "type": "ui-form",
+        "z": "e6613618b3405f10",
+        "name": "REPORT_SETTINGS",
+        "group": "e98ad7098a2677db",
+        "label": "",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "name",
+                "key": "name",
+                "type": "text",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "TestStandard",
+                "key": "standard",
+                "type": "dropdown",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "ups_model",
+                "key": "model",
+                "type": "text",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Client",
+                "key": "client_name",
+                "type": "text",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Brand",
+                "key": "brand_name",
+                "type": "text",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "TestEngineer",
+                "key": "test_enginner",
+                "type": "text",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "AprrovalEngineer",
+                "key": "approval_engineer",
+                "type": "text",
+                "required": false,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "name": "",
+            "standard": "",
+            "model": "",
+            "client_name": "",
+            "brand_name": "",
+            "test_enginner": "",
+            "approval_engineer": ""
+        },
+        "payload": "",
+        "submit": "submit",
+        "cancel": "clear",
+        "resetOnSubmit": true,
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": "",
+        "className": "",
+        "passthru": false,
+        "dropdownOptions": [
+            {
+                "dropdown": "standard",
+                "value": "0",
+                "label": " IEC_62040_1"
+            },
+            {
+                "dropdown": "standard",
+                "value": "1",
+                "label": "IEC_62040_2"
+            },
+            {
+                "dropdown": "standard",
+                "value": "2",
+                "label": "IEC_62040_3"
+            },
+            {
+                "dropdown": "standard",
+                "value": "3",
+                "label": "IEC_62040_4"
+            },
+            {
+                "dropdown": "standard",
+                "value": "4",
+                "label": "IEC_62040_5"
+            }
+        ],
+        "x": 240,
+        "y": 120,
+        "wires": [
+            [
+                "e9a4f7de5026de54"
+            ]
+        ]
+    },
+    {
+        "id": "e9a4f7de5026de54",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "b06b941286798352",
+        "type": "inject",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 60,
+        "wires": [
+            [
+                "5d58a652fc68e02d"
+            ]
+        ]
+    },
+    {
+        "id": "5d58a652fc68e02d",
+        "type": "fs-file-lister",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "start": "src/proto",
+        "pattern": "*.*",
+        "folders": "*",
+        "hidden": true,
+        "lstype": "files",
+        "path": true,
+        "single": false,
+        "depth": 0,
+        "stat": false,
+        "showWarnings": true,
+        "x": 360,
+        "y": 60,
+        "wires": [
+            [
+                "df71034f668f9cb5"
+            ]
+        ]
+    },
+    {
+        "id": "df71034f668f9cb5",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f8ea56e6ef8f2e3f",
+        "type": "encode",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "protofile": "",
+        "protoType": "",
+        "x": 400,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e98ad7098a2677db",
+        "type": "ui-group",
+        "name": "report_settings",
+        "page": "cb5e987bd157d173",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "cb5e987bd157d173",
+        "type": "ui-page",
+        "name": "SETTINGS",
+        "ui": "6bb6879aa70631ea",
+        "path": "/settings",
+        "icon": "cog-outline",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 4,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
+    },
+    {
+        "id": "f51f9a07212ff54b",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#d1479f",
+            "primary": "#0094ce",
+            "bgPage": "#ededed",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    }
+]
