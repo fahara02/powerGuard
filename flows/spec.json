@@ -1,0 +1,245 @@
+[
+    {
+        "id": "fa6da6e95a3482ec",
+        "type": "tab",
+        "label": "SPEC",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ed89ecfdb91e7e5e",
+        "type": "ui-template",
+        "z": "fa6da6e95a3482ec",
+        "group": "e98ad7098a2677db",
+        "page": "",
+        "ui": "",
+        "name": "UPS_SPEC",
+        "order": 1,
+        "width": 3,
+        "height": 0,
+        "head": "",
+        "format": "<template>\n  <div class=\"form-container\">\n    <h2>UPS Specification Form</h2>\n    <form @submit.prevent=\"submitForm\">\n      <!-- Phase Selection -->\n      <label for=\"phase\">Phase:</label>\n      <select v-model=\"formData.phase\" id=\"phase\">\n        <option :value=\"0\">Single Phase</option>\n        <option :value=\"1\">Three Phase</option>\n      </select>\n\n      <!-- Rated VA -->\n      <label for=\"rated_va\">Rated VA:</label>\n      <input type=\"number\" v-model=\"formData.rated_va\" id=\"rated_va\" />\n\n      <!-- Rated Voltage -->\n      <label for=\"rated_voltage\">Rated Voltage:</label>\n      <input type=\"number\" v-model=\"formData.rated_voltage\" id=\"rated_voltage\" />\n\n      <!-- Rated Current -->\n      <label for=\"rated_current\">Rated Current:</label>\n      <input type=\"number\" v-model=\"formData.rated_current\" id=\"rated_current\" />\n\n      <!-- Minimum Input Voltage -->\n      <label for=\"min_input_voltage\">Minimum Input Voltage:</label>\n      <input type=\"number\" v-model=\"formData.min_input_voltage\" id=\"min_input_voltage\" />\n\n      <!-- Maximum Input Voltage -->\n      <label for=\"max_input_voltage\">Maximum Input Voltage:</label>\n      <input type=\"number\" v-model=\"formData.max_input_voltage\" id=\"max_input_voltage\" />\n\n      <!-- PF Rated Current -->\n<label for=\"pf_rated_current\">Power Factor Rated Current (0-1):</label>\n<input \n  type=\"number\" \n  v-model=\"formData.pf_rated_current\" \n  id=\"pf_rated_current\" \n  step=\"0.01\" \n  min=\"0\" \n  max=\"1\" \n/>\n\n\n      <!-- Max Continuous Amp -->\n      <label for=\"max_continous_amp\">Max Continuous Amp:</label>\n      <input type=\"number\" v-model=\"formData.max_continous_amp\" id=\"max_continous_amp\" />\n\n      <!-- Overload Amp -->\n      <label for=\"overload_amp\">Overload Amp:</label>\n      <input type=\"number\" v-model=\"formData.overload_amp\" id=\"overload_amp\" />\n\n      <!-- Overload Long -->\n      <h3>Overload Long</h3>\n      <label for=\"long_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_long.load_percentage\" id=\"long_load_percentage\" />\n\n      <label for=\"long_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_long.overload_time_min\" id=\"long_overload_time\" />\n\n      <!-- Overload Medium -->\n      <h3>Overload Medium</h3>\n      <label for=\"medium_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_medium.load_percentage\" id=\"medium_load_percentage\" />\n\n      <label for=\"medium_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_medium.overload_time_min\" id=\"medium_overload_time\" />\n\n      <!-- Overload Short -->\n      <h3>Overload Short</h3>\n      <label for=\"short_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_short.load_percentage\" id=\"short_load_percentage\" />\n\n      <label for=\"short_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_short.overload_time_min\" id=\"short_overload_time\" />\n\n      <!-- Average Switch Time -->\n      <label for=\"avg_switch_time\">Average Switch Time (ms):</label>\n      <input type=\"number\" v-model=\"formData.avg_switch_time_ms\" id=\"avg_switch_time\" />\n\n      <!-- Average Backup Time -->\n      <label for=\"avg_backup_time\">Average Backup Time (ms):</label>\n      <input type=\"number\" v-model=\"formData.avg_backup_time_ms\" id=\"avg_backup_time\" />\n\n      <button type=\"submit\">Submit</button>\n    </form>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      formData: {\n        phase: 0,\n        rated_va: 1000,\n        rated_voltage: 230,\n        rated_current: 10,\n        min_input_voltage: 180,\n        max_input_voltage: 260,\n        pf_rated_current: 0.9,\n        max_continous_amp: 15,\n        overload_amp: 20,\n        overload_long: {\n          load_percentage: 110,\n          overload_time_min: 30,\n        },\n        overload_medium: {\n          load_percentage: 125,\n          overload_time_min: 10,\n        },\n        overload_short: {\n          load_percentage: 150,\n          overload_time_min: 1,\n        },\n        avg_switch_time_ms: 5,\n        avg_backup_time_ms: 300000,\n      },\n    };\n  },\n  methods: {\n    submitForm() {\n      const msg = { payload: this.formData };\n      this.send(msg);\n\n    },\n  },\n};\n</script>\n\n\n<style scoped>\n  .form-container {\n    max-width: 900px;\n    margin: 0 auto;\n    padding: 20px;\n    background-color: #f4f4f9;\n    border-radius: 10px;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n  }\n\n  form {\n    display: flex;\n    flex-direction: column;\n    gap: 15px;\n  }\n\n  label {\n    font-weight: bold;\n  }\n\n  input, select, button {\n    padding: 10px;\n    font-size: 1rem;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n  }\n\n  button {\n    background-color: #007bff;\n    color: white;\n    cursor: pointer;\n    border: none;\n  }\n\n  button:hover {\n    background-color: #0056b3;\n  }\n\n  h3 {\n    margin-bottom: 5px;\n  }\n</style>\n",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 370,
+        "y": 240,
+        "wires": [
+            [
+                "66a00806a461d0a2",
+                "625ed91f0b7f41af"
+            ]
+        ]
+    },
+    {
+        "id": "66a00806a461d0a2",
+        "type": "debug",
+        "z": "fa6da6e95a3482ec",
+        "name": "debug 9",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "fea3c4582361255b",
+        "type": "inject",
+        "z": "fa6da6e95a3482ec",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 240,
+        "wires": [
+            [
+                "ed89ecfdb91e7e5e"
+            ]
+        ]
+    },
+    {
+        "id": "625ed91f0b7f41af",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "Insert using variable",
+        "func": "// Access the data from the incoming form node\nvar data = msg.payload;\n\n// Prepare SQL queries for OverLoad table and Spec table\nvar overloadQueries = [];\n\n// Insert data into OverLoad table\noverloadQueries.push(`\n    INSERT INTO OverLoad (load_percentage, overload_time_min) \n    VALUES (${data.overload_long.load_percentage}, ${data.overload_long.overload_time_min})\n`);\noverloadQueries.push(`\n    INSERT INTO OverLoad (load_percentage, overload_time_min) \n    VALUES (${data.overload_medium.load_percentage}, ${data.overload_medium.overload_time_min})\n`);\noverloadQueries.push(`\n    INSERT INTO OverLoad (load_percentage, overload_time_min) \n    VALUES (${data.overload_short.load_percentage}, ${data.overload_short.overload_time_min})\n`);\n\n// Insert data into Spec table using foreign key references\nvar specQuery = `\nINSERT INTO spec (\n    phase, rating_va, rated_voltage, rated_current, \n    min_input_voltage, max_input_voltage, pf_rated_current, \n    max_continous_amp, overload_amp, overload_long_id, \n    overload_medium_id, overload_short_id, avg_switch_time_ms, \n    avg_backup_time_ms\n) VALUES (\n    ${data.phase}, ${data.rated_va}, ${data.rated_voltage}, ${data.rated_current}, \n    ${data.min_input_voltage}, ${data.max_input_voltage}, ${data.pf_rated_current}, \n    ${data.max_continous_amp}, ${data.overload_amp}, \n    (SELECT MAX(id) FROM OverLoad WHERE load_percentage=${data.overload_long.load_percentage} AND overload_time_min=${data.overload_long.overload_time_min}), \n    (SELECT MAX(id) FROM OverLoad WHERE load_percentage=${data.overload_medium.load_percentage} AND overload_time_min=${data.overload_medium.overload_time_min}), \n    (SELECT MAX(id) FROM OverLoad WHERE load_percentage=${data.overload_short.load_percentage} AND overload_time_min=${data.overload_short.overload_time_min}), \n    ${data.avg_switch_time_ms}, ${data.avg_backup_time_ms}\n);\n`;\n\n// Combine all queries\nvar fullQuery = overloadQueries.join(\"; \") + \"; \" + specQuery;\n\n// Prepare the message to send to the SQLite node\nvar msg1 = {};\nmsg1.topic = fullQuery;\n\n// Return the message for execution\nreturn msg1;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 320,
+        "wires": [
+            [
+                "eeb29a0b386d8cf1",
+                "f7b4899c55e40305"
+            ]
+        ]
+    },
+    {
+        "id": "eeb29a0b386d8cf1",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "4a28ed258215bca1",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 560,
+        "y": 320,
+        "wires": [
+            [
+                "af3608a7f0441bca"
+            ]
+        ]
+    },
+    {
+        "id": "f7b4899c55e40305",
+        "type": "debug",
+        "z": "fa6da6e95a3482ec",
+        "name": "debug 10",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "af3608a7f0441bca",
+        "type": "debug",
+        "z": "fa6da6e95a3482ec",
+        "name": "debug 11",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "e98ad7098a2677db",
+        "type": "ui-group",
+        "name": "SPEC",
+        "page": "56e295c5bde3cd1f",
+        "width": 3,
+        "height": "3",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "4a28ed258215bca1",
+        "type": "sqlitedb",
+        "db": "/Users/farukhannan/FHR_DEVS/MyDEVS/Python/powerGuard/db/test_reports.db",
+        "mode": "RWC"
+    },
+    {
+        "id": "56e295c5bde3cd1f",
+        "type": "ui-page",
+        "name": "SPEC",
+        "ui": "6bb6879aa70631ea",
+        "path": "/spec",
+        "icon": "file-document",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 5,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
+    },
+    {
+        "id": "f51f9a07212ff54b",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#d1479f",
+            "primary": "#0094ce",
+            "bgPage": "#ededed",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    }
+]
