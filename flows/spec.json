@@ -25,8 +25,8 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 270,
-        "y": 20,
+        "x": 290,
+        "y": 80,
         "wires": [
             [
                 "b5751b1463e35f8e"
@@ -74,45 +74,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 740,
-        "y": 240,
+        "x": 200,
+        "y": 380,
         "wires": [
-            [
-                "eeb29a0b386d8cf1"
-            ]
+            []
         ]
-    },
-    {
-        "id": "eeb29a0b386d8cf1",
-        "type": "sqlite",
-        "z": "fa6da6e95a3482ec",
-        "mydb": "0d4c44b815a8faab",
-        "sqlquery": "msg.topic",
-        "sql": "",
-        "name": "MAIN_DB",
-        "x": 480,
-        "y": 300,
-        "wires": [
-            [
-                "af3608a7f0441bca"
-            ]
-        ]
-    },
-    {
-        "id": "f7b4899c55e40305",
-        "type": "debug",
-        "z": "fa6da6e95a3482ec",
-        "name": "debug 10",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 460,
-        "y": 460,
-        "wires": []
     },
     {
         "id": "af3608a7f0441bca",
@@ -158,8 +124,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 900,
-        "y": 20,
+        "x": 880,
+        "y": 80,
         "wires": [
             [
                 "f10108f26abf0478"
@@ -179,7 +145,7 @@
         "finalize": "",
         "libs": [],
         "x": 690,
-        "y": 20,
+        "y": 80,
         "wires": [
             [
                 "5fcac7502291a652"
@@ -207,8 +173,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 420,
-        "y": 200,
+        "x": 120,
+        "y": 120,
         "wires": [
             [
                 "7122ee90d62130a4"
@@ -222,8 +188,8 @@
         "name": "",
         "scope": null,
         "uncaught": false,
-        "x": 200,
-        "y": 560,
+        "x": 100,
+        "y": 440,
         "wires": [
             [
                 "32c27692.03eeaa",
@@ -242,8 +208,8 @@
         "tostatus": false,
         "complete": "true",
         "targetType": "full",
-        "x": 350,
-        "y": 560,
+        "x": 290,
+        "y": 480,
         "wires": []
     },
     {
@@ -254,8 +220,8 @@
         "func": "var payload=msg.error.message;\nmsg.payload = payload +\" timestamp \"+msg.payload;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 360,
-        "y": 500,
+        "x": 300,
+        "y": 440,
         "wires": [
             [
                 "2eac70b89e0f075c"
@@ -270,8 +236,8 @@
         "func": "node.error(\"\",msg);//clear error\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 450,
-        "y": 700,
+        "x": 370,
+        "y": 540,
         "wires": [
             []
         ]
@@ -288,8 +254,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "str",
-        "x": 230,
-        "y": 640,
+        "x": 130,
+        "y": 540,
         "wires": [
             [
                 "e33e7ff6.a8878"
@@ -300,8 +266,8 @@
         "id": "2eac70b89e0f075c",
         "type": "ui-text",
         "z": "fa6da6e95a3482ec",
-        "group": "e98ad7098a2677db",
-        "order": 0,
+        "group": "e646fb9cc2101751",
+        "order": 1,
         "width": 0,
         "height": 0,
         "name": "",
@@ -315,29 +281,8 @@
         "wrapText": false,
         "className": "",
         "x": 550,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "2acbb1933ff1b015",
-        "type": "function",
-        "z": "fa6da6e95a3482ec",
-        "name": "function 2",
-        "func": "// Access the data from the incoming form node\nvar data = msg.payload;\n\n// Prepare the SQL query for the entire operation\nvar fullQuery = `\nBEGIN TRANSACTION;\n\n-- Insert into OverLoad table for overload_long\nINSERT INTO OverLoad (load_percentage, overload_time_min) \nVALUES (${data.overload_long.load_percentage}, ${data.overload_long.overload_time_min});\n-- Capture the ID of overload_long\nWITH overload_long_id AS (SELECT last_insert_rowid() AS id)\n\n-- Insert into OverLoad table for overload_medium\nINSERT INTO OverLoad (load_percentage, overload_time_min) \nVALUES (${data.overload_medium.load_percentage}, ${data.overload_medium.overload_time_min});\n-- Capture the ID of overload_medium\nWITH overload_medium_id AS (SELECT last_insert_rowid() AS id)\n\n-- Insert into OverLoad table for overload_short\nINSERT INTO OverLoad (load_percentage, overload_time_min) \nVALUES (${data.overload_short.load_percentage}, ${data.overload_short.overload_time_min});\n-- Capture the ID of overload_short\nWITH overload_short_id AS (SELECT last_insert_rowid() AS id)\n\n-- Insert data into spec table using the captured IDs\nINSERT INTO spec (\n    phase, rating_va, rated_voltage, rated_current, \n    min_input_voltage, max_input_voltage, pf_rated_current, \n    max_continous_amp, overload_amp, overload_long_id, \n    overload_medium_id, overload_short_id, avg_switch_time_ms, \n    avg_backup_time_ms\n) VALUES (\n    ${data.phase}, ${data.rated_va}, ${data.rated_voltage}, ${data.rated_current}, \n    ${data.min_input_voltage}, ${data.max_input_voltage}, ${data.pf_rated_current}, \n    ${data.max_continous_amp}, ${data.overload_amp},\n    (SELECT id FROM overload_long_id),\n    (SELECT id FROM overload_medium_id),\n    (SELECT id FROM overload_short_id),\n    ${data.avg_switch_time_ms}, ${data.avg_backup_time_ms}\n);\n\nCOMMIT;\n`;\n\n// Prepare the message to send to the SQLite node\nreturn { topic: fullQuery };\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 180,
         "y": 440,
-        "wires": [
-            [
-                "eeb29a0b386d8cf1",
-                "f7b4899c55e40305"
-            ]
-        ]
+        "wires": []
     },
     {
         "id": "f10108f26abf0478",
@@ -351,8 +296,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1110,
-        "y": 20,
+        "x": 1050,
+        "y": 80,
         "wires": [
             [
                 "55c671781f9dd10b"
@@ -367,30 +312,13 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 1280,
-        "y": 40,
+        "x": 1240,
+        "y": 80,
         "wires": [
             [
-                "bab7893903817ce1",
-                "80b2d92d3dfa6cd1"
+                "bab7893903817ce1"
             ]
         ]
-    },
-    {
-        "id": "66a00806a461d0a2",
-        "type": "debug",
-        "z": "fa6da6e95a3482ec",
-        "name": "debug 9",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1320,
-        "y": 160,
-        "wires": []
     },
     {
         "id": "bab7893903817ce1",
@@ -404,28 +332,472 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1330,
-        "y": 100,
+        "x": 1450,
+        "y": 80,
         "wires": [
             [
-                "66a00806a461d0a2"
+                "dbb287655beae14c"
             ]
         ]
     },
     {
-        "id": "80b2d92d3dfa6cd1",
-        "type": "debug",
+        "id": "4941e95b05b83ce1",
+        "type": "delay",
         "z": "fa6da6e95a3482ec",
-        "name": "debug 12",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1040,
-        "y": 260,
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 160,
+        "y": 180,
+        "wires": [
+            [
+                "ee727c3090e143e0"
+            ]
+        ]
+    },
+    {
+        "id": "ee727c3090e143e0",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "inser Overload medium",
+        "func": "var spec = global.get(\"new_spec\");\nvar load_p = spec.overload_medium.load_percentage;\nvar ov_time = spec.overload_medium.overload_time_min;\n\n// Construct the SQL query\nvar topic = `INSERT INTO OverLoad (load_percentage, overload_time_min) VALUES (${load_p}, ${ov_time});`;\n\n// Return the query to be executed by the SQLite node\nreturn { topic: topic };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 180,
+        "wires": [
+            [
+                "9fbbba592b4d3cdb"
+            ]
+        ]
+    },
+    {
+        "id": "7ed41b589cdb55de",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 940,
+        "y": 180,
+        "wires": [
+            [
+                "1bc1947f99ad8b6e"
+            ]
+        ]
+    },
+    {
+        "id": "1bc1947f99ad8b6e",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "set global overload mediumj id",
+        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"overload_medium_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured overload_medium_id: \" + lastId);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1210,
+        "y": 180,
+        "wires": [
+            [
+                "5a449e77ef33a460"
+            ]
+        ]
+    },
+    {
+        "id": "a1ad7bb94e343670",
+        "type": "delay",
+        "z": "fa6da6e95a3482ec",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 160,
+        "y": 240,
+        "wires": [
+            [
+                "9537219456780367"
+            ]
+        ]
+    },
+    {
+        "id": "dbb287655beae14c",
+        "type": "link out",
+        "z": "fa6da6e95a3482ec",
+        "name": "overload_long_id_set",
+        "mode": "link",
+        "links": [
+            "781b2b6c1e50c880"
+        ],
+        "x": 1655,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "781b2b6c1e50c880",
+        "type": "link in",
+        "z": "fa6da6e95a3482ec",
+        "name": "link in 3",
+        "links": [
+            "dbb287655beae14c"
+        ],
+        "x": 55,
+        "y": 180,
+        "wires": [
+            [
+                "4941e95b05b83ce1"
+            ]
+        ]
+    },
+    {
+        "id": "5a449e77ef33a460",
+        "type": "link out",
+        "z": "fa6da6e95a3482ec",
+        "name": "overload_medium_id_set",
+        "mode": "link",
+        "links": [
+            "b5134714174fb262"
+        ],
+        "x": 1455,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "b5134714174fb262",
+        "type": "link in",
+        "z": "fa6da6e95a3482ec",
+        "name": "link in 7",
+        "links": [
+            "5a449e77ef33a460"
+        ],
+        "x": 55,
+        "y": 240,
+        "wires": [
+            [
+                "a1ad7bb94e343670"
+            ]
+        ]
+    },
+    {
+        "id": "9537219456780367",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "inser Overload short",
+        "func": "var spec = global.get(\"new_spec\");\nvar load_p = spec.overload_medium.load_percentage;\nvar ov_time = spec.overload_medium.overload_time_min;\n\n// Construct the SQL query\nvar topic = `INSERT INTO OverLoad (load_percentage, overload_time_min) VALUES (${load_p}, ${ov_time});`;\n\n// Return the query to be executed by the SQLite node\nreturn { topic: topic };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 240,
+        "wires": [
+            [
+                "0afacc5f5408c92b"
+            ]
+        ]
+    },
+    {
+        "id": "c803bdd59f1d6307",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "get medium id",
+        "func": "msg.topic=\"SELECT last_insert_rowid()\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 180,
+        "wires": [
+            [
+                "7ed41b589cdb55de"
+            ]
+        ]
+    },
+    {
+        "id": "9fbbba592b4d3cdb",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 580,
+        "y": 180,
+        "wires": [
+            [
+                "c803bdd59f1d6307"
+            ]
+        ]
+    },
+    {
+        "id": "0afacc5f5408c92b",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 580,
+        "y": 240,
+        "wires": [
+            [
+                "68bf81fdcd879589"
+            ]
+        ]
+    },
+    {
+        "id": "68bf81fdcd879589",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "get short id",
+        "func": "msg.topic=\"SELECT last_insert_rowid()\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 240,
+        "wires": [
+            [
+                "68bd7b6373a6fb47"
+            ]
+        ]
+    },
+    {
+        "id": "68bd7b6373a6fb47",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 940,
+        "y": 240,
+        "wires": [
+            [
+                "c9e666be9e8db58b"
+            ]
+        ]
+    },
+    {
+        "id": "c9e666be9e8db58b",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "set global overload short id",
+        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"overload_short_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured overload_short_id: \" + lastId);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 240,
+        "wires": [
+            [
+                "316936fd8f043cdc"
+            ]
+        ]
+    },
+    {
+        "id": "c90cf51249636fc0",
+        "type": "delay",
+        "z": "fa6da6e95a3482ec",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 160,
+        "y": 300,
+        "wires": [
+            [
+                "b0a6e40e6de9b9f9"
+            ]
+        ]
+    },
+    {
+        "id": "b0a6e40e6de9b9f9",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "spec",
+        "func": "// Access the global variables for overload IDs\nvar overloadLongId = global.get(\"overload_long_id\");\nvar overloadMediumId = global.get(\"overload_medium_id\");\nvar overloadShortId = global.get(\"overload_short_id\");\n\n// Access the data from the incoming payload\nvar data = global.get(\"new_spec\");\n\n// Construct the SQL query for inserting into the spec table\nvar topic = `\nINSERT INTO spec (\n    phase, rating_va, rated_voltage, rated_current, \n    min_input_voltage, max_input_voltage, pf_rated_current, \n    max_continous_amp, overload_amp, overload_long_id, \n    overload_medium_id, overload_short_id, avg_switch_time_ms, \n    avg_backup_time_ms\n) VALUES (\n    '${data.phase}', ${data.rated_va}, ${data.rated_voltage}, ${data.rated_current}, \n    ${data.min_input_voltage}, ${data.max_input_voltage}, ${data.pf_rated_current}, \n    ${data.max_continous_amp}, ${data.overload_amp}, \n    ${overloadLongId}, ${overloadMediumId}, ${overloadShortId},\n    ${data.avg_switch_time_ms}, ${data.avg_backup_time_ms}\n);\n`;\n\n// Return the query for execution\nreturn { topic: topic };\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 300,
+        "wires": [
+            [
+                "c6ed1523341d51c1"
+            ]
+        ]
+    },
+    {
+        "id": "316936fd8f043cdc",
+        "type": "link out",
+        "z": "fa6da6e95a3482ec",
+        "name": "overload_short_id_set",
+        "mode": "link",
+        "links": [
+            "7a0dc356b1a5bf4d"
+        ],
+        "x": 1435,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "7a0dc356b1a5bf4d",
+        "type": "link in",
+        "z": "fa6da6e95a3482ec",
+        "name": "link in 8",
+        "links": [
+            "316936fd8f043cdc"
+        ],
+        "x": 55,
+        "y": 300,
+        "wires": [
+            [
+                "c90cf51249636fc0"
+            ]
+        ]
+    },
+    {
+        "id": "c6ed1523341d51c1",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 580,
+        "y": 300,
+        "wires": [
+            [
+                "00c5609a01d7e96b"
+            ]
+        ]
+    },
+    {
+        "id": "00c5609a01d7e96b",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "get spec id",
+        "func": "msg.topic=\"SELECT last_insert_rowid()\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 300,
+        "wires": [
+            [
+                "5661e8c29247bd17"
+            ]
+        ]
+    },
+    {
+        "id": "5661e8c29247bd17",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 940,
+        "y": 300,
+        "wires": [
+            [
+                "ec9b60e20776030b"
+            ]
+        ]
+    },
+    {
+        "id": "ec9b60e20776030b",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "set global spec id",
+        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"spec_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured spec_id: \" + lastId);\nmsg.payload=lastId;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1170,
+        "y": 300,
+        "wires": [
+            [
+                "309a5ee517f1f9b5"
+            ]
+        ]
+    },
+    {
+        "id": "309a5ee517f1f9b5",
+        "type": "ui-text",
+        "z": "fa6da6e95a3482ec",
+        "group": "e646fb9cc2101751",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "SPEC ID",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1380,
+        "y": 300,
         "wires": []
     },
     {
@@ -447,6 +819,20 @@
         "type": "sqlitedb",
         "db": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\db\\test_reports.db",
         "mode": "RWC"
+    },
+    {
+        "id": "e646fb9cc2101751",
+        "type": "ui-group",
+        "name": "DB_UPDATES",
+        "page": "56e295c5bde3cd1f",
+        "width": 6,
+        "height": 1,
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
     },
     {
         "id": "56e295c5bde3cd1f",
