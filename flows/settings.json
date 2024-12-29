@@ -206,10 +206,10 @@
         "ui": "",
         "name": "REPORT_SETTING",
         "order": 1,
-        "width": 0,
+        "width": 4,
         "height": 0,
         "head": "",
-        "format": "<template>\n    <div class=\"form-container\">\n      <h2>Report Settings</h2>\n      <form @submit.prevent=\"submitForm\">\n        <!-- Report ID -->\n        <label for=\"report_id\">Report ID:</label>\n        <div class=\"report-id-container\">\n          <input\n            type=\"number\"\n            v-model=\"formData.report_id\"\n            id=\"report_id\"\n            required\n            readonly\n          />\n          <button type=\"button\" @click=\"generateReportID\">Generate</button>\n        </div>\n  \n        <!-- Standard -->\n        <label for=\"standard\">Standard:</label>\n        <select v-model=\"formData.standard\" id=\"standard\" required>\n          <option v-for=\"(value, key) in TestStandard\" :key=\"value\" :value=\"value\">\n            {{ key }}\n          </option>\n        </select>\n  \n        <!-- UPS Model -->\n        <label for=\"ups_model\">UPS Model:</label>\n        <input type=\"text\" v-model=\"formData.ups_model\" id=\"ups_model\" required />\n  \n        <!-- Client Name -->\n        <label for=\"client_name\">Client Name:</label>\n        <input type=\"text\" v-model=\"formData.client_name\" id=\"client_name\" />\n  \n        <!-- Brand Name -->\n        <label for=\"brand_name\">Brand Name:</label>\n        <input type=\"text\" v-model=\"formData.brand_name\" id=\"brand_name\" />\n  \n        <!-- Test Engineer Name -->\n        <label for=\"test_engineer_name\">Test Engineer Name:</label>\n        <input type=\"text\" v-model=\"formData.test_engineer_name\" id=\"test_engineer_name\" />\n  \n        <!-- Test Approval Name -->\n        <label for=\"test_approval_name\">Test Approval Name:</label>\n        <input type=\"text\" v-model=\"formData.test_approval_name\" id=\"test_approval_name\" />\n  \n        <!-- Spec ID Dropdown -->\n        <label for=\"spec_id\">Specification ID:</label>\n        <select v-model=\"formData.spec_id\" id=\"spec_id\" required>\n          <option v-for=\"id in specOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n        </select>\n  \n        <!-- Display Spec Data -->\n        <div v-if=\"selectedSpec\">\n          <h3>Spec Details:</h3>\n          <p><strong>Phase:</strong> {{ selectedSpec.phase }}</p>\n          <p><strong>Rated VA:</strong> {{ selectedSpec.rating_va }}</p>\n          <p><strong>Rated Voltage:</strong> {{ selectedSpec.rated_voltage }}</p>\n          <p><strong>Rated Current:</strong> {{ selectedSpec.rated_current }}</p>\n          <p><strong>Power Factor Rated Current:</strong> {{ selectedSpec.pf_rated_current }}</p>\n          <p><strong>Max Continuous Amp:</strong> {{ selectedSpec.max_continous_amp }}</p>\n          <p><strong>Overload Amp:</strong> {{ selectedSpec.overload_amp }}</p>\n          <p><strong>Average Switch Time (ms):</strong> {{ selectedSpec.avg_switch_time_ms }}</p>\n          <p><strong>Average Backup Time (ms):</strong> {{ selectedSpec.avg_backup_time_ms }}</p>\n        </div>\n  \n        <button type=\"submit\">Submit</button>\n      </form>\n    </div>\n  </template>\n  \n  <script>\n  export default {\n    data() {\n      return {\n        latest_spec_id: 0, // Initial placeholder, dynamically updated\n        spec: [], // Initially empty\n        formData: {\n          report_id: 44042913,\n          standard: 0,\n          ups_model: \"UVA-123\",\n          client_name: 'Walton',\n          brand_name: 'Walton',\n          test_engineer_name: \"Engr Atik\",\n          test_approval_name: \"Engr Jhon\",\n          spec_id: null, // Selected spec_id\n        },\n        TestStandard: {\n        IEC_62040_1: \"IEC_62040_1\",\n        IEC_62040_2: \"IEC_62040_2\",\n        IEC_62040_3: \"IEC_62040_3\",\n        IEC_62040_4: \"IEC_62040_4\",\n        IEC_62040_5: \"IEC_62040_5\",\n      },\n      };\n    },\n    computed: {\n      specOptions() {\n        return this.spec.map((spec) => spec.id).sort((a, b) => a - b);\n      },\n      selectedSpec() {\n        return this.spec.find((spec) => spec.id === this.formData.spec_id) || null;\n      },\n    },\n    methods: {\n      submitForm() {\n        const msg = { payload: this.formData };\n        this.send(msg); // Replace with your submission logic\n      },\n      updateSpecData(payload) {\n        if (payload.latest_spec_id !== undefined) {\n          this.latest_spec_id = payload.latest_spec_id;\n        }\n        if (payload.spec && Array.isArray(payload.spec)) {\n          this.spec = payload.spec;\n        } else {\n          console.error(\"Spec data is not properly formatted:\", payload.spec);\n        }\n  \n        const latestSpec = this.spec.find((spec) => spec.id === this.latest_spec_id - 1);\n        if (!this.formData.spec_id && latestSpec) {\n          this.formData.spec_id = latestSpec.id;\n        }\n      },\n      generateReportID() {\n        this.formData.report_id = Math.floor(10000000 + Math.random() * 90000000);\n      },\n    },\n    mounted() {\n      this.$watch('msg', (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updateSpecData(newMsg.payload);\n        }\n      });\n    },\n  };\n  </script>\n  \n  <style scoped>\n  .form-container {\n    max-width: 600px;\n    margin: 0 auto;\n    padding: 20px;\n    background-color: #f4f4f9;\n    border-radius: 10px;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n  }\n  \n  form {\n    display: flex;\n    flex-direction: column;\n    gap: 15px;\n  }\n  \n  label {\n    font-weight: bold;\n  }\n  \n  input,\n  select,\n  button {\n    padding: 10px;\n    font-size: 1rem;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n  }\n  \n  button {\n    background-color: #007bff;\n    color: white;\n    cursor: pointer;\n    border: none;\n  }\n  \n  button:hover {\n    background-color: #0056b3;\n  }\n  \n  h3 {\n    margin-top: 20px;\n  }\n  \n  .report-id-container {\n    display: flex;\n    gap: 10px;\n  }\n  </style>\n  ",
+        "format": "<template>\n    <div class=\"form-container\">\n      <h2>Report Settings</h2>\n      <form @submit.prevent=\"submitForm\">\n        <!-- Report ID -->\n        <label for=\"report_id\">Report ID:</label>\n        <div class=\"report-id-container\">\n          <input\n            type=\"number\"\n            v-model=\"formData.report_id\"\n            id=\"report_id\"\n            required\n            readonly\n          />\n          <button type=\"button\" @click=\"generateReportID\">Generate</button>\n        </div>\n  \n        <!-- Standard -->\n        <label for=\"standard\">Standard:</label>\n        <select v-model=\"formData.standard\" id=\"standard\" required>\n          <option v-for=\"(value, key) in TestStandard\" :key=\"value\" :value=\"value\">\n            {{ key }}\n          </option>\n        </select>\n  \n        <!-- UPS Model -->\n        <label for=\"ups_model\">UPS Model:</label>\n        <input type=\"text\" v-model=\"formData.ups_model\" id=\"ups_model\" required />\n  \n        <!-- Client Name -->\n        <label for=\"client_name\">Client Name:</label>\n        <input type=\"text\" v-model=\"formData.client_name\" id=\"client_name\" />\n  \n        <!-- Brand Name -->\n        <label for=\"brand_name\">Brand Name:</label>\n        <input type=\"text\" v-model=\"formData.brand_name\" id=\"brand_name\" />\n  \n        <!-- Test Engineer Name -->\n        <label for=\"test_engineer_name\">Test Engineer Name:</label>\n        <input type=\"text\" v-model=\"formData.test_engineer_name\" id=\"test_engineer_name\" />\n  \n        <!-- Test Approval Name -->\n        <label for=\"test_approval_name\">Test Approval Name:</label>\n        <input type=\"text\" v-model=\"formData.test_approval_name\" id=\"test_approval_name\" />\n  \n        <!-- Spec ID Dropdown -->\n        <label for=\"spec_id\">Specification ID:</label>\n        <select v-model=\"formData.spec_id\" id=\"spec_id\" required>\n          <option v-for=\"id in specOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n        </select>\n  \n        <!-- Display Spec Data -->\n        <div v-if=\"selectedSpec\">\n          <h3>Spec Details:</h3>\n          <p><strong>Phase:</strong> {{ selectedSpec.phase }}</p>\n          <p><strong>Rated VA:</strong> {{ selectedSpec.rating_va }}</p>\n          <p><strong>Rated Voltage:</strong> {{ selectedSpec.rated_voltage }}</p>\n          <p><strong>Rated Current:</strong> {{ selectedSpec.rated_current }}</p>\n          <p><strong>Power Factor Rated Current:</strong> {{ selectedSpec.pf_rated_current }}</p>\n          <p><strong>Max Continuous Amp:</strong> {{ selectedSpec.max_continous_amp }}</p>\n          <p><strong>Overload Amp:</strong> {{ selectedSpec.overload_amp }}</p>\n          <p><strong>Average Switch Time (ms):</strong> {{ selectedSpec.avg_switch_time_ms }}</p>\n          <p><strong>Average Backup Time (ms):</strong> {{ selectedSpec.avg_backup_time_ms }}</p>\n        </div>\n  \n        <button type=\"submit\">Submit</button>\n      </form>\n    </div>\n  </template>\n  \n  <script>\n  export default {\n    data() {\n      return {\n        latest_spec_id: 0, // Initial placeholder, dynamically updated\n        spec: [], // Initially empty\n        formData: {\n          report_id: 44042913,\n          standard: \"IEC_62040_1\",\n          ups_model: \"UVA-123\",\n          client_name: 'Walton',\n          brand_name: 'Walton',\n          test_engineer_name: \"Engr Atik\",\n          test_approval_name: \"Engr Jhon\",\n          spec_id: null, // Selected spec_id\n        },\n        TestStandard: {\n        IEC_62040_1: \"IEC_62040_1\",\n        IEC_62040_2: \"IEC_62040_2\",\n        IEC_62040_3: \"IEC_62040_3\",\n        IEC_62040_4: \"IEC_62040_4\",\n        IEC_62040_5: \"IEC_62040_5\",\n      },\n      };\n    },\n    computed: {\n      specOptions() {\n        return this.spec.map((spec) => spec.id).sort((a, b) => a - b);\n      },\n      selectedSpec() {\n        return this.spec.find((spec) => spec.id === this.formData.spec_id) || null;\n      },\n    },\n    methods: {\n      submitForm() {\n        const msg = { payload: this.formData };\n        this.send(msg); // Replace with your submission logic\n      },\n      updateSpecData(payload) {\n        if (payload.latest_spec_id !== undefined) {\n          this.latest_spec_id = payload.latest_spec_id;\n        }\n        if (payload.spec && Array.isArray(payload.spec)) {\n          this.spec = payload.spec;\n        } else {\n          console.error(\"Spec data is not properly formatted:\", payload.spec);\n        }\n  \n        const latestSpec = this.spec.find((spec) => spec.id === this.latest_spec_id - 1);\n        if (!this.formData.spec_id && latestSpec) {\n          this.formData.spec_id = latestSpec.id;\n        }\n      },\n      generateReportID() {\n        this.formData.report_id = Math.floor(10000000 + Math.random() * 90000000);\n      },\n    },\n    mounted() {\n      this.$watch('msg', (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updateSpecData(newMsg.payload);\n        }\n      });\n    },\n  };\n  </script>\n  \n  <style scoped>\n  .form-container {\n    max-width: 600px;\n    margin: 0 auto;\n    padding: 20px;\n    background-color: #f4f4f9;\n    border-radius: 10px;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n  }\n  \n  form {\n    display: flex;\n    flex-direction: column;\n    gap: 15px;\n  }\n  \n  label {\n    font-weight: bold;\n  }\n  \n  input,\n  select,\n  button {\n    padding: 10px;\n    font-size: 1rem;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n  }\n  \n  button {\n    background-color: #007bff;\n    color: white;\n    cursor: pointer;\n    border: none;\n  }\n  \n  button:hover {\n    background-color: #0056b3;\n  }\n  \n  h3 {\n    margin-top: 20px;\n  }\n  \n  .report-id-container {\n    display: flex;\n    gap: 10px;\n  }\n  </style>\n  ",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
@@ -461,8 +461,8 @@
         "links": [
             "551c73509d8c3c10"
         ],
-        "x": 115,
-        "y": 380,
+        "x": 75,
+        "y": 320,
         "wires": [
             [
                 "788cd66141eccdce"
@@ -481,12 +481,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 250,
-        "y": 380,
+        "x": 210,
+        "y": 320,
         "wires": [
             [
-                "400174fe9f6a9b3c",
-                "c35305a6c66dda82"
+                "400174fe9f6a9b3c"
             ]
         ]
     },
@@ -502,12 +501,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 760,
-        "y": 380,
+        "x": 600,
+        "y": 320,
         "wires": [
             [
-                "c0902961a8cacb78",
-                "48e96248f39ebcb4"
+                "c0902961a8cacb78"
             ]
         ]
     },
@@ -519,12 +517,11 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 520,
-        "y": 380,
+        "x": 400,
+        "y": 320,
         "wires": [
             [
-                "b8decd7f7a02b7f4",
-                "756e81628918a005"
+                "b8decd7f7a02b7f4"
             ]
         ]
     },
@@ -536,8 +533,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 980,
-        "y": 380,
+        "x": 820,
+        "y": 320,
         "wires": [
             [
                 "f8989db16189f054"
@@ -556,77 +553,13 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1200,
-        "y": 380,
+        "x": 1020,
+        "y": 320,
         "wires": [
             [
-                "ad20477a2b526e1d"
+                "f8242694d1fe6f5a"
             ]
         ]
-    },
-    {
-        "id": "ad20477a2b526e1d",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 6",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1200,
-        "y": 480,
-        "wires": []
-    },
-    {
-        "id": "c35305a6c66dda82",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 7",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 520,
-        "y": 300,
-        "wires": []
-    },
-    {
-        "id": "756e81628918a005",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 8",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 780,
-        "y": 300,
-        "wires": []
-    },
-    {
-        "id": "48e96248f39ebcb4",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 9",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1020,
-        "y": 300,
-        "wires": []
     },
     {
         "id": "d50bbc87398634fe",
@@ -649,6 +582,28 @@
         ]
     },
     {
+        "id": "f8242694d1fe6f5a",
+        "type": "ui-text",
+        "z": "e6613618b3405f10",
+        "group": "e646fb9cc2101751",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "SETTING ID",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1230,
+        "y": 320,
+        "wires": []
+    },
+    {
         "id": "fcaa87c16afbdfcd",
         "type": "protobuf-file",
         "protopath": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\src\\proto\\pData.proto",
@@ -658,12 +613,12 @@
     {
         "id": "785ed2fd62cefc23",
         "type": "ui-group",
-        "name": "FIXED",
+        "name": "Report_Settings",
         "page": "cb5e987bd157d173",
-        "width": 6,
+        "width": 4,
         "height": 1,
-        "order": 1,
-        "showTitle": true,
+        "order": 2,
+        "showTitle": false,
         "className": "",
         "visible": "true",
         "disabled": "false",
@@ -674,6 +629,20 @@
         "type": "sqlitedb",
         "db": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\db\\test_reports.db",
         "mode": "RWC"
+    },
+    {
+        "id": "e646fb9cc2101751",
+        "type": "ui-group",
+        "name": "DB_UPDATES",
+        "page": "cb5e987bd157d173",
+        "width": 4,
+        "height": 1,
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
     },
     {
         "id": "cb5e987bd157d173",
@@ -708,8 +677,8 @@
         ],
         "order": 4,
         "className": "",
-        "visible": "true",
-        "disabled": "false"
+        "visible": true,
+        "disabled": false
     },
     {
         "id": "6bb6879aa70631ea",

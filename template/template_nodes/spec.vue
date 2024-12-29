@@ -2,12 +2,13 @@
   <div class="form-container">
     <h2>UPS Specification Form</h2>
     <form @submit.prevent="submitForm">
-      <!-- Phase Selection -->
-      <label for="phase">Phase:</label>
-      <select v-model="formData.phase" id="phase">
-        <option :value="0">Single Phase</option>
-        <option :value="1">Three Phase</option>
-      </select>
+    <!-- Phase Selection -->
+<label for="phase">Phase:</label>
+<select v-model="formData.phase" id="phase">
+  <option value="SINGLE_PHASE">Single Phase</option>
+  <option value="THREE_PHASE">Three Phase</option>
+</select>
+
 
       <!-- Rated VA -->
       <label for="rated_va">Rated VA:</label>
@@ -91,7 +92,7 @@ export default {
   data() {
     return {
       formData: {
-        phase: 0,
+        phase: "SINGLE_PHASE",
         rated_va: 1000,
         rated_voltage: 230,
         rated_current: 10,

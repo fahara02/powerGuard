@@ -76,7 +76,7 @@
         spec: [], // Initially empty
         formData: {
           report_id: 44042913,
-          standard: 0,
+          standard: "IEC_62040_1",
           ups_model: "UVA-123",
           client_name: 'Walton',
           brand_name: 'Walton',

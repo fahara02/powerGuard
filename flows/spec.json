@@ -19,7 +19,7 @@
         "width": 3,
         "height": 0,
         "head": "",
-        "format": "<template>\n  <div class=\"form-container\">\n    <h2>UPS Specification Form</h2>\n    <form @submit.prevent=\"submitForm\">\n      <!-- Phase Selection -->\n      <label for=\"phase\">Phase:</label>\n      <select v-model=\"formData.phase\" id=\"phase\">\n        <option :value=\"0\">Single Phase</option>\n        <option :value=\"1\">Three Phase</option>\n      </select>\n\n      <!-- Rated VA -->\n      <label for=\"rated_va\">Rated VA:</label>\n      <input type=\"number\" v-model=\"formData.rated_va\" id=\"rated_va\" />\n\n      <!-- Rated Voltage -->\n      <label for=\"rated_voltage\">Rated Voltage:</label>\n      <input type=\"number\" v-model=\"formData.rated_voltage\" id=\"rated_voltage\" />\n\n      <!-- Rated Current -->\n      <label for=\"rated_current\">Rated Current:</label>\n      <input type=\"number\" v-model=\"formData.rated_current\" id=\"rated_current\" />\n\n      <!-- Minimum Input Voltage -->\n      <label for=\"min_input_voltage\">Minimum Input Voltage:</label>\n      <input type=\"number\" v-model=\"formData.min_input_voltage\" id=\"min_input_voltage\" />\n\n      <!-- Maximum Input Voltage -->\n      <label for=\"max_input_voltage\">Maximum Input Voltage:</label>\n      <input type=\"number\" v-model=\"formData.max_input_voltage\" id=\"max_input_voltage\" />\n\n      <!-- PF Rated Current -->\n<label for=\"pf_rated_current\">Power Factor Rated Current (0-1):</label>\n<input \n  type=\"number\" \n  v-model=\"formData.pf_rated_current\" \n  id=\"pf_rated_current\" \n  step=\"0.01\" \n  min=\"0\" \n  max=\"1\" \n/>\n\n\n      <!-- Max Continuous Amp -->\n      <label for=\"max_continous_amp\">Max Continuous Amp:</label>\n      <input type=\"number\" v-model=\"formData.max_continous_amp\" id=\"max_continous_amp\" />\n\n      <!-- Overload Amp -->\n      <label for=\"overload_amp\">Overload Amp:</label>\n      <input type=\"number\" v-model=\"formData.overload_amp\" id=\"overload_amp\" />\n\n      <!-- Overload Long -->\n      <h3>Overload Long</h3>\n      <label for=\"long_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_long.load_percentage\" id=\"long_load_percentage\" />\n\n      <label for=\"long_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_long.overload_time_min\" id=\"long_overload_time\" />\n\n      <!-- Overload Medium -->\n      <h3>Overload Medium</h3>\n      <label for=\"medium_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_medium.load_percentage\" id=\"medium_load_percentage\" />\n\n      <label for=\"medium_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_medium.overload_time_min\" id=\"medium_overload_time\" />\n\n      <!-- Overload Short -->\n      <h3>Overload Short</h3>\n      <label for=\"short_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_short.load_percentage\" id=\"short_load_percentage\" />\n\n      <label for=\"short_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_short.overload_time_min\" id=\"short_overload_time\" />\n\n      <!-- Average Switch Time -->\n      <label for=\"avg_switch_time\">Average Switch Time (ms):</label>\n      <input type=\"number\" v-model=\"formData.avg_switch_time_ms\" id=\"avg_switch_time\" />\n\n      <!-- Average Backup Time -->\n      <label for=\"avg_backup_time\">Average Backup Time (ms):</label>\n      <input type=\"number\" v-model=\"formData.avg_backup_time_ms\" id=\"avg_backup_time\" />\n\n      <button type=\"submit\">Submit</button>\n    </form>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      formData: {\n        phase: 0,\n        rated_va: 1000,\n        rated_voltage: 230,\n        rated_current: 10,\n        min_input_voltage: 180,\n        max_input_voltage: 260,\n        pf_rated_current: 0.9,\n        max_continous_amp: 15,\n        overload_amp: 20,\n        overload_long: {\n          load_percentage: 110,\n          overload_time_min: 30,\n        },\n        overload_medium: {\n          load_percentage: 125,\n          overload_time_min: 10,\n        },\n        overload_short: {\n          load_percentage: 150,\n          overload_time_min: 1,\n        },\n        avg_switch_time_ms: 5,\n        avg_backup_time_ms: 300000,\n      },\n    };\n  },\n  methods: {\n    submitForm() {\n      const msg = { payload: this.formData };\n      this.send(msg);\n\n    },\n  },\n};\n</script>\n\n\n<style scoped>\n  .form-container {\n    max-width: 900px;\n    margin: 0 auto;\n    padding: 20px;\n    background-color: #f4f4f9;\n    border-radius: 10px;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n  }\n\n  form {\n    display: flex;\n    flex-direction: column;\n    gap: 15px;\n  }\n\n  label {\n    font-weight: bold;\n  }\n\n  input, select, button {\n    padding: 10px;\n    font-size: 1rem;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n  }\n\n  button {\n    background-color: #007bff;\n    color: white;\n    cursor: pointer;\n    border: none;\n  }\n\n  button:hover {\n    background-color: #0056b3;\n  }\n\n  h3 {\n    margin-bottom: 5px;\n  }\n</style>\n",
+        "format": "<template>\n  <div class=\"form-container\">\n    <h2>UPS Specification Form</h2>\n    <form @submit.prevent=\"submitForm\">\n    <!-- Phase Selection -->\n<label for=\"phase\">Phase:</label>\n<select v-model=\"formData.phase\" id=\"phase\">\n  <option value=\"SINGLE_PHASE\">Single Phase</option>\n  <option value=\"THREE_PHASE\">Three Phase</option>\n</select>\n\n\n      <!-- Rated VA -->\n      <label for=\"rated_va\">Rated VA:</label>\n      <input type=\"number\" v-model=\"formData.rated_va\" id=\"rated_va\" />\n\n      <!-- Rated Voltage -->\n      <label for=\"rated_voltage\">Rated Voltage:</label>\n      <input type=\"number\" v-model=\"formData.rated_voltage\" id=\"rated_voltage\" />\n\n      <!-- Rated Current -->\n      <label for=\"rated_current\">Rated Current:</label>\n      <input type=\"number\" v-model=\"formData.rated_current\" id=\"rated_current\" />\n\n      <!-- Minimum Input Voltage -->\n      <label for=\"min_input_voltage\">Minimum Input Voltage:</label>\n      <input type=\"number\" v-model=\"formData.min_input_voltage\" id=\"min_input_voltage\" />\n\n      <!-- Maximum Input Voltage -->\n      <label for=\"max_input_voltage\">Maximum Input Voltage:</label>\n      <input type=\"number\" v-model=\"formData.max_input_voltage\" id=\"max_input_voltage\" />\n\n      <!-- PF Rated Current -->\n<label for=\"pf_rated_current\">Power Factor Rated Current (0-1):</label>\n<input \n  type=\"number\" \n  v-model=\"formData.pf_rated_current\" \n  id=\"pf_rated_current\" \n  step=\"0.01\" \n  min=\"0\" \n  max=\"1\" \n/>\n\n\n      <!-- Max Continuous Amp -->\n      <label for=\"max_continous_amp\">Max Continuous Amp:</label>\n      <input type=\"number\" v-model=\"formData.max_continous_amp\" id=\"max_continous_amp\" />\n\n      <!-- Overload Amp -->\n      <label for=\"overload_amp\">Overload Amp:</label>\n      <input type=\"number\" v-model=\"formData.overload_amp\" id=\"overload_amp\" />\n\n      <!-- Overload Long -->\n      <h3>Overload Long</h3>\n      <label for=\"long_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_long.load_percentage\" id=\"long_load_percentage\" />\n\n      <label for=\"long_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_long.overload_time_min\" id=\"long_overload_time\" />\n\n      <!-- Overload Medium -->\n      <h3>Overload Medium</h3>\n      <label for=\"medium_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_medium.load_percentage\" id=\"medium_load_percentage\" />\n\n      <label for=\"medium_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_medium.overload_time_min\" id=\"medium_overload_time\" />\n\n      <!-- Overload Short -->\n      <h3>Overload Short</h3>\n      <label for=\"short_load_percentage\">Load Percentage:</label>\n      <input type=\"number\" v-model=\"formData.overload_short.load_percentage\" id=\"short_load_percentage\" />\n\n      <label for=\"short_overload_time\">Overload Time (min):</label>\n      <input type=\"number\" v-model=\"formData.overload_short.overload_time_min\" id=\"short_overload_time\" />\n\n      <!-- Average Switch Time -->\n      <label for=\"avg_switch_time\">Average Switch Time (ms):</label>\n      <input type=\"number\" v-model=\"formData.avg_switch_time_ms\" id=\"avg_switch_time\" />\n\n      <!-- Average Backup Time -->\n      <label for=\"avg_backup_time\">Average Backup Time (ms):</label>\n      <input type=\"number\" v-model=\"formData.avg_backup_time_ms\" id=\"avg_backup_time\" />\n\n      <button type=\"submit\">Submit</button>\n    </form>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      formData: {\n        phase: \"SINGLE_PHASE\",\n        rated_va: 1000,\n        rated_voltage: 230,\n        rated_current: 10,\n        min_input_voltage: 180,\n        max_input_voltage: 260,\n        pf_rated_current: 0.9,\n        max_continous_amp: 15,\n        overload_amp: 20,\n        overload_long: {\n          load_percentage: 110,\n          overload_time_min: 30,\n        },\n        overload_medium: {\n          load_percentage: 125,\n          overload_time_min: 10,\n        },\n        overload_short: {\n          load_percentage: 150,\n          overload_time_min: 1,\n        },\n        avg_switch_time_ms: 5,\n        avg_backup_time_ms: 300000,\n      },\n    };\n  },\n  methods: {\n    submitForm() {\n      const msg = { payload: this.formData };\n      this.send(msg);\n\n    },\n  },\n};\n</script>\n\n\n<style scoped>\n  .form-container {\n    max-width: 900px;\n    margin: 0 auto;\n    padding: 20px;\n    background-color: #f4f4f9;\n    border-radius: 10px;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n  }\n\n  form {\n    display: flex;\n    flex-direction: column;\n    gap: 15px;\n  }\n\n  label {\n    font-weight: bold;\n  }\n\n  input, select, button {\n    padding: 10px;\n    font-size: 1rem;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n  }\n\n  button {\n    background-color: #007bff;\n    color: white;\n    cursor: pointer;\n    border: none;\n  }\n\n  button:hover {\n    background-color: #0056b3;\n  }\n\n  h3 {\n    margin-bottom: 5px;\n  }\n</style>\n",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
@@ -29,7 +29,8 @@
         "y": 80,
         "wires": [
             [
-                "b5751b1463e35f8e"
+                "b5751b1463e35f8e",
+                "c9ea6530ad87d3ba"
             ]
         ]
     },
@@ -201,7 +202,11 @@
         "name": "sql errors",
         "func": "var payload=msg.error.message;\nmsg.payload = payload +\" timestamp \"+msg.payload;\nreturn msg;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
         "x": 300,
         "y": 440,
         "wires": [
@@ -255,7 +260,7 @@
         "name": "",
         "label": "DB ERROR",
         "format": "{{msg.payload}}",
-        "layout": "row-spread",
+        "layout": "row-left",
         "style": false,
         "font": "",
         "fontSize": 16,
@@ -655,7 +660,8 @@
         "y": 300,
         "wires": [
             [
-                "c6ed1523341d51c1"
+                "c6ed1523341d51c1",
+                "50ce707bed85d3c0"
             ]
         ]
     },
@@ -766,7 +772,7 @@
         "type": "ui-text",
         "z": "fa6da6e95a3482ec",
         "group": "e646fb9cc2101751",
-        "order": 2,
+        "order": 3,
         "width": 0,
         "height": 0,
         "name": "",
@@ -804,7 +810,7 @@
         "links": [
             "738c7b20e44dc65c"
         ],
-        "x": 85,
+        "x": 55,
         "y": 360,
         "wires": [
             [
@@ -869,10 +875,42 @@
         ]
     },
     {
+        "id": "50ce707bed85d3c0",
+        "type": "debug",
+        "z": "fa6da6e95a3482ec",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "c9ea6530ad87d3ba",
+        "type": "debug",
+        "z": "fa6da6e95a3482ec",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 80,
+        "wires": []
+    },
+    {
         "id": "e98ad7098a2677db",
         "type": "ui-group",
         "name": "SPEC",
-        "page": "56e295c5bde3cd1f",
+        "page": "cb5e987bd157d173",
         "width": 3,
         "height": "3",
         "order": 1,
@@ -892,10 +930,10 @@
         "id": "e646fb9cc2101751",
         "type": "ui-group",
         "name": "DB_UPDATES",
-        "page": "56e295c5bde3cd1f",
-        "width": 6,
+        "page": "cb5e987bd157d173",
+        "width": 4,
         "height": 1,
-        "order": 2,
+        "order": 3,
         "showTitle": true,
         "className": "",
         "visible": "true",
@@ -903,12 +941,12 @@
         "groupType": "default"
     },
     {
-        "id": "56e295c5bde3cd1f",
+        "id": "cb5e987bd157d173",
         "type": "ui-page",
-        "name": "SPEC",
+        "name": "SETTINGS",
         "ui": "6bb6879aa70631ea",
-        "path": "/spec",
-        "icon": "file-document",
+        "path": "/settings",
+        "icon": "cog-outline",
         "layout": "grid",
         "theme": "f51f9a07212ff54b",
         "breakpoints": [
@@ -933,10 +971,10 @@
                 "cols": "12"
             }
         ],
-        "order": 5,
+        "order": 4,
         "className": "",
-        "visible": "true",
-        "disabled": "false"
+        "visible": true,
+        "disabled": false
     },
     {
         "id": "6bb6879aa70631ea",
