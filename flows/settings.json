@@ -8,136 +8,6 @@
         "env": []
     },
     {
-        "id": "c22fcd60c631ef02",
-        "type": "ui-form",
-        "z": "e6613618b3405f10",
-        "name": "REPORT_SETTINGS",
-        "group": "785ed2fd62cefc23",
-        "label": "",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "options": [
-            {
-                "label": "name",
-                "key": "name",
-                "type": "text",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "TestStandard",
-                "key": "standard",
-                "type": "dropdown",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "ups_model",
-                "key": "model",
-                "type": "text",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Client",
-                "key": "client_name",
-                "type": "text",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Brand",
-                "key": "brand_name",
-                "type": "text",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "TestEngineer",
-                "key": "test_enginner",
-                "type": "text",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "AprrovalEngineer",
-                "key": "approval_engineer",
-                "type": "text",
-                "required": false,
-                "rows": null
-            }
-        ],
-        "formValue": {
-            "name": "",
-            "standard": "",
-            "model": "",
-            "client_name": "",
-            "brand_name": "",
-            "test_enginner": "",
-            "approval_engineer": ""
-        },
-        "payload": "",
-        "submit": "submit",
-        "cancel": "clear",
-        "resetOnSubmit": true,
-        "topic": "topic",
-        "topicType": "msg",
-        "splitLayout": "",
-        "className": "",
-        "passthru": false,
-        "dropdownOptions": [
-            {
-                "dropdown": "standard",
-                "value": "0",
-                "label": " IEC_62040_1"
-            },
-            {
-                "dropdown": "standard",
-                "value": "1",
-                "label": "IEC_62040_2"
-            },
-            {
-                "dropdown": "standard",
-                "value": "2",
-                "label": "IEC_62040_3"
-            },
-            {
-                "dropdown": "standard",
-                "value": "3",
-                "label": "IEC_62040_4"
-            },
-            {
-                "dropdown": "standard",
-                "value": "4",
-                "label": "IEC_62040_5"
-            }
-        ],
-        "x": 240,
-        "y": 120,
-        "wires": [
-            [
-                "e9a4f7de5026de54"
-            ]
-        ]
-    },
-    {
-        "id": "e9a4f7de5026de54",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 2",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 520,
-        "y": 120,
-        "wires": []
-    },
-    {
         "id": "b06b941286798352",
         "type": "inject",
         "z": "e6613618b3405f10",
@@ -170,7 +40,7 @@
         "id": "5d58a652fc68e02d",
         "type": "fs-file-lister",
         "z": "e6613618b3405f10",
-        "name": "",
+        "name": "PROTO",
         "start": "src/proto",
         "pattern": "*.proto*",
         "folders": "*",
@@ -237,22 +107,6 @@
         "wires": []
     },
     {
-        "id": "269441a7ba5f862a",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 4",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 720,
-        "y": 220,
-        "wires": []
-    },
-    {
         "id": "dea6212759a9d76b",
         "type": "inject",
         "z": "e6613618b3405f10",
@@ -274,7 +128,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 140,
-        "y": 280,
+        "y": 320,
         "wires": [
             [
                 "f5f64a1ecdcb57f7"
@@ -302,24 +156,6 @@
         ]
     },
     {
-        "id": "a2aade93aa0c3b38",
-        "type": "function",
-        "z": "e6613618b3405f10",
-        "name": "all_protos",
-        "func": "// Convert the input array in msg.payload to a comma-separated string\nmsg.payload = msg.payload.join(',');\n\n// Return the modified message object\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 520,
-        "y": 220,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "e79a3cfe5289963c",
         "type": "decode",
         "z": "e6613618b3405f10",
@@ -333,90 +169,6 @@
                 "d7f2f78d77a4908e"
             ]
         ]
-    },
-    {
-        "id": "5a76781b0529404a",
-        "type": "sqlite",
-        "z": "e6613618b3405f10",
-        "mydb": "4a28ed258215bca1",
-        "sqlquery": "msg.topic",
-        "sql": "",
-        "name": "MAIN_DB",
-        "x": 340,
-        "y": 420,
-        "wires": [
-            [
-                "19a29a8abe90821b"
-            ]
-        ]
-    },
-    {
-        "id": "e9f332661740ef76",
-        "type": "fs-file-lister",
-        "z": "e6613618b3405f10",
-        "name": "",
-        "start": "db",
-        "pattern": "*.*",
-        "folders": "*",
-        "hidden": true,
-        "lstype": "files",
-        "path": true,
-        "single": false,
-        "depth": 0,
-        "stat": false,
-        "showWarnings": true,
-        "x": 320,
-        "y": 360,
-        "wires": [
-            [
-                "6e2658e72d337141"
-            ]
-        ]
-    },
-    {
-        "id": "ea17e8f7b8f6af97",
-        "type": "inject",
-        "z": "e6613618b3405f10",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 140,
-        "y": 360,
-        "wires": [
-            [
-                "e9f332661740ef76"
-            ]
-        ]
-    },
-    {
-        "id": "6e2658e72d337141",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 5",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 560,
-        "y": 360,
-        "wires": []
     },
     {
         "id": "922ac39b3aa31a7c",
@@ -442,9 +194,7 @@
         "x": 150,
         "y": 420,
         "wires": [
-            [
-                "5a76781b0529404a"
-            ]
+            []
         ]
     },
     {
@@ -465,125 +215,144 @@
         "wires": []
     },
     {
-        "id": "80603d441a974681",
-        "type": "ui-form",
+        "id": "2ee26788bce0c2dd",
+        "type": "ui-template",
         "z": "e6613618b3405f10",
-        "name": "UPS_SPEC",
         "group": "785ed2fd62cefc23",
-        "label": "UPS_SPEC",
-        "order": 2,
+        "page": "",
+        "ui": "",
+        "name": "REPORT_SETTING",
+        "order": 1,
         "width": 0,
         "height": 0,
-        "options": [
-            {
-                "label": "Phase",
-                "key": "phase",
-                "type": "dropdown",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Rating",
-                "key": "rated_va",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Rated Voltage",
-                "key": "rated_voltage",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Rated Amp",
-                "key": "rated_current",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Vin Min",
-                "key": "min_input_voltage ",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Vin Max",
-                "key": "max_input_voltage ",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Rated PF",
-                "key": "pf_rated_current",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Max Amp",
-                "key": "max_continous_amp",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Overload Amp",
-                "key": "overload_amp",
-                "type": "number",
-                "required": false,
-                "rows": null
-            }
-        ],
-        "formValue": {
-            "phase": "",
-            "rated_va": "",
-            "rated_voltage": "",
-            "rated_current": "",
-            "min_input_voltage ": "",
-            "max_input_voltage ": "",
-            "pf_rated_current": "",
-            "max_continous_amp": "",
-            "overload_amp": ""
-        },
-        "payload": "",
-        "submit": "submit",
-        "cancel": "clear",
-        "resetOnSubmit": true,
-        "topic": "topic",
-        "topicType": "msg",
-        "splitLayout": "",
+        "head": "",
+        "format": "<template>\n  <div class=\"form-container\">\n    <h2>Report Settings</h2>\n    <form @submit.prevent=\"submitForm\">\n      <!-- Report ID -->\n      <label for=\"report_id\">Report ID:</label>\n      <div class=\"report-id-container\">\n        <input\n          type=\"number\"\n          v-model=\"formData.report_id\"\n          id=\"report_id\"\n          required\n          readonly\n        />\n        <button type=\"button\" @click=\"generateReportID\">Generate</button>\n      </div>\n\n      <!-- Standard -->\n      <label for=\"standard\">Standard:</label>\n      <select v-model=\"formData.standard\" id=\"standard\" required>\n        <option v-for=\"(value, key) in TestStandard\" :key=\"value\" :value=\"value\">\n          {{ key }}\n        </option>\n      </select>\n\n      <!-- UPS Model -->\n      <label for=\"ups_model\">UPS Model:</label>\n      <input type=\"number\" v-model=\"formData.ups_model\" id=\"ups_model\" required />\n\n      <!-- Client Name -->\n      <label for=\"client_name\">Client Name:</label>\n      <input type=\"text\" v-model=\"formData.client_name\" id=\"client_name\" />\n\n      <!-- Brand Name -->\n      <label for=\"brand_name\">Brand Name:</label>\n      <input type=\"text\" v-model=\"formData.brand_name\" id=\"brand_name\" />\n\n      <!-- Test Engineer Name -->\n      <label for=\"test_engineer_name\">Test Engineer Name:</label>\n      <input type=\"text\" v-model=\"formData.test_engineer_name\" id=\"test_engineer_name\" />\n\n      <!-- Test Approval Name -->\n      <label for=\"test_approval_name\">Test Approval Name:</label>\n      <input type=\"text\" v-model=\"formData.test_approval_name\" id=\"test_approval_name\" />\n\n      <!-- Spec ID Dropdown -->\n      <label for=\"spec_id\">Specification ID:</label>\n      <select v-model=\"formData.spec_id\" id=\"spec_id\" required>\n        <option v-for=\"id in specOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n      </select>\n\n      <!-- Display Spec Data -->\n      <div v-if=\"selectedSpec\">\n        <h3>Spec Details:</h3>\n        <p><strong>Phase:</strong> {{ selectedSpec.phase }}</p>\n        <p><strong>Rated VA:</strong> {{ selectedSpec.rating_va }}</p>\n        <p><strong>Rated Voltage:</strong> {{ selectedSpec.rated_voltage }}</p>\n        <p><strong>Rated Current:</strong> {{ selectedSpec.rated_current }}</p>\n        <p><strong>Power Factor Rated Current:</strong> {{ selectedSpec.pf_rated_current }}</p>\n        <p><strong>Max Continuous Amp:</strong> {{ selectedSpec.max_continous_amp }}</p>\n        <p><strong>Overload Amp:</strong> {{ selectedSpec.overload_amp }}</p>\n        <p><strong>Average Switch Time (ms):</strong> {{ selectedSpec.avg_switch_time_ms }}</p>\n        <p><strong>Average Backup Time (ms):</strong> {{ selectedSpec.avg_backup_time_ms }}</p>\n      </div>\n\n      <button type=\"submit\">Submit</button>\n    </form>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      latest_spec_id: 0, // Initial placeholder, dynamically updated\n      spec: [], // Initially empty\n      formData: {\n        report_id: null,\n        standard: null,\n        ups_model: null,\n        client_name: '',\n        brand_name: '',\n        test_engineer_name: '',\n        test_approval_name: '',\n        spec_id: null, // Selected spec_id\n      },\n      TestStandard: {\n        IEC_62040_1: 0,\n        IEC_62040_2: 1,\n        IEC_62040_3: 2,\n        IEC_62040_4: 3,\n        IEC_62040_5: 4,\n      },\n    };\n  },\n  computed: {\n    specOptions() {\n      return this.spec.map((spec) => spec.id).sort((a, b) => a - b);\n    },\n    selectedSpec() {\n      return this.spec.find((spec) => spec.id === this.formData.spec_id) || null;\n    },\n  },\n  methods: {\n    submitForm() {\n      const msg = { payload: this.formData };\n      this.send(msg); // Replace with your submission logic\n    },\n    updateSpecData(payload) {\n      if (payload.latest_spec_id !== undefined) {\n        this.latest_spec_id = payload.latest_spec_id;\n      }\n      if (payload.spec && Array.isArray(payload.spec)) {\n        this.spec = payload.spec;\n      } else {\n        console.error(\"Spec data is not properly formatted:\", payload.spec);\n      }\n\n      const latestSpec = this.spec.find((spec) => spec.id === this.latest_spec_id - 1);\n      if (!this.formData.spec_id && latestSpec) {\n        this.formData.spec_id = latestSpec.id;\n      }\n    },\n    generateReportID() {\n      this.formData.report_id = Math.floor(10000000 + Math.random() * 90000000);\n    },\n  },\n  mounted() {\n    this.$watch('msg', (newMsg) => {\n      if (newMsg && newMsg.payload) {\n        this.updateSpecData(newMsg.payload);\n      }\n    });\n  },\n};\n</script>\n\n<style scoped>\n.form-container {\n  max-width: 600px;\n  margin: 0 auto;\n  padding: 20px;\n  background-color: #f4f4f9;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n}\n\nform {\n  display: flex;\n  flex-direction: column;\n  gap: 15px;\n}\n\nlabel {\n  font-weight: bold;\n}\n\ninput,\nselect,\nbutton {\n  padding: 10px;\n  font-size: 1rem;\n  border-radius: 5px;\n  border: 1px solid #ccc;\n}\n\nbutton {\n  background-color: #007bff;\n  color: white;\n  cursor: pointer;\n  border: none;\n}\n\nbutton:hover {\n  background-color: #0056b3;\n}\n\nh3 {\n  margin-top: 20px;\n}\n\n.report-id-container {\n  display: flex;\n  gap: 10px;\n}\n</style>\n",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
         "className": "",
-        "passthru": false,
-        "dropdownOptions": [
-            {
-                "dropdown": "phase",
-                "value": "SINGLE_PHASE",
-                "label": "SINGLE_PHASE"
-            },
-            {
-                "dropdown": "phase",
-                "value": "THREE_PHASE",
-                "label": "THREE_PHASE"
-            }
-        ],
-        "x": 250,
-        "y": 520,
+        "x": 580,
+        "y": 200,
         "wires": [
             [
-                "3c022c1b6e131f76"
+                "d50bbc87398634fe"
             ]
         ]
     },
     {
-        "id": "3c022c1b6e131f76",
+        "id": "03f0d8cdc2f1b6d1",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "fetch global data",
+        "func": "// In a Node-RED function node\nmsg.payload = {\n  latest_spec_id: global.get(\"latest_spec_id\") || 0,\n  spec: global.get(\"spec\") || [],\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 200,
+        "wires": [
+            [
+                "2ee26788bce0c2dd"
+            ]
+        ]
+    },
+    {
+        "id": "53fd82b76f9712fb",
+        "type": "link in",
+        "z": "e6613618b3405f10",
+        "name": "link in 10",
+        "links": [
+            "deb253e450919a1a"
+        ],
+        "x": 65,
+        "y": 160,
+        "wires": [
+            [
+                "03f0d8cdc2f1b6d1"
+            ]
+        ]
+    },
+    {
+        "id": "ea17e8f7b8f6af97",
+        "type": "inject",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 120,
+        "wires": [
+            [
+                "e9f332661740ef76"
+            ]
+        ]
+    },
+    {
+        "id": "e9f332661740ef76",
+        "type": "fs-file-lister",
+        "z": "e6613618b3405f10",
+        "name": "DB",
+        "start": "db",
+        "pattern": "*.*",
+        "folders": "*",
+        "hidden": true,
+        "lstype": "files",
+        "path": true,
+        "single": false,
+        "depth": 0,
+        "stat": false,
+        "showWarnings": true,
+        "x": 370,
+        "y": 120,
+        "wires": [
+            [
+                "17b9394803e27c56"
+            ]
+        ]
+    },
+    {
+        "id": "17b9394803e27c56",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "setGlobalpath",
+        "func": "global.set(\"db_path\",msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 120,
+        "wires": [
+            [
+                "6e2658e72d337141"
+            ]
+        ]
+    },
+    {
+        "id": "6e2658e72d337141",
         "type": "debug",
         "z": "e6613618b3405f10",
-        "name": "debug 7",
+        "name": "debug 5",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -591,87 +360,44 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 420,
-        "y": 520,
+        "x": 840,
+        "y": 120,
         "wires": []
     },
     {
-        "id": "aa3ea1c75a205790",
-        "type": "ui-form",
+        "id": "b41defef826bea8e",
+        "type": "inject",
         "z": "e6613618b3405f10",
-        "name": "Overload",
-        "group": "785ed2fd62cefc23",
-        "label": "OverLoads",
-        "order": 3,
-        "width": 0,
-        "height": 0,
-        "options": [
+        "name": "",
+        "props": [
             {
-                "label": "Load Percentage",
-                "key": "load_percentage",
-                "type": "number",
-                "required": false,
-                "rows": null
+                "p": "payload"
             },
             {
-                "label": "Time",
-                "key": "overload_time_min",
-                "type": "number",
-                "required": false,
-                "rows": null
-            },
-            {
-                "label": "Overload Type",
-                "key": "type",
-                "type": "dropdown",
-                "required": false,
-                "rows": null
+                "p": "topic",
+                "vt": "str"
             }
         ],
-        "formValue": {
-            "load_percentage": "",
-            "overload_time_min": "",
-            "type": ""
-        },
+        "repeat": "0.1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
         "payload": "",
-        "submit": "submit",
-        "cancel": "clear",
-        "resetOnSubmit": true,
-        "topic": "topic",
-        "topicType": "msg",
-        "splitLayout": "",
-        "className": "",
-        "passthru": false,
-        "dropdownOptions": [
-            {
-                "dropdown": "type",
-                "value": "overload_long",
-                "label": "overload_long"
-            },
-            {
-                "dropdown": "type",
-                "value": "overload_medium",
-                "label": "overload_medium"
-            },
-            {
-                "dropdown": "type",
-                "value": "overload_short",
-                "label": "overload_short"
-            }
-        ],
-        "x": 240,
-        "y": 560,
+        "payloadType": "date",
+        "x": 130,
+        "y": 220,
         "wires": [
             [
-                "ea7c319790c3db46"
+                "03f0d8cdc2f1b6d1"
             ]
         ]
     },
     {
-        "id": "ea7c319790c3db46",
+        "id": "7beadb4baf162041",
         "type": "debug",
         "z": "e6613618b3405f10",
-        "name": "debug 8",
+        "name": "debug 2",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -679,9 +405,85 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 600,
-        "y": 580,
+        "x": 1060,
+        "y": 160,
         "wires": []
+    },
+    {
+        "id": "d50bbc87398634fe",
+        "type": "rbe",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 770,
+        "y": 200,
+        "wires": [
+            [
+                "9c280c8461b4b98b"
+            ]
+        ]
+    },
+    {
+        "id": "9c280c8461b4b98b",
+        "type": "switch",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "report_id",
+                "vt": "str"
+            },
+            {
+                "t": "hask",
+                "v": "latest_spec_id",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 910,
+        "y": 200,
+        "wires": [
+            [
+                "7beadb4baf162041"
+            ],
+            [
+                "63d48c7ddf8b20ed"
+            ]
+        ]
+    },
+    {
+        "id": "63d48c7ddf8b20ed",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "fcaa87c16afbdfcd",
+        "type": "protobuf-file",
+        "protopath": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\src\\proto\\pData.proto",
+        "watchFile": false,
+        "keepCase": true
     },
     {
         "id": "785ed2fd62cefc23",
@@ -696,19 +498,6 @@
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
-    },
-    {
-        "id": "fcaa87c16afbdfcd",
-        "type": "protobuf-file",
-        "protopath": "/Users/farukhannan/FHR_DEVS/MyDEVS/Python/powerGuard/src/proto/pData.proto",
-        "watchFile": false,
-        "keepCase": true
-    },
-    {
-        "id": "4a28ed258215bca1",
-        "type": "sqlitedb",
-        "db": "/Users/farukhannan/FHR_DEVS/MyDEVS/Python/powerGuard/db/test_reports.db",
-        "mode": "RWC"
     },
     {
         "id": "cb5e987bd157d173",
