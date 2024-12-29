@@ -1,25 +1,23 @@
 import logging
 import sqlite3
-from typing import Optional, Dict, Any
-from pathlib import Path
-from typing import Any, Optional
 import time
 from datetime import datetime, timezone
-from google.protobuf.timestamp_pb2 import Timestamp
+from pathlib import Path
+from typing import Any, Dict, Optional
 
+from google.protobuf.timestamp_pb2 import Timestamp
 from pydantic import BaseModel, PrivateAttr, field_validator
 
 # Import generated proto classes
 from powerguard.bootstrap import paths
-from google.protobuf.timestamp_pb2 import Timestamp
-from proto.pData_pb2 import PowerMeasure, PowerMeasureType
-from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
-from proto.ups_test_pb2 import TestResult, TestType
-from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
-
-from powerguard.data.validator import Validator
-from powerguard.data.inserter import Inserter
 from powerguard.data.fetcher import Fetcher
+from powerguard.data.inserter import Inserter
+from powerguard.data.validator import Validator
+from proto.pData_pb2 import PowerMeasure, PowerMeasureType
+from proto.report_pb2 import (Measurement, ReportSettings, TestReport,
+                              TestStandard)
+from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
+from proto.ups_test_pb2 import TestResult, TestType
 
 
 class DataManager(BaseModel):
@@ -108,7 +106,7 @@ class DataManager(BaseModel):
                 rated_current INTEGER,
                 min_input_voltage INTEGER,
                 max_input_voltage INTEGER,
-                pf_rated_current INTEGER,
+                pf_rated_current REAL,
                 max_continous_amp INTEGER,
                 overload_amp INTEGER,
                 overload_long_id INTEGER,

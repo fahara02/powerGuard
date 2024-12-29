@@ -26,7 +26,7 @@ message spec{
 	uint32 rated_current =4;
 	uint32  min_input_voltage = 5;
 	uint32  max_input_voltage = 6;
-	uint32 pf_rated_current=7;
+	float pf_rated_current=7;
 	uint32 max_continous_amp=8;
 	uint32 overload_amp=9;
     OverLoad overload_long=10;
