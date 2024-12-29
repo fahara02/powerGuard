@@ -63,24 +63,6 @@
         ]
     },
     {
-        "id": "625ed91f0b7f41af",
-        "type": "function",
-        "z": "fa6da6e95a3482ec",
-        "name": "Insert using variable",
-        "func": "// Access the data from the incoming form node\nvar data = msg.payload;\n\n// Prepare SQL queries for OverLoad table and Spec table\nvar overloadQueries = [];\n\n// Insert data into OverLoad table\noverloadQueries.push(`\n    INSERT INTO OverLoad (load_percentage, overload_time_min) \n    VALUES (${data.overload_long.load_percentage}, ${data.overload_long.overload_time_min})\n`);\noverloadQueries.push(`\n    INSERT INTO OverLoad (load_percentage, overload_time_min) \n    VALUES (${data.overload_medium.load_percentage}, ${data.overload_medium.overload_time_min})\n`);\noverloadQueries.push(`\n    INSERT INTO OverLoad (load_percentage, overload_time_min) \n    VALUES (${data.overload_short.load_percentage}, ${data.overload_short.overload_time_min})\n`);\n\n// Insert data into Spec table using foreign key references\nvar specQuery = `\nINSERT INTO spec (\n    phase, rating_va, rated_voltage, rated_current, \n    min_input_voltage, max_input_voltage, pf_rated_current, \n    max_continous_amp, overload_amp, overload_long_id, \n    overload_medium_id, overload_short_id, avg_switch_time_ms, \n    avg_backup_time_ms\n) VALUES (\n    ${data.phase}, ${data.rated_va}, ${data.rated_voltage}, ${data.rated_current}, \n    ${data.min_input_voltage}, ${data.max_input_voltage}, ${data.pf_rated_current}, \n    ${data.max_continous_amp}, ${data.overload_amp}, \n    (SELECT MAX(id) FROM OverLoad WHERE load_percentage=${data.overload_long.load_percentage} AND overload_time_min=${data.overload_long.overload_time_min}), \n    (SELECT MAX(id) FROM OverLoad WHERE load_percentage=${data.overload_medium.load_percentage} AND overload_time_min=${data.overload_medium.overload_time_min}), \n    (SELECT MAX(id) FROM OverLoad WHERE load_percentage=${data.overload_short.load_percentage} AND overload_time_min=${data.overload_short.overload_time_min}), \n    ${data.avg_switch_time_ms}, ${data.avg_backup_time_ms}\n);\n`;\n\n// Combine all queries\nvar fullQuery = overloadQueries.join(\"; \") + \"; \" + specQuery;\n\n// Prepare the message to send to the SQLite node\nvar msg1 = {};\nmsg1.topic = fullQuery;\n\n// Return the message for execution\nreturn msg1;\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 200,
-        "y": 380,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "af3608a7f0441bca",
         "type": "debug",
         "z": "fa6da6e95a3482ec",
@@ -92,7 +74,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 640,
+        "x": 940,
         "y": 360,
         "wires": []
     },
@@ -463,7 +445,7 @@
         "id": "781b2b6c1e50c880",
         "type": "link in",
         "z": "fa6da6e95a3482ec",
-        "name": "link in 3",
+        "name": "overload_medium_in",
         "links": [
             "dbb287655beae14c"
         ],
@@ -492,7 +474,7 @@
         "id": "b5134714174fb262",
         "type": "link in",
         "z": "fa6da6e95a3482ec",
-        "name": "link in 7",
+        "name": "overload_short_in",
         "links": [
             "5a449e77ef33a460"
         ],
@@ -694,7 +676,7 @@
         "id": "7a0dc356b1a5bf4d",
         "type": "link in",
         "z": "fa6da6e95a3482ec",
-        "name": "link in 8",
+        "name": "final_spec_in",
         "links": [
             "316936fd8f043cdc"
         ],
@@ -763,7 +745,7 @@
         "type": "function",
         "z": "fa6da6e95a3482ec",
         "name": "set global spec id",
-        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"spec_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured spec_id: \" + lastId);\nmsg.payload=lastId;\nreturn msg;\n",
+        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"latest_spec_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured latest_spec_id: \" + lastId);\nmsg.payload=lastId;\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -774,7 +756,8 @@
         "y": 300,
         "wires": [
             [
-                "309a5ee517f1f9b5"
+                "309a5ee517f1f9b5",
+                "738c7b20e44dc65c"
             ]
         ]
     },
@@ -796,9 +779,94 @@
         "color": "#717171",
         "wrapText": false,
         "className": "",
-        "x": 1380,
+        "x": 1480,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "738c7b20e44dc65c",
+        "type": "link out",
+        "z": "fa6da6e95a3482ec",
+        "name": "latest_spec_id_out",
+        "mode": "link",
+        "links": [
+            "cd699073d00f603e"
+        ],
+        "x": 1465,
         "y": 300,
         "wires": []
+    },
+    {
+        "id": "cd699073d00f603e",
+        "type": "link in",
+        "z": "fa6da6e95a3482ec",
+        "name": "link in 3",
+        "links": [
+            "738c7b20e44dc65c"
+        ],
+        "x": 85,
+        "y": 360,
+        "wires": [
+            [
+                "def410b75fcfd683"
+            ]
+        ]
+    },
+    {
+        "id": "def410b75fcfd683",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "get_all_spec",
+        "func": "msg.topic=\"SELECT * FROM spec ORDER BY id DESC LIMIT 100\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 360,
+        "wires": [
+            [
+                "95f8395436660ba7"
+            ]
+        ]
+    },
+    {
+        "id": "95f8395436660ba7",
+        "type": "sqlite",
+        "z": "fa6da6e95a3482ec",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 440,
+        "y": 360,
+        "wires": [
+            [
+                "f0cfb132c6dc3bb9"
+            ]
+        ]
+    },
+    {
+        "id": "f0cfb132c6dc3bb9",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "set global spec",
+        "func": "global.set(\"spec\",msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 360,
+        "wires": [
+            [
+                "af3608a7f0441bca"
+            ]
+        ]
     },
     {
         "id": "e98ad7098a2677db",

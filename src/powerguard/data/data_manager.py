@@ -125,7 +125,7 @@ class DataManager(BaseModel):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 report_id INTEGER NOT NULL UNIQUE,
                 standard TEXT NOT NULL,
-                ups_model INTEGER NOT NULL,
+                ups_model TEXT NOT NULL,
                 client_name TEXT,
                 brand_name TEXT,
                 test_engineer_name TEXT,
@@ -522,7 +522,7 @@ class DataManager(BaseModel):
             rated_current=21,
             min_input_voltage=200,
             max_input_voltage=240,
-            pf_rated_current=100,  # 1.0 PF represented as 100 for simplicity
+            pf_rated_current=1,  # 1.0 PF represented as 100 for simplicity
             max_continous_amp=25,
             overload_amp=30,
             overload_long=overload_long,
@@ -639,7 +639,7 @@ class DataManager(BaseModel):
         report_settings = ReportSettings(
             report_id=report_id,
             standard=TestStandard.IEC_62040_3,
-            ups_model=101,
+            ups_model="UVA111",
             spec=ups_spec,
             client_name=client_name,
             brand_name=brand_name,

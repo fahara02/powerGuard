@@ -82,8 +82,8 @@
         "name": "",
         "protofile": "fcaa87c16afbdfcd",
         "protoType": "PowerMeasure",
-        "x": 500,
-        "y": 280,
+        "x": 540,
+        "y": 560,
         "wires": [
             [
                 "e79a3cfe5289963c"
@@ -102,8 +102,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 800,
-        "y": 280,
+        "x": 900,
+        "y": 580,
         "wires": []
     },
     {
@@ -127,8 +127,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 140,
-        "y": 320,
+        "x": 100,
+        "y": 560,
         "wires": [
             [
                 "f5f64a1ecdcb57f7"
@@ -147,8 +147,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 320,
-        "y": 280,
+        "x": 340,
+        "y": 560,
         "wires": [
             [
                 "f8ea56e6ef8f2e3f"
@@ -162,8 +162,8 @@
         "name": "",
         "protofile": "fcaa87c16afbdfcd",
         "protoType": "PowerMeasure",
-        "x": 640,
-        "y": 280,
+        "x": 720,
+        "y": 560,
         "wires": [
             [
                 "d7f2f78d77a4908e"
@@ -191,28 +191,11 @@
         "topic": "SELECT * FROM PowerMeasure ORDER BY id DESC LIMIT 100",
         "payload": "",
         "payloadType": "date",
-        "x": 150,
-        "y": 420,
+        "x": 130,
+        "y": 620,
         "wires": [
             []
         ]
-    },
-    {
-        "id": "19a29a8abe90821b",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 6",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 580,
-        "y": 420,
-        "wires": []
     },
     {
         "id": "2ee26788bce0c2dd",
@@ -226,7 +209,7 @@
         "width": 0,
         "height": 0,
         "head": "",
-        "format": "<template>\n  <div class=\"form-container\">\n    <h2>Report Settings</h2>\n    <form @submit.prevent=\"submitForm\">\n      <!-- Report ID -->\n      <label for=\"report_id\">Report ID:</label>\n      <div class=\"report-id-container\">\n        <input\n          type=\"number\"\n          v-model=\"formData.report_id\"\n          id=\"report_id\"\n          required\n          readonly\n        />\n        <button type=\"button\" @click=\"generateReportID\">Generate</button>\n      </div>\n\n      <!-- Standard -->\n      <label for=\"standard\">Standard:</label>\n      <select v-model=\"formData.standard\" id=\"standard\" required>\n        <option v-for=\"(value, key) in TestStandard\" :key=\"value\" :value=\"value\">\n          {{ key }}\n        </option>\n      </select>\n\n      <!-- UPS Model -->\n      <label for=\"ups_model\">UPS Model:</label>\n      <input type=\"number\" v-model=\"formData.ups_model\" id=\"ups_model\" required />\n\n      <!-- Client Name -->\n      <label for=\"client_name\">Client Name:</label>\n      <input type=\"text\" v-model=\"formData.client_name\" id=\"client_name\" />\n\n      <!-- Brand Name -->\n      <label for=\"brand_name\">Brand Name:</label>\n      <input type=\"text\" v-model=\"formData.brand_name\" id=\"brand_name\" />\n\n      <!-- Test Engineer Name -->\n      <label for=\"test_engineer_name\">Test Engineer Name:</label>\n      <input type=\"text\" v-model=\"formData.test_engineer_name\" id=\"test_engineer_name\" />\n\n      <!-- Test Approval Name -->\n      <label for=\"test_approval_name\">Test Approval Name:</label>\n      <input type=\"text\" v-model=\"formData.test_approval_name\" id=\"test_approval_name\" />\n\n      <!-- Spec ID Dropdown -->\n      <label for=\"spec_id\">Specification ID:</label>\n      <select v-model=\"formData.spec_id\" id=\"spec_id\" required>\n        <option v-for=\"id in specOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n      </select>\n\n      <!-- Display Spec Data -->\n      <div v-if=\"selectedSpec\">\n        <h3>Spec Details:</h3>\n        <p><strong>Phase:</strong> {{ selectedSpec.phase }}</p>\n        <p><strong>Rated VA:</strong> {{ selectedSpec.rating_va }}</p>\n        <p><strong>Rated Voltage:</strong> {{ selectedSpec.rated_voltage }}</p>\n        <p><strong>Rated Current:</strong> {{ selectedSpec.rated_current }}</p>\n        <p><strong>Power Factor Rated Current:</strong> {{ selectedSpec.pf_rated_current }}</p>\n        <p><strong>Max Continuous Amp:</strong> {{ selectedSpec.max_continous_amp }}</p>\n        <p><strong>Overload Amp:</strong> {{ selectedSpec.overload_amp }}</p>\n        <p><strong>Average Switch Time (ms):</strong> {{ selectedSpec.avg_switch_time_ms }}</p>\n        <p><strong>Average Backup Time (ms):</strong> {{ selectedSpec.avg_backup_time_ms }}</p>\n      </div>\n\n      <button type=\"submit\">Submit</button>\n    </form>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      latest_spec_id: 0, // Initial placeholder, dynamically updated\n      spec: [], // Initially empty\n      formData: {\n        report_id: null,\n        standard: null,\n        ups_model: null,\n        client_name: '',\n        brand_name: '',\n        test_engineer_name: '',\n        test_approval_name: '',\n        spec_id: null, // Selected spec_id\n      },\n      TestStandard: {\n        IEC_62040_1: 0,\n        IEC_62040_2: 1,\n        IEC_62040_3: 2,\n        IEC_62040_4: 3,\n        IEC_62040_5: 4,\n      },\n    };\n  },\n  computed: {\n    specOptions() {\n      return this.spec.map((spec) => spec.id).sort((a, b) => a - b);\n    },\n    selectedSpec() {\n      return this.spec.find((spec) => spec.id === this.formData.spec_id) || null;\n    },\n  },\n  methods: {\n    submitForm() {\n      const msg = { payload: this.formData };\n      this.send(msg); // Replace with your submission logic\n    },\n    updateSpecData(payload) {\n      if (payload.latest_spec_id !== undefined) {\n        this.latest_spec_id = payload.latest_spec_id;\n      }\n      if (payload.spec && Array.isArray(payload.spec)) {\n        this.spec = payload.spec;\n      } else {\n        console.error(\"Spec data is not properly formatted:\", payload.spec);\n      }\n\n      const latestSpec = this.spec.find((spec) => spec.id === this.latest_spec_id - 1);\n      if (!this.formData.spec_id && latestSpec) {\n        this.formData.spec_id = latestSpec.id;\n      }\n    },\n    generateReportID() {\n      this.formData.report_id = Math.floor(10000000 + Math.random() * 90000000);\n    },\n  },\n  mounted() {\n    this.$watch('msg', (newMsg) => {\n      if (newMsg && newMsg.payload) {\n        this.updateSpecData(newMsg.payload);\n      }\n    });\n  },\n};\n</script>\n\n<style scoped>\n.form-container {\n  max-width: 600px;\n  margin: 0 auto;\n  padding: 20px;\n  background-color: #f4f4f9;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n}\n\nform {\n  display: flex;\n  flex-direction: column;\n  gap: 15px;\n}\n\nlabel {\n  font-weight: bold;\n}\n\ninput,\nselect,\nbutton {\n  padding: 10px;\n  font-size: 1rem;\n  border-radius: 5px;\n  border: 1px solid #ccc;\n}\n\nbutton {\n  background-color: #007bff;\n  color: white;\n  cursor: pointer;\n  border: none;\n}\n\nbutton:hover {\n  background-color: #0056b3;\n}\n\nh3 {\n  margin-top: 20px;\n}\n\n.report-id-container {\n  display: flex;\n  gap: 10px;\n}\n</style>\n",
+        "format": "<template>\n    <div class=\"form-container\">\n      <h2>Report Settings</h2>\n      <form @submit.prevent=\"submitForm\">\n        <!-- Report ID -->\n        <label for=\"report_id\">Report ID:</label>\n        <div class=\"report-id-container\">\n          <input\n            type=\"number\"\n            v-model=\"formData.report_id\"\n            id=\"report_id\"\n            required\n            readonly\n          />\n          <button type=\"button\" @click=\"generateReportID\">Generate</button>\n        </div>\n  \n        <!-- Standard -->\n        <label for=\"standard\">Standard:</label>\n        <select v-model=\"formData.standard\" id=\"standard\" required>\n          <option v-for=\"(value, key) in TestStandard\" :key=\"value\" :value=\"value\">\n            {{ key }}\n          </option>\n        </select>\n  \n        <!-- UPS Model -->\n        <label for=\"ups_model\">UPS Model:</label>\n        <input type=\"text\" v-model=\"formData.ups_model\" id=\"ups_model\" required />\n  \n        <!-- Client Name -->\n        <label for=\"client_name\">Client Name:</label>\n        <input type=\"text\" v-model=\"formData.client_name\" id=\"client_name\" />\n  \n        <!-- Brand Name -->\n        <label for=\"brand_name\">Brand Name:</label>\n        <input type=\"text\" v-model=\"formData.brand_name\" id=\"brand_name\" />\n  \n        <!-- Test Engineer Name -->\n        <label for=\"test_engineer_name\">Test Engineer Name:</label>\n        <input type=\"text\" v-model=\"formData.test_engineer_name\" id=\"test_engineer_name\" />\n  \n        <!-- Test Approval Name -->\n        <label for=\"test_approval_name\">Test Approval Name:</label>\n        <input type=\"text\" v-model=\"formData.test_approval_name\" id=\"test_approval_name\" />\n  \n        <!-- Spec ID Dropdown -->\n        <label for=\"spec_id\">Specification ID:</label>\n        <select v-model=\"formData.spec_id\" id=\"spec_id\" required>\n          <option v-for=\"id in specOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n        </select>\n  \n        <!-- Display Spec Data -->\n        <div v-if=\"selectedSpec\">\n          <h3>Spec Details:</h3>\n          <p><strong>Phase:</strong> {{ selectedSpec.phase }}</p>\n          <p><strong>Rated VA:</strong> {{ selectedSpec.rating_va }}</p>\n          <p><strong>Rated Voltage:</strong> {{ selectedSpec.rated_voltage }}</p>\n          <p><strong>Rated Current:</strong> {{ selectedSpec.rated_current }}</p>\n          <p><strong>Power Factor Rated Current:</strong> {{ selectedSpec.pf_rated_current }}</p>\n          <p><strong>Max Continuous Amp:</strong> {{ selectedSpec.max_continous_amp }}</p>\n          <p><strong>Overload Amp:</strong> {{ selectedSpec.overload_amp }}</p>\n          <p><strong>Average Switch Time (ms):</strong> {{ selectedSpec.avg_switch_time_ms }}</p>\n          <p><strong>Average Backup Time (ms):</strong> {{ selectedSpec.avg_backup_time_ms }}</p>\n        </div>\n  \n        <button type=\"submit\">Submit</button>\n      </form>\n    </div>\n  </template>\n  \n  <script>\n  export default {\n    data() {\n      return {\n        latest_spec_id: 0, // Initial placeholder, dynamically updated\n        spec: [], // Initially empty\n        formData: {\n          report_id: 44042913,\n          standard: 0,\n          ups_model: \"UVA-123\",\n          client_name: 'Walton',\n          brand_name: 'Walton',\n          test_engineer_name: \"Engr Atik\",\n          test_approval_name: \"Engr Jhon\",\n          spec_id: null, // Selected spec_id\n        },\n        TestStandard: {\n        IEC_62040_1: \"IEC_62040_1\",\n        IEC_62040_2: \"IEC_62040_2\",\n        IEC_62040_3: \"IEC_62040_3\",\n        IEC_62040_4: \"IEC_62040_4\",\n        IEC_62040_5: \"IEC_62040_5\",\n      },\n      };\n    },\n    computed: {\n      specOptions() {\n        return this.spec.map((spec) => spec.id).sort((a, b) => a - b);\n      },\n      selectedSpec() {\n        return this.spec.find((spec) => spec.id === this.formData.spec_id) || null;\n      },\n    },\n    methods: {\n      submitForm() {\n        const msg = { payload: this.formData };\n        this.send(msg); // Replace with your submission logic\n      },\n      updateSpecData(payload) {\n        if (payload.latest_spec_id !== undefined) {\n          this.latest_spec_id = payload.latest_spec_id;\n        }\n        if (payload.spec && Array.isArray(payload.spec)) {\n          this.spec = payload.spec;\n        } else {\n          console.error(\"Spec data is not properly formatted:\", payload.spec);\n        }\n  \n        const latestSpec = this.spec.find((spec) => spec.id === this.latest_spec_id - 1);\n        if (!this.formData.spec_id && latestSpec) {\n          this.formData.spec_id = latestSpec.id;\n        }\n      },\n      generateReportID() {\n        this.formData.report_id = Math.floor(10000000 + Math.random() * 90000000);\n      },\n    },\n    mounted() {\n      this.$watch('msg', (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updateSpecData(newMsg.payload);\n        }\n      });\n    },\n  };\n  </script>\n  \n  <style scoped>\n  .form-container {\n    max-width: 600px;\n    margin: 0 auto;\n    padding: 20px;\n    background-color: #f4f4f9;\n    border-radius: 10px;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);\n  }\n  \n  form {\n    display: flex;\n    flex-direction: column;\n    gap: 15px;\n  }\n  \n  label {\n    font-weight: bold;\n  }\n  \n  input,\n  select,\n  button {\n    padding: 10px;\n    font-size: 1rem;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n  }\n  \n  button {\n    background-color: #007bff;\n    color: white;\n    cursor: pointer;\n    border: none;\n  }\n  \n  button:hover {\n    background-color: #0056b3;\n  }\n  \n  h3 {\n    margin-top: 20px;\n  }\n  \n  .report-id-container {\n    display: flex;\n    gap: 10px;\n  }\n  </style>\n  ",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
@@ -236,7 +219,7 @@
         "y": 200,
         "wires": [
             [
-                "d50bbc87398634fe"
+                "9c280c8461b4b98b"
             ]
         ]
     },
@@ -265,9 +248,7 @@
         "type": "link in",
         "z": "e6613618b3405f10",
         "name": "link in 10",
-        "links": [
-            "deb253e450919a1a"
-        ],
+        "links": [],
         "x": 65,
         "y": 160,
         "wires": [
@@ -410,26 +391,6 @@
         "wires": []
     },
     {
-        "id": "d50bbc87398634fe",
-        "type": "rbe",
-        "z": "e6613618b3405f10",
-        "name": "",
-        "func": "rbe",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 770,
-        "y": 200,
-        "wires": [
-            [
-                "9c280c8461b4b98b"
-            ]
-        ]
-    },
-    {
         "id": "9c280c8461b4b98b",
         "type": "switch",
         "z": "e6613618b3405f10",
@@ -451,14 +412,15 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 910,
+        "x": 790,
         "y": 200,
         "wires": [
             [
-                "7beadb4baf162041"
+                "7beadb4baf162041",
+                "551c73509d8c3c10"
             ],
             [
-                "63d48c7ddf8b20ed"
+                "d50bbc87398634fe"
             ]
         ]
     },
@@ -474,9 +436,217 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1060,
-        "y": 220,
+        "x": 1180,
+        "y": 240,
         "wires": []
+    },
+    {
+        "id": "551c73509d8c3c10",
+        "type": "link out",
+        "z": "e6613618b3405f10",
+        "name": "report_out",
+        "mode": "link",
+        "links": [
+            "bec162c6d4155317"
+        ],
+        "x": 1105,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "bec162c6d4155317",
+        "type": "link in",
+        "z": "e6613618b3405f10",
+        "name": "insert_report_in",
+        "links": [
+            "551c73509d8c3c10"
+        ],
+        "x": 115,
+        "y": 380,
+        "wires": [
+            [
+                "788cd66141eccdce"
+            ]
+        ]
+    },
+    {
+        "id": "788cd66141eccdce",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "insert Report",
+        "func": "var data=msg.payload;\n\n// Construct the SQL query for inserting into the ReportSettings table\nvar topic = `\nINSERT INTO ReportSettings (\n    report_id, standard, ups_model, client_name, \n    brand_name, test_engineer_name, test_approval_name, \n    spec_id\n) VALUES (\n    '${data.report_id}', '${data.standard}', '${data.ups_model}', '${data.client_name}', \n    '${data.brand_name}', '${data.test_engineer_name}', '${data.test_approval_name}', \n    '${data.spec_id}'\n);\n`;\n\n// Return the query for execution\nreturn { topic: topic };\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 380,
+        "wires": [
+            [
+                "400174fe9f6a9b3c",
+                "c35305a6c66dda82"
+            ]
+        ]
+    },
+    {
+        "id": "b8decd7f7a02b7f4",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "get report settings  id",
+        "func": "msg.topic=\"SELECT last_insert_rowid()\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 380,
+        "wires": [
+            [
+                "c0902961a8cacb78",
+                "48e96248f39ebcb4"
+            ]
+        ]
+    },
+    {
+        "id": "400174fe9f6a9b3c",
+        "type": "sqlite",
+        "z": "e6613618b3405f10",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 520,
+        "y": 380,
+        "wires": [
+            [
+                "b8decd7f7a02b7f4",
+                "756e81628918a005"
+            ]
+        ]
+    },
+    {
+        "id": "c0902961a8cacb78",
+        "type": "sqlite",
+        "z": "e6613618b3405f10",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 980,
+        "y": 380,
+        "wires": [
+            [
+                "f8989db16189f054"
+            ]
+        ]
+    },
+    {
+        "id": "f8989db16189f054",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "set global settings id",
+        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"latest_settings_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured latest_settings_id: \" + lastId);\nmsg.payload=lastId;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 380,
+        "wires": [
+            [
+                "ad20477a2b526e1d"
+            ]
+        ]
+    },
+    {
+        "id": "ad20477a2b526e1d",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1200,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c35305a6c66dda82",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "756e81628918a005",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "48e96248f39ebcb4",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 9",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "d50bbc87398634fe",
+        "type": "rbe",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 1030,
+        "y": 220,
+        "wires": [
+            [
+                "63d48c7ddf8b20ed"
+            ]
+        ]
     },
     {
         "id": "fcaa87c16afbdfcd",
@@ -498,6 +668,12 @@
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
+    },
+    {
+        "id": "0d4c44b815a8faab",
+        "type": "sqlitedb",
+        "db": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\db\\test_reports.db",
+        "mode": "RWC"
     },
     {
         "id": "cb5e987bd157d173",

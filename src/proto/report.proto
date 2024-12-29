@@ -14,7 +14,7 @@ enum TestStandard{
 message ReportSettings{
 	uint32 report_id=1;
 	TestStandard standard=2;
-	uint32 ups_model=3;
+	string ups_model=3;
 	ups.spec spec =4;
 	string client_name=5;
 	string brand_name=6;
