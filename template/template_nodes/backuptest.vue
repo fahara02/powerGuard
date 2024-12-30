@@ -1,7 +1,7 @@
 <template>
   <div class="backup-test-ui">
     <h1>Backup Test Control</h1>
-    <form @submit.prevent="startBackupTest">
+    <div>
       <div>
         <!-- Setting ID Dropdown -->
         <label for="setting_id">Report Settings ID:</label>
@@ -42,7 +42,7 @@
         <button type="submit" :disabled="backupTestRunning">Start Test</button>
         <button type="button" @click="stopBackupTest" :disabled="!backupTestRunning">Stop Test</button>
       </div>
-    </form>
+    </div>
 
     <div v-if="backupTestRunning" class="test-status">
       <p>Test running... Backup time: {{ BackUpTestData.BackupTime }} seconds</p>
