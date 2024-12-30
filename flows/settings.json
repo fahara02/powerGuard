@@ -546,7 +546,7 @@
         "type": "function",
         "z": "e6613618b3405f10",
         "name": "set global settings id",
-        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"latest_settings_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured latest_settings_id: \" + lastId);\nmsg.payload=lastId;\nreturn msg;\n",
+        "func": "// Access the first element of the payload\nvar lastId = msg.payload[0][\"last_insert_rowid()\"];\n\n// Save it globally for later use\nglobal.set(\"latest_setting_id\", lastId);\n\n// Debugging\nnode.warn(\"Captured latest_setting_id: \" + lastId);\nmsg.payload=lastId;\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -557,7 +557,8 @@
         "y": 320,
         "wires": [
             [
-                "f8242694d1fe6f5a"
+                "f8242694d1fe6f5a",
+                "45a085ba923b6c12"
             ]
         ]
     },
@@ -601,6 +602,105 @@
         "className": "",
         "x": 1230,
         "y": 320,
+        "wires": []
+    },
+    {
+        "id": "1169497c4a1d7bd6",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "get_all_settings",
+        "func": "msg.topic=\"SELECT * FROM ReportSettings ORDER BY id DESC LIMIT 100\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 380,
+        "wires": [
+            [
+                "3d266bab08b42ef5"
+            ]
+        ]
+    },
+    {
+        "id": "3d266bab08b42ef5",
+        "type": "sqlite",
+        "z": "e6613618b3405f10",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 420,
+        "y": 380,
+        "wires": [
+            [
+                "44fcdae9c4c87fd9"
+            ]
+        ]
+    },
+    {
+        "id": "44fcdae9c4c87fd9",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "set global settings",
+        "func": "global.set(\"settings\",msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 380,
+        "wires": [
+            [
+                "30277c68a568763f"
+            ]
+        ]
+    },
+    {
+        "id": "45a085ba923b6c12",
+        "type": "link out",
+        "z": "e6613618b3405f10",
+        "name": "global_setting_id_out",
+        "mode": "link",
+        "links": [
+            "9692563aa62ae277"
+        ],
+        "x": 1205,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "9692563aa62ae277",
+        "type": "link in",
+        "z": "e6613618b3405f10",
+        "name": "get_all_setting_in",
+        "links": [
+            "45a085ba923b6c12"
+        ],
+        "x": 75,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "30277c68a568763f",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 9",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 380,
         "wires": []
     },
     {
