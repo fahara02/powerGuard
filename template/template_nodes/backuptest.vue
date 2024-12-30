@@ -17,9 +17,15 @@
         </select>
       </div>
       <div>
-        <label for="step-id">Step ID:</label>
-        <input type="number" v-model.number="formData.stepId" id="step-id" required min="0" />
+        <!-- MODE -->
+        <label for="mode">Mode:</label>
+        <select v-model="formData.mode" id="mode" required>
+          <option v-for="(value, key) in MODE" :key="value" :value="value">
+            {{ key }}
+          </option>
+        </select>
       </div>
+
       <div>
         <label for="load-percentage">Load Percentage:</label>
         <input type="number" v-model.number="formData.loadPercentage" id="load-percentage" required min="0" max="100" />
@@ -70,10 +76,16 @@ export default {
         LINEAR: 0,
         NON_LINEAR: 1,
       },
+      MODE: {
+        NORMAL_MODE: 0,
+        STORAGE_MODE: 1,
+        FAULT_MODE: 2,
+        ALARM_MODE: 4,
+      },
       formData: {
         setting_id: 0,
         loadType: 0,
-        stepId: 0,
+        mode: 0,
         loadPercentage: 0,
       },
       backupTestRunning: false,
