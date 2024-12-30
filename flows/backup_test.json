@@ -42,7 +42,7 @@
                 "y": 200,
                 "wires": [
                     {
-                        "id": "966c30caa57f365d",
+                        "id": "177fa5a20a296f07",
                         "port": 0
                     }
                 ]
@@ -50,6 +50,16 @@
             {
                 "x": 480,
                 "y": 240,
+                "wires": [
+                    {
+                        "id": "966c30caa57f365d",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 480,
+                "y": 280,
                 "wires": [
                     {
                         "id": "c68acec97eaba8e4",
@@ -166,7 +176,8 @@
                 "d1e43871407afb36",
                 "38fb4992c1a440b2",
                 "966c30caa57f365d",
-                "c68acec97eaba8e4"
+                "c68acec97eaba8e4",
+                "177fa5a20a296f07"
             ]
         ]
     },
@@ -190,7 +201,7 @@
         "to": "",
         "reg": false,
         "x": 330,
-        "y": 200,
+        "y": 240,
         "wires": [
             []
         ]
@@ -215,7 +226,32 @@
         "to": "",
         "reg": false,
         "x": 340,
-        "y": 240,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "177fa5a20a296f07",
+        "type": "change",
+        "z": "c0c5d3d48807a804",
+        "name": "energy",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "output_energy",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 330,
+        "y": 200,
         "wires": [
             []
         ]
@@ -469,103 +505,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 400,
-        "y": 80,
+        "x": 420,
+        "y": 40,
         "wires": [
             []
         ]
-    },
-    {
-        "id": "b97b4bf05380867d",
-        "type": "ui-gauge",
-        "z": "46413099658d8708",
-        "name": "OUTPUT_CURRENT",
-        "group": "eaf9e02b16206474",
-        "order": 2,
-        "width": 3,
-        "height": 3,
-        "gtype": "gauge-half",
-        "gstyle": "needle",
-        "title": "Output Current",
-        "units": "amp",
-        "icon": "",
-        "prefix": "",
-        "suffix": "",
-        "segments": [
-            {
-                "from": "0",
-                "color": "#d45cd6"
-            },
-            {
-                "from": "18",
-                "color": "#2bff00"
-            },
-            {
-                "from": "23",
-                "color": "#53ea80"
-            },
-            {
-                "from": "28",
-                "color": "#c22e2e"
-            }
-        ],
-        "min": 0,
-        "max": "30",
-        "sizeThickness": 16,
-        "sizeGap": 4,
-        "sizeKeyThickness": 8,
-        "styleRounded": true,
-        "styleGlow": false,
-        "className": "",
-        "x": 300,
-        "y": 420,
-        "wires": []
-    },
-    {
-        "id": "9c7f46da21c2c262",
-        "type": "ui-gauge",
-        "z": "46413099658d8708",
-        "name": "OUTPUT_POWER",
-        "group": "eaf9e02b16206474",
-        "order": 5,
-        "width": 3,
-        "height": 3,
-        "gtype": "gauge-half",
-        "gstyle": "needle",
-        "title": "Output Power",
-        "units": "watt",
-        "icon": "",
-        "prefix": "",
-        "suffix": "",
-        "segments": [
-            {
-                "from": "0",
-                "color": "#d45cd6"
-            },
-            {
-                "from": "1000",
-                "color": "#2bff00"
-            },
-            {
-                "from": "4000",
-                "color": "#53ea80"
-            },
-            {
-                "from": "4800",
-                "color": "#c22e2e"
-            }
-        ],
-        "min": 0,
-        "max": "5000",
-        "sizeThickness": 16,
-        "sizeGap": 4,
-        "sizeKeyThickness": 8,
-        "styleRounded": true,
-        "styleGlow": false,
-        "className": "",
-        "x": 290,
-        "y": 460,
-        "wires": []
     },
     {
         "id": "06ec5b2d0bcde3d7",
@@ -575,21 +519,12 @@
         "x": 80,
         "y": 420,
         "wires": [
-            [
-                "04467546f3220eb1"
-            ],
-            [
-                "b97b4bf05380867d"
-            ],
-            [
-                "9c7f46da21c2c262"
-            ],
-            [
-                "610276145f478d06"
-            ],
-            [
-                "2550b98f2b222612"
-            ]
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
         ]
     },
     {
@@ -649,55 +584,6 @@
         ]
     },
     {
-        "id": "04467546f3220eb1",
-        "type": "ui-gauge-classic",
-        "z": "46413099658d8708",
-        "name": "voltage",
-        "group": "eaf9e02b16206474",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "min": 0,
-        "max": "300",
-        "sectors": [
-            {
-                "start": "0",
-                "color": "red"
-            },
-            {
-                "start": "180",
-                "color": "green"
-            },
-            {
-                "start": "240",
-                "color": "green"
-            },
-            {
-                "start": "241",
-                "color": "red"
-            }
-        ],
-        "major_division": "100",
-        "minor_division": "10",
-        "value_decimal_places": 1,
-        "scale_decimal_places": 0,
-        "label": "",
-        "measurement": "voltage",
-        "units": "v",
-        "needles": [
-            {
-                "topic": "",
-                "color": "black",
-                "lengthPercent": "100"
-            }
-        ],
-        "sweep_angle": 250,
-        "myclass": "",
-        "x": 280,
-        "y": 380,
-        "wires": []
-    },
-    {
         "id": "20b478891d72398b",
         "type": "ui-switch",
         "z": "46413099658d8708",
@@ -732,117 +618,119 @@
         ]
     },
     {
-        "id": "2550b98f2b222612",
-        "type": "ui-gauge",
-        "z": "46413099658d8708",
-        "name": "OUTPUT_FREQUENCY",
-        "group": "eaf9e02b16206474",
-        "order": 3,
-        "width": 3,
-        "height": 3,
-        "gtype": "gauge-half",
-        "gstyle": "needle",
-        "title": "Output Frequency",
-        "units": "Hz",
-        "icon": "",
-        "prefix": "",
-        "suffix": "",
-        "segments": [
-            {
-                "from": "0",
-                "color": "#d45cd6"
-            },
-            {
-                "from": "48",
-                "color": "#2bff00"
-            },
-            {
-                "from": "52",
-                "color": "#53ea80"
-            },
-            {
-                "from": "60",
-                "color": "#c22e2e"
-            }
-        ],
-        "min": 0,
-        "max": "60",
-        "sizeThickness": 16,
-        "sizeGap": 4,
-        "sizeKeyThickness": 8,
-        "styleRounded": true,
-        "styleGlow": false,
-        "className": "",
-        "x": 310,
-        "y": 540,
-        "wires": []
-    },
-    {
-        "id": "610276145f478d06",
-        "type": "ui-gauge",
-        "z": "46413099658d8708",
-        "name": "OUTPUT_PF",
-        "group": "eaf9e02b16206474",
-        "order": 4,
-        "width": 3,
-        "height": 3,
-        "gtype": "gauge-half",
-        "gstyle": "needle",
-        "title": "Output PF",
-        "units": "",
-        "icon": "",
-        "prefix": "",
-        "suffix": "",
-        "segments": [
-            {
-                "from": "0",
-                "color": "#d45cd6"
-            },
-            {
-                "from": "0.7",
-                "color": "#2bff00"
-            },
-            {
-                "from": "0.98",
-                "color": "#53ea80"
-            },
-            {
-                "from": "1",
-                "color": "#c22e2e"
-            }
-        ],
-        "min": 0,
-        "max": "1",
-        "sizeThickness": 16,
-        "sizeGap": 4,
-        "sizeKeyThickness": 8,
-        "styleRounded": true,
-        "styleGlow": false,
-        "className": "",
-        "x": 270,
-        "y": 500,
-        "wires": []
-    },
-    {
         "id": "ddde2940ca2fe7fe",
         "type": "ui-template",
         "z": "46413099658d8708",
-        "group": "ac18f679c10f1fd0",
+        "group": "eaf9e02b16206474",
         "page": "",
         "ui": "",
-        "name": "",
-        "order": 0,
-        "width": 0,
-        "height": 0,
+        "name": "POWER_METER_INPUTPOWER",
+        "order": 1,
+        "width": 3,
+        "height": "6",
         "head": "",
-        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Circular Voltage Gauge -->\n    <div class=\"meter-border\">\n      <div class=\"meter-display\">\n        <h3>Voltage</h3>\n        <h1>{{ voltage }} V</h1>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\n  export default {\n  data() {\n    return {\n      voltage: 0, // Default voltage\n      maxVoltage: 30, // Maximum voltage the gauge can display\n    };\n  },\n  computed: {\n    // Calculate the gauge's percentage value\n    gaugeValue() {\n      return (this.voltage / this.maxVoltage) * 100;\n    },\n  },\n  mounted() {\n    // Simulate voltage updates for demonstration purposes\n    setInterval(() => {\n      this.voltage = Math.floor(Math.random() * (this.maxVoltage + 1));\n    }, 1000);\n  },\n};\n</script>\n\n<style scoped>\n  /* Outer Meter Container */\n  .meter-container {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    height: 300px;\n    width: 300px;\n    background-color: #111;\n    /* Dark retro background */\n    border-radius: 50%;\n    border: 15px solid #666;\n    /* Thick grey boundary */\n    box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 0.6), 0px 4px 8px rgba(0, 0, 0, 0.8);\n    /* 3D retro look */\n    position: relative;\n  }\n\n  /* Inner Meter Display */\n  .meter-display {\n    background-color: #000;\n    /* Inner dark display */\n    color: #fff;\n    /* White text for readability */\n    border-radius: 50%;\n    width: 80%;\n    height: 80%;\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: center;\n    font-family: \"Courier New\", Courier, monospace;\n    /* Retro font */\n    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.8);\n  }\n\n  /* Text Styling */\n  .meter-display h3 {\n    font-size: 1.2rem;\n    margin: 0;\n    color: #bbb;\n    /* Slightly dimmed text for labels */\n  }\n\n  .meter-display h1 {\n    font-size: 2.5rem;\n    margin: 0;\n  }\n\n  /* Outer Border Styling */\n  .meter-border {\n    width: 100%;\n    height: 100%;\n    border-radius: 50%;\n    position: relative;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n  }\n</style>",
+        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n        type: 0, // Default to INPUT_POWER\n      },\n      dataType: {\n        INPUT_POWER: 0,\n        OUTPUT_POWER: 1,\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload && payload.data) {\n        this.data = { ...this.data, ...payload.data }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 460,
-        "y": 480,
+        "x": 660,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c0cdc61cfda7f36f",
+        "type": "function",
+        "z": "46413099658d8708",
+        "name": "input_power",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n    data: {\n        type: 0, // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    }\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 500,
+        "wires": [
+            [
+                "ddde2940ca2fe7fe"
+            ]
+        ]
+    },
+    {
+        "id": "ed6919bf01d28de8",
+        "type": "inject",
+        "z": "46413099658d8708",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 520,
+        "wires": [
+            [
+                "c0cdc61cfda7f36f",
+                "47585c468c9ebe2f"
+            ]
+        ]
+    },
+    {
+        "id": "47585c468c9ebe2f",
+        "type": "function",
+        "z": "46413099658d8708",
+        "name": "outout_power",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n    data: {\n        type: 1, // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    }\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 580,
+        "wires": [
+            [
+                "9de60c78c8758b1e"
+            ]
+        ]
+    },
+    {
+        "id": "9de60c78c8758b1e",
+        "type": "ui-template",
+        "z": "46413099658d8708",
+        "group": "eaf9e02b16206474",
+        "page": "",
+        "ui": "",
+        "name": "POWER_METER_OUTPUT POWER",
+        "order": 2,
+        "width": 4,
+        "height": "6",
+        "head": "",
+        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n        type: 0, // Default to INPUT_POWER\n      },\n      dataType: {\n        INPUT_POWER: 0,\n        OUTPUT_POWER: 1,\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload && payload.data) {\n        this.data = { ...this.data, ...payload.data }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 670,
+        "y": 580,
         "wires": [
             []
         ]
@@ -866,7 +754,7 @@
         "type": "ui-group",
         "name": "OUTPUT_DATA",
         "page": "7d0f53039d1540b1",
-        "width": "6",
+        "width": 7,
         "height": "1",
         "order": 2,
         "showTitle": true,
