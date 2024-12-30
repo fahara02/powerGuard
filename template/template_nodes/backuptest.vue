@@ -39,7 +39,8 @@
       </div>
 
       <div class="buttons">
-        <button type="submit" :disabled="backupTestRunning">Start Test</button>
+        <button type="button" @click="startBackupTest" :disabled="backupTestRunning">Start Test</button>
+
         <button type="button" @click="stopBackupTest" :disabled="!backupTestRunning">Stop Test</button>
       </div>
     </div>
@@ -76,6 +77,7 @@ export default {
         loadPercentage: 0,
       },
       backupTestRunning: false,
+      cmd_mains_input: 1,
       BackUpTestData: {
         BackupTime: 0,
         sense_mains_input: 1,
@@ -88,17 +90,52 @@ export default {
   },
   computed: {
     settingOptions() {
-      return this.setting.map((setting) => setting.id).sort((a, b) => a - b);
+      return this.setting.map((setting) => setting.id || 0).sort((a, b) => a - b);
     },
     selectedSetting() {
       return this.setting.find((setting) => setting.id === this.formData.setting_id) || null;
     },
   },
   methods: {
+
+    // updateBackUpTestData(payload) {
+    //     if (payload && payload.BackUpTestData) {
+    //       this.BackUpTestData = { ...this.BackUpTestData, ...payload.BackUpTestData };
+    //     }
+    //   },
+    updateBackUpTestData(payload) {
+      if (payload && payload.BackUpTestData) {
+        const { BackUpTestData } = payload;
+
+        // Ensure all properties are updated or set to defaults if undefined
+        this.BackUpTestData = {
+          BackupTime: BackUpTestData.BackupTime ?? 0,
+          sense_mains_input: BackUpTestData.sense_mains_input ?? 1,
+          sense_ups_output: BackUpTestData.sense_ups_output ?? 0,
+          alarm_status: BackUpTestData.alarm_status ?? 0,
+          inputPdata: BackUpTestData.inputPdata || {},
+          outputPdata: BackUpTestData.outputPdata || {},
+        };
+
+        // Log to ensure data was updated properly
+        console.log("Updated BackUpTestData:", this.BackUpTestData);
+      } else {
+        console.warn("Invalid payload or missing BackUpTestData:", payload);
+      }
+    },
+    updateSettingData(payload) {
+      if (payload && payload.SettingData && Array.isArray(payload.SettingData.settings)) {
+        this.setting = payload.SettingData.settings;
+      } else {
+        console.warn("No valid settings data received in payload", payload);
+        this.setting = [];
+      }
+    },
+
     createPayload(overrides = {}) {
       return {
         alarm_status: this.BackUpTestData.alarm_status,
-        cmd_mains_input: this.BackUpTestData.sense_mains_input,
+        cmd_mains_input: this.cmd_mains_input,
         backupTestRunning: this.backupTestRunning,
         BackupTime: this.BackUpTestData.BackupTime,
         additionalData: {
@@ -109,6 +146,10 @@ export default {
         },
         ...overrides,
       };
+    },
+    sendMessage(payload) {
+      // Emit a message to Node-RED using socket
+      this.$socket.emit('msg-output:' + this.id, { payload });
     },
     async delay(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
@@ -179,10 +220,12 @@ export default {
   max-width: 400px;
   margin: 0 auto;
 }
+
 .buttons {
   display: flex;
   gap: 10px;
 }
+
 .test-status,
 .test-result {
   margin-top: 20px;
