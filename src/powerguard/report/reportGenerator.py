@@ -182,12 +182,13 @@ class ReportGenerator(BaseModel):
                 measurement["power_measures"].append(
                     {
                         "power_measure_id": row["power_measure_id"],
-                        "power_measure_type": row["power_measure_type"],
-                        "power_measure_name": row["power_measure_name"],
+                        "power_measure_type": row["power_measure_type"],                        
                         "power_measure_voltage": row["power_measure_voltage"],
                         "power_measure_current": row["power_measure_current"],
                         "power_measure_power": row["power_measure_power"],
+                         "power_measure_energy": row["power_measure_energy"],
                         "power_measure_pf": row["power_measure_pf"],
+                        "power_measure_frequency": row["power_measure_frequency"],
                     }
                 )
 

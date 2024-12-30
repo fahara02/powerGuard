@@ -1,9 +1,11 @@
 import logging
 import sqlite3
+
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
-from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
-from proto.ups_test_pb2 import TestResult, TestType
+from proto.report_pb2 import (Measurement, ReportSettings, TestReport,
+                              TestStandard)
 from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
+from proto.ups_test_pb2 import TestResult, TestType
 
 
 class Inserter:
@@ -96,17 +98,18 @@ class Inserter:
             # Insert into PowerMeasure table with measurement_id as FK
             self._cursor.execute(
                 """
-                INSERT INTO PowerMeasure (measurement_id, type, name, voltage, current, power, pf)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO PowerMeasure (measurement_id, type,  voltage, current, power,energy, pf,frequency)
+                VALUES (?, ?, ?, ?, ?, ?, ?,?)
                 """,
                 (
                     measurement_id,  # Foreign key linking to Measurement
-                    PowerMeasureType.Name(power.type),  # Enum to string
-                    str(power.name),  # Convert name to string
+                    PowerMeasureType.Name(power.type),  # Enum to string                    
                     power.voltage,  # Voltage value
                     power.current,  # Current value
                     power.power,  # Power value
+                    power.energy,
                     power.pf,  # Power factor value
+                    power.frequency,
                 ),
             )
 
@@ -287,7 +290,7 @@ class Inserter:
             for power_measure in measurement.power_measures:
                 try:
                     power_measure_savepoint_name = (
-                        f"{savepoint_name}_power_measure_{power_measure.name}"
+                        f"{savepoint_name}_power_measure_{power_measure.type}"
                     )
                     self.insert_power_measure(
                         power_measure,

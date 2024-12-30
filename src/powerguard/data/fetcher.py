@@ -1,5 +1,5 @@
-from typing import Optional, Dict, Any
 from collections import defaultdict
+from typing import Any, Dict, Optional
 
 
 class Fetcher:
@@ -37,12 +37,13 @@ class Fetcher:
             Measurement.timestamp AS measurement_timestamp, 
             Measurement.load_type AS measurement_loadtype,
             PowerMeasure.id AS power_measure_id,
-            PowerMeasure.type AS power_measure_type,
-            PowerMeasure.name AS power_measure_name,
+            PowerMeasure.type AS power_measure_type,           
             PowerMeasure.voltage AS power_measure_voltage,
             PowerMeasure.current AS power_measure_current,
             PowerMeasure.power AS power_measure_power,
-            PowerMeasure.pf AS power_measure_pf
+            PowerMeasure.energy AS power_measure_energy,
+            PowerMeasure.pf AS power_measure_pf,
+            PowerMeasure.frequency AS power_measure_frequency
         FROM TestReport
         JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
         LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id

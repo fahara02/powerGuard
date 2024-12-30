@@ -14,8 +14,7 @@ from powerguard.data.fetcher import Fetcher
 from powerguard.data.inserter import Inserter
 from powerguard.data.validator import Validator
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
-from proto.report_pb2 import (Measurement, ReportSettings, TestReport,
-                              TestStandard)
+from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 from proto.ups_test_pb2 import TestResult, TestType
 
@@ -79,12 +78,13 @@ class DataManager(BaseModel):
             CREATE TABLE IF NOT EXISTS PowerMeasure (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 measurement_id INTEGER NOT NULL, -- FK linking to Measurement table
-                type TEXT NOT NULL,
-                name TEXT NOT NULL,
+                type TEXT NOT NULL,               
                 voltage REAL,
                 current REAL,
                 power REAL,
+                energy REAL,                
                 pf REAL,
+                frequency REAL,
                 FOREIGN KEY (measurement_id) REFERENCES Measurement (id) ON DELETE CASCADE
             )
             """,
@@ -534,100 +534,113 @@ class DataManager(BaseModel):
 
         # Create PowerMeasure objects
         input_power1 = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT,
-            name="input_power",
+            type=PowerMeasureType.UPS_INPUT,            
             voltage=230.0,
             current=10.0,
             power=2300.0,
+            energy=1000,
             pf=0.98,
+            frequency=50.1,
         )
         output_power1 = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT,
-            name="output_power",
+            type=PowerMeasureType.UPS_OUTPUT,            
             voltage=220.0,
             current=10.5,
             power=2310.0,
-            pf=0.97,
+            energy=1000,
+            pf=0.98,
+            frequency=50.1,
         )
         input_power2 = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT,
-            name="input_power",
+            type=PowerMeasureType.UPS_INPUT,           
             voltage=231.0,
             current=11.0,
             power=2350.0,
+            energy=1000,
             pf=0.98,
+            frequency=50.1,
         )
         output_power2 = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT,
-            name="output_power",
+            type=PowerMeasureType.UPS_OUTPUT,            
             voltage=220.0,
             current=11.5,
             power=2360.0,
-            pf=0.97,
+            energy=1000,
+            pf=0.98,
+            frequency=50.1,
         )
         input_power3 = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT,
-            name="input_power",
+            type=PowerMeasureType.UPS_INPUT,            
             voltage=230.0,
             current=10.0,
             power=2300.0,
+            energy=1000,
             pf=0.98,
+            frequency=50.1,
         )
         output_power3 = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT,
-            name="output_power",
+            type=PowerMeasureType.UPS_OUTPUT,           
             voltage=220.0,
             current=10.5,
             power=2310.0,
-            pf=0.97,
+            energy=1000,
+            pf=0.98,
+            frequency=50.1,
         )
         input_power4 = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT,
-            name="input_power",
+            type=PowerMeasureType.UPS_INPUT,            
             voltage=231.0,
             current=11.0,
             power=2350.0,
+            energy=1000,
             pf=0.98,
+            frequency=50.1,
         )
         output_power4 = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT,
-            name="output_power",
+            type=PowerMeasureType.UPS_OUTPUT,            
             voltage=220.0,
             current=11.5,
             power=2350.0,
-            pf=0.97,
+            energy=1000,
+            pf=0.98,
+            frequency=50.1,
         )
         input_power5 = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT,
-            name="input_power",
+            type=PowerMeasureType.UPS_INPUT,            
             voltage=251.0,
             current=7,
             power=2350.0,
+            energy=1000,
             pf=0.98,
+            frequency=50.1,
         )
         output_power5 = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT,
-            name="output_power",
+            type=PowerMeasureType.UPS_OUTPUT,            
             voltage=240.0,
             current=0,
             power=2350.0,
-            pf=0.97,
+            energy=1000,
+            pf=0.98,
+            frequency=50.1,
+           
         )
         input_power6 = PowerMeasure(
-            type=PowerMeasureType.UPS_INPUT,
-            name="input_power",
+            type=PowerMeasureType.UPS_INPUT,          
             voltage=264.0,
             current=8,
             power=2350.0,
+            energy=1000,
             pf=0.98,
+            frequency=50.1,
         )
         output_power6 = PowerMeasure(
-            type=PowerMeasureType.UPS_OUTPUT,
-            name="output_power",
+            type=PowerMeasureType.UPS_OUTPUT,           
             voltage=275.0,
             current=2350.0,
             power=2370,
-            pf=0.97,
+            energy=1000,
+            pf=0.98,
+            frequency=50.1,
         )
         pMeasures1 = [input_power1, output_power1]
         pMeasures2 = [input_power2, output_power2]

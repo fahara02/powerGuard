@@ -6,11 +6,12 @@ enum PowerMeasureType{
     MAINS=2;
 }
 message PowerMeasure{
-    PowerMeasureType type=1;
-    string name=2;
-    float voltage = 3;
-    float current = 4;
-    float power = 5;
+    PowerMeasureType type=1;  
+    float voltage = 2;
+    float current = 3;
+    float power = 4;
+    float energy=5;    
     float pf = 6;
+    float frequency=7;
 
 }
