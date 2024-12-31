@@ -98,14 +98,23 @@ export default {
                 loadPercentage: 0,
             },
             backupTestRunning: false,
-            cmd_mains_input: 1,
+
+            BackUpTestCMDS: {
+                cmd_mains_input: 1,
+                alarm_status: 0,
+                backupTestRunning: false,
+            },
+
             BackUpTestData: {
                 BackupTime: 0,
-                sense_mains_input: 1,
-                sense_ups_output: 0,
-                alarm_status: 0,
                 inputPdata: {},
                 outputPdata: {},
+            },
+            BackUpTestSense: {
+
+                sense_mains_input: 1,
+                sense_ups_output: 0,
+
             },
 
             measurements: [],
@@ -121,11 +130,16 @@ export default {
     },
     methods: {
 
-        // updateBackUpTestData(payload) {
-        //     if (payload && payload.BackUpTestData) {
-        //       this.BackUpTestData = { ...this.BackUpTestData, ...payload.BackUpTestData };
-        //     }
-        //   },
+        resetTestState() {
+            this.BackUpTestData = {
+                BackupTime: 0,
+                inputPdata: {},
+                outputPdata: {},
+            };
+            this.test_duration = 0;
+            this.measurements = [];
+            this.send({ topic: 'info', payload: "data has been reset" });
+        },
 
         generateMeasurement() {
             const uniqueId = Math.floor(Math.random() * 9000000000) + 1000000000;
@@ -163,13 +177,27 @@ export default {
 
             // Log the report for debugging or send it to the server
             console.log("Generated Test Report:", report);
-
-            // Emit the report via socket (if required)
-            this.$socket.emit('test-report', { report });
-
             return report;
         },
 
+        updateBackUptestSense(payload) {
+            if (payload && payload.BackUpTestSense) {
+                const { BackUpTestSense } = payload;
+
+                // Ensure all properties are updated or set to defaults if undefined
+                this.BackUpTestSense = {
+
+                    sense_mains_input: BackUpTestSense.sense_mains_input ?? 1,
+                    sense_ups_output: BackUpTestSense.sense_ups_output ?? 0,
+
+                };
+
+                // Log to ensure data was updated properly
+                console.log("Updated  BackUpTestSense:", this.BackUpTestSense);
+            } else {
+                console.warn("Invalid payload or missing  BackUpTestSense:", payload);
+            }
+        },
 
         updateBackUpTestData(payload) {
             if (payload && payload.BackUpTestData) {
@@ -178,9 +206,6 @@ export default {
                 // Ensure all properties are updated or set to defaults if undefined
                 this.BackUpTestData = {
                     BackupTime: BackUpTestData.BackupTime ?? 0,
-                    sense_mains_input: BackUpTestData.sense_mains_input ?? 1,
-                    sense_ups_output: BackUpTestData.sense_ups_output ?? 0,
-                    alarm_status: BackUpTestData.alarm_status ?? 0,
                     inputPdata: BackUpTestData.inputPdata || {},
                     outputPdata: BackUpTestData.outputPdata || {},
                 };
@@ -202,9 +227,10 @@ export default {
 
         createRunCmds(overrides = {}) {
             return {
-                alarm_status: this.BackUpTestData.alarm_status,
-                cmd_mains_input: this.cmd_mains_input,
+                alarm_status: this.BackUpTestCMDS.alarm_status,
+                cmd_mains_input: this.BackUpTestCMDS.cmd_mains_input,
                 backupTestRunning: this.backupTestRunning,
+                backupTestRunning: this.BackUpTestCMDS.backupTestRunning,
                 BackupTime: this.BackUpTestData.BackupTime,
                 additionalData: {
                     setting_id: this.formData.setting_id,
@@ -223,17 +249,29 @@ export default {
             return new Promise((resolve) => setTimeout(resolve, ms));
         },
         async startBackupTest() {
+            this.resetTestState();
+            this.send({
+                topic: 'commands', payload: this.createRunCmds()
+            });
+            await this.delay(1000);
             this.send({
                 topic: 'info', payload: "starting backup Test"
             });
 
             this.backupTestRunning = true;
+            this.BackUpTestCMDS.backupTestRunning = true;
+            this.send({
+                topic: 'commands', payload: this.createRunCmds({
+                    backupTestRunning: true,
 
+
+                })
+            });
 
 
             try {
                 await this.delay(2000);
-                this.BackUpTestData.alarm_status = 1;
+                this.BackUpTestCMDS.alarm_status = 1;
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         alarm_status: 1,
@@ -242,7 +280,7 @@ export default {
                     })
                 });
                 await this.delay(2000);
-                this.BackUpTestData.alarm_status = 0;
+                this.BackUpTestCMDS.alarm_status = 0;
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         alarm_status: 0
@@ -262,7 +300,7 @@ export default {
                 const maxRetries = 100;
                 let retryCount = 0;
 
-                while (this.BackUpTestData.sense_mains_input !== 0) {
+                while (this.BackUpTestSense.sense_mains_input !== 0) {
                     await this.delay(100);
                     retryCount++;
                     if (retryCount > maxRetries) {
@@ -272,7 +310,7 @@ export default {
                 }
 
                 retryCount = 0; // Reset for next loop
-                while (this.BackUpTestData.sense_ups_output !== 1) {
+                while (this.BackUpTestSense.sense_ups_output !== 1) {
                     await this.delay(100);
                     retryCount++;
                     if (retryCount > maxRetries) {
@@ -281,12 +319,7 @@ export default {
                     if (!this.backupTestRunning) throw new Error("Test stopped");
                 }
 
-
-
-
-
-
-                while (this.BackUpTestData.sense_ups_output === 1 && this.BackUpTestData.sense_mains_input === 0) {
+                while (this.BackUpTestSense.sense_ups_output === 1 && this.BackUpTestSense.sense_mains_input === 0) {
                     if (!this.backupTestRunning) {
                         this.send({ topic: 'info', payload: "Stop cmd during run" });
                         throw new Error("Test stopped during main loop");
@@ -322,18 +355,21 @@ export default {
                 topic: 'info', payload: "stopping backup Test "
             });
             this.backupTestRunning = false;
-            this.cmd_mains_input = 1;
+            this.BackUpTestCMDS.backupTestRunning = false;
+            this.BackUpTestCMDS.cmd_mains_input = 1;
             this.send({
                 payload: this.createRunCmds({
                     alarm_status: 0,
-                    cmd_mains_input: 1
+                    cmd_mains_input: 1,
+                    backupTestRunning: false
 
                 }),
             });
             this.BackUpTestData = {
                 ...this.BackUpTestData,
                 alarm_status: 0,
-                cmd_mains_input: 1
+                cmd_mains_input: 1,
+                backupTestRunning: false
             };
             this.testReport = this.createTestReport();
             this.send({ topic: 'report', payload: this.testReport });
@@ -342,8 +378,11 @@ export default {
     mounted() {
         this.$watch("msg", (newMsg) => {
             if (newMsg && newMsg.payload) {
-                this.updateBackUpTestData(newMsg.payload);
                 this.updateSettingData(newMsg.payload);
+                this.updateBackUptestSense(newMsg.payload);
+                this.updateBackUpTestData(newMsg.payload);
+
+
             }
         });
     },
