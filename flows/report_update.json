@@ -15,7 +15,7 @@
         "links": [
             "bb5af27275e2ee33"
         ],
-        "x": 365,
+        "x": 75,
         "y": 220,
         "wires": [
             [
@@ -40,7 +40,8 @@
         "wires": [
             [
                 "d45672f67dbbab27",
-                "d835063f835b621d"
+                "d835063f835b621d",
+                "ac7df2e2275af626"
             ]
         ]
     },
@@ -49,14 +50,14 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "SORT_REPORT",
-        "func": "\nlet payload = msg.payload;\n\n// Extract Settings Object\nlet settings = payload.settings;\n\n// Extract Measurements Array\nlet measurements = payload.measurements;\n\n// Extract Remaining Data\nlet { settings: _, measurements: __, ...otherObjects } = payload;\n\n// Prepare Outputs\nconst output = [\n    { payload: settings },         // Output 1: Settings Object\n    { payload: measurements },     // Output 2: Measurements Array\n    { payload: otherObjects }      // Output 3: Other Remaining Objects\n];\n\n// Send Result\nreturn output;\n",
+        "func": "let payload = msg.payload;\n\n// Extract Settings Object\nlet settings = payload.settings;\n\n// Extract Measurements Array\nlet measurements = payload.measurements;\n\n// Extract Remaining Data\nlet { settings: _, measurements: __, ...otherObjects } = payload;\n\n// Extract all measurement IDs\nlet measurement_ids = measurements.map(measurement => measurement.m_unique_id);\n\n// Store the measurement_ids array in flow context\nflow.set(\"measurement_ids\", measurement_ids);\n\n// Prepare Outputs\nconst output = [\n    { payload: settings },         // Output 1: Settings Object\n    { payload: measurements },     // Output 2: Measurements Array\n    { payload: otherObjects }      // Output 3: Other Remaining Objects\n];\n\n// Send Result\nreturn output;\n\n",
         "outputs": 3,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 550,
+        "x": 250,
         "y": 220,
         "wires": [
             [
@@ -83,8 +84,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 800,
-        "y": 180,
+        "x": 580,
+        "y": 140,
         "wires": []
     },
     {
@@ -100,8 +101,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 800,
-        "y": 220,
+        "x": 600,
+        "y": 180,
         "wires": []
     },
     {
@@ -117,8 +118,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 770,
-        "y": 260,
+        "x": 570,
+        "y": 220,
         "wires": []
     },
     {
@@ -166,5 +167,158 @@
         "x": 580,
         "y": 80,
         "wires": []
+    },
+    {
+        "id": "ac7df2e2275af626",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "PROCESS MEASUREMENTS",
+        "func": "// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Asynchronous function to process measurements\nasync function processMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        const measurementId = measurement.m_unique_id;\n        const powerMeasures = measurement.power_measures.map(pm => ({\n            ...pm,\n            measurement_id: measurementId\n        }));\n\n        // Send each power measure object with 1-second delay\n        for (let powerMeasure of powerMeasures) {\n            send({ payload: powerMeasure });\n            await delay(1000); // 1-second delay\n        }\n    }\n    done(); // Indicate the function has completed\n}\n\n// Main Function Logic\nlet payload = msg.payload;\n\n// Ensure the input contains measurements\nif (!payload.measurements || !Array.isArray(payload.measurements)) {\n    node.error(\"Invalid input: 'measurements' must be an array.\", msg);\n    return null;\n}\n\n// Start asynchronous processing\nprocessMeasurements(payload.measurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 340,
+        "wires": [
+            [
+                "24a1009b7bdba82f",
+                "20450f4f7a43a947"
+            ]
+        ]
+    },
+    {
+        "id": "24a1009b7bdba82f",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "power data",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "20450f4f7a43a947",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "insert _power_measures",
+        "func": "// Ensure msg.payload contains the necessary data\nif (!msg.payload || typeof msg.payload !== \"object\") {\n    node.error(\"Invalid input: msg.payload must be an object.\");\n    return null;\n}\n\n// Extract powerMeasure object from msg.payload\nvar powerMeasure = msg.payload;\n\n// Validate required fields\nif (\n    powerMeasure.type === undefined ||\n    powerMeasure.voltage === undefined ||\n    powerMeasure.current === undefined ||\n    powerMeasure.power === undefined ||\n    powerMeasure.energy === undefined ||\n    powerMeasure.pf === undefined ||\n    powerMeasure.frequency === undefined ||\n    powerMeasure.measurement_id === undefined\n) {\n    node.error(\"Invalid input: msg.payload must contain all required fields.\");\n    return null;\n}\n\n// Construct the SQL query\nvar topic = `INSERT INTO PowerMeasure (type, voltage, current, power, energy, pf, frequency, measurement_id) \nVALUES (${powerMeasure.type}, ${powerMeasure.voltage}, ${powerMeasure.current}, ${powerMeasure.power}, \n${powerMeasure.energy}, ${powerMeasure.pf}, ${powerMeasure.frequency}, ${powerMeasure.measurement_id});`;\n\n// Return the query to be executed by the SQLite node\nreturn { topic: topic };\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 440,
+        "wires": [
+            [
+                "519b0cfe351f15ce"
+            ]
+        ]
+    },
+    {
+        "id": "b0fe93bafaeabdf8",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "debug 12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "519b0cfe351f15ce",
+        "type": "sqlite",
+        "z": "4ec0a7f75863202f",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 400,
+        "y": 440,
+        "wires": [
+            [
+                "712512ae60b1cdc9"
+            ]
+        ]
+    },
+    {
+        "id": "712512ae60b1cdc9",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "get powermeasure id",
+        "func": "msg.topic=\"SELECT last_insert_rowid()\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 440,
+        "wires": [
+            [
+                "16e508bdf889111c"
+            ]
+        ]
+    },
+    {
+        "id": "16e508bdf889111c",
+        "type": "sqlite",
+        "z": "4ec0a7f75863202f",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 780,
+        "y": 440,
+        "wires": [
+            [
+                "72fb27e46012366a"
+            ]
+        ]
+    },
+    {
+        "id": "72fb27e46012366a",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "save power measure id",
+        "func": "// Ensure msg.payload contains the ID from the query result\nif (!msg.payload || !msg.payload[0] || !msg.payload[0]['last_insert_rowid()']) {\n    node.error(\"Invalid input: msg.payload must contain the result of last_insert_rowid().\");\n    return null;\n}\n\n// Extract the last inserted row ID\nlet lastInsertId = msg.payload[0]['last_insert_rowid()'];\n\n// Retrieve the existing array from flow context or initialize it\nlet allPowerMeasureIds = flow.get(\"all_power_measure_id\") || [];\n\n// Add the new ID to the array\nallPowerMeasureIds.push(lastInsertId);\n\n// Save the updated array back to the flow context\nflow.set(\"all_power_measure_id\", allPowerMeasureIds);\n\n// Log the updated array for debugging (optional)\nnode.warn(`Updated all_power_measure_id: ${JSON.stringify(allPowerMeasureIds)}`);\n\n// Pass through the message for further processing\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 830,
+        "y": 560,
+        "wires": [
+            [
+                "b0fe93bafaeabdf8"
+            ]
+        ]
+    },
+    {
+        "id": "0d4c44b815a8faab",
+        "type": "sqlitedb",
+        "db": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\db\\test_reports.db",
+        "mode": "RWC"
     }
 ]
