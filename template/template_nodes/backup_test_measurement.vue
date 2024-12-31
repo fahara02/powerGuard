@@ -133,10 +133,7 @@ export default {
 
             return {
                 m_unique_id: uniqueId,
-                time_stamp: {
-                    seconds: Math.floor(timestamp.getTime() / 1000),
-                    nanos: timestamp.getMilliseconds() * 1000000,
-                },
+                time_stamp: timestamp.getTime(),
                 name: "Measurement Backup test",
                 mode: this.formData.mode,
                 phase_name: "Phase A",
@@ -226,49 +223,94 @@ export default {
             return new Promise((resolve) => setTimeout(resolve, ms));
         },
         async startBackupTest() {
+            this.send({
+                topic: 'info', payload: "starting backup Test"
+            });
+
             this.backupTestRunning = true;
-            this.BackUpTestData.alarm_status = 1;
-            this.send({ topic: 'commands', payload: this.createRunCmds() });
+
+
 
             try {
+                await this.delay(2000);
+                this.BackUpTestData.alarm_status = 1;
+                this.send({
+                    topic: 'commands', payload: this.createRunCmds({
+                        alarm_status: 1,
+
+
+                    })
+                });
                 await this.delay(2000);
                 this.BackUpTestData.alarm_status = 0;
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
-                        alarm_status: 1
+                        alarm_status: 0
 
                     })
                 });
                 await this.delay(2000);
+
+                this.cmd_mains_input = 0;
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
-                        alarm_status: 0,
-                        cmd_mains_input: 0,
+                        cmd_mains_input: 0
+
                     })
-                });
+                })
                 await this.delay(2000);
+                const maxRetries = 100;
+                let retryCount = 0;
+
                 while (this.BackUpTestData.sense_mains_input !== 0) {
                     await this.delay(100);
+                    retryCount++;
+                    if (retryCount > maxRetries) {
+                        throw new Error("Timeout: sense_mains_input did not change to 0");
+                    }
                     if (!this.backupTestRunning) throw new Error("Test stopped");
                 }
 
+                retryCount = 0; // Reset for next loop
                 while (this.BackUpTestData.sense_ups_output !== 1) {
                     await this.delay(100);
+                    retryCount++;
+                    if (retryCount > maxRetries) {
+                        throw new Error("Timeout: sense_ups_output did not change to 1");
+                    }
                     if (!this.backupTestRunning) throw new Error("Test stopped");
                 }
 
-                while (this.BackUpTestData.sense_ups_output === 1) {
+
+
+
+
+
+                while (this.BackUpTestData.sense_ups_output === 1 && this.BackUpTestData.sense_mains_input === 0) {
+                    if (!this.backupTestRunning) {
+                        this.send({ topic: 'info', payload: "Stop cmd during run" });
+                        throw new Error("Test stopped during main loop");
+                    }
+                    this.send({ topic: 'info', payload: "running backup Test" });
                     await this.delay(1000);
+
+
                     this.BackUpTestData.BackupTime++;
                     this.test_duration++;
-                    if (this.test_duration > 10) {
+
+                    if (this.test_duration >= 10) {
                         this.test_duration = 0;
                         const measurement = this.generateMeasurement();
+                        if (this.measurements.length > 1000) {
+                            this.measurements.shift();
+                        }
                         this.measurements.push(measurement);
+                        this.send({ topic: 'info', payload: "new measurement recorded" });
                     }
 
                     this.send({ topic: 'commands', payload: this.createRunCmds() });
                 }
+
             } catch (error) {
                 console.error(error.message);
             } finally {
@@ -276,17 +318,22 @@ export default {
             }
         },
         stopBackupTest() {
+            this.send({
+                topic: 'info', payload: "stopping backup Test "
+            });
             this.backupTestRunning = false;
+            this.cmd_mains_input = 1;
             this.send({
                 payload: this.createRunCmds({
                     alarm_status: 0,
-                    cmd_mains_input: 1,
+                    cmd_mains_input: 1
+
                 }),
             });
             this.BackUpTestData = {
                 ...this.BackUpTestData,
                 alarm_status: 0,
-                sense_mains_input: 1,
+                cmd_mains_input: 1
             };
             this.testReport = this.createTestReport();
             this.send({ topic: 'report', payload: this.testReport });

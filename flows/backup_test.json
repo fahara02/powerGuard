@@ -195,28 +195,6 @@
         "wires": []
     },
     {
-        "id": "8e85192e8ffe247b",
-        "type": "ui-text",
-        "z": "46413099658d8708",
-        "group": "ac18f679c10f1fd0",
-        "order": 3,
-        "width": 3,
-        "height": 0,
-        "name": "",
-        "label": "BACKUP TIME",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "style": true,
-        "font": "Georgia,Georgia,serif",
-        "fontSize": 16,
-        "color": "#121212",
-        "wrapText": false,
-        "className": "",
-        "x": 460,
-        "y": 680,
-        "wires": []
-    },
-    {
         "id": "861182f42f524856",
         "type": "function",
         "z": "46413099658d8708",
@@ -275,8 +253,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 90,
-        "y": 680,
+        "x": 130,
+        "y": 1040,
         "wires": [
             [
                 "c909ad4f0537c120"
@@ -302,46 +280,10 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 260,
-        "y": 680,
+        "x": 380,
+        "y": 960,
         "wires": [
-            [
-                "8e85192e8ffe247b"
-            ]
-        ]
-    },
-    {
-        "id": "20b478891d72398b",
-        "type": "ui-switch",
-        "z": "46413099658d8708",
-        "name": "",
-        "label": "BackupTest",
-        "group": "ac18f679c10f1fd0",
-        "order": 2,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "decouple": false,
-        "topic": "topic",
-        "topicType": "msg",
-        "style": "",
-        "className": "",
-        "layout": "row-left",
-        "clickableArea": "switch",
-        "onvalue": "true",
-        "onvalueType": "bool",
-        "onicon": "",
-        "oncolor": "",
-        "offvalue": "false",
-        "offvalueType": "bool",
-        "officon": "",
-        "offcolor": "",
-        "x": 210,
-        "y": 40,
-        "wires": [
-            [
-                "518691ee2b8704be"
-            ]
+            []
         ]
     },
     {
@@ -356,14 +298,14 @@
         "width": 3,
         "height": "6",
         "head": "",
-        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n        type: 0, // Default to INPUT_POWER\n      },\n      dataType: {\n        INPUT_POWER: 0,\n        OUTPUT_POWER: 1,\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload && payload.data) {\n        this.data = { ...this.data, ...payload.data }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
+        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        type: 0, // Default to INPUT_POWER\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n\n      },\n      dataType: {\n        INPUT_POWER: 0,\n        OUTPUT_POWER: 1,\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload) {\n        this.data = { ...this.data, ...payload }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 660,
-        "y": 520,
+        "x": 620,
+        "y": 540,
         "wires": [
             []
         ]
@@ -372,20 +314,18 @@
         "id": "c0cdc61cfda7f36f",
         "type": "function",
         "z": "46413099658d8708",
-        "name": "input_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n    data: {\n        type: 0, // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    }\n};\n\nreturn msg;\n",
+        "name": "random_input_power",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n  \n        type: 0, // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    \n};\n\n\n\n\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 350,
-        "y": 500,
+        "x": 440,
+        "y": 440,
         "wires": [
-            [
-                "ddde2940ca2fe7fe"
-            ]
+            []
         ]
     },
     {
@@ -409,12 +349,12 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
-        "y": 520,
+        "x": 70,
+        "y": 600,
         "wires": [
             [
-                "c0cdc61cfda7f36f",
-                "47585c468c9ebe2f"
+                "47585c468c9ebe2f",
+                "75fa05daa403b11c"
             ]
         ]
     },
@@ -422,8 +362,8 @@
         "id": "47585c468c9ebe2f",
         "type": "function",
         "z": "46413099658d8708",
-        "name": "outout_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n    data: {\n        type: 1, // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    }\n};\n\nreturn msg;\n",
+        "name": "random_outout_power",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n   \n        type: 1, // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n   \n};\n\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -431,7 +371,7 @@
         "finalize": "",
         "libs": [],
         "x": 340,
-        "y": 580,
+        "y": 700,
         "wires": [
             [
                 "9de60c78c8758b1e"
@@ -450,14 +390,14 @@
         "width": 4,
         "height": "6",
         "head": "",
-        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n        type: 0, // Default to INPUT_POWER\n      },\n      dataType: {\n        INPUT_POWER: 0,\n        OUTPUT_POWER: 1,\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload && payload.data) {\n        this.data = { ...this.data, ...payload.data }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
+        "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        type: 0, // Default to INPUT_POWER\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n\n      },\n      dataType: {\n        INPUT_POWER: 0,\n        OUTPUT_POWER: 1,\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload) {\n        this.data = { ...this.data, ...payload }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 670,
-        "y": 580,
+        "x": 650,
+        "y": 680,
         "wires": [
             []
         ]
@@ -474,14 +414,14 @@
         "width": 0,
         "height": 9,
         "head": "",
-        "format": "<template>\n    <div class=\"backup-test-ui\">\n        <h1>Backup Test Control</h1>\n        <div>\n            <div>\n                <!-- Setting ID Dropdown -->\n                <label for=\"setting_id\">Report Settings ID:</label>\n                <select v-model=\"formData.setting_id\" id=\"setting_id\" required>\n                    <option v-for=\"id in settingOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n                </select>\n\n                <label for=\"load-type\">Load Type:</label>\n                <select v-model=\"formData.loadType\" id=\"load-type\" required>\n                    <option v-for=\"(value, key) in loadTypes\" :key=\"key\" :value=\"value\">\n                        {{ key }}\n                    </option>\n                </select>\n            </div>\n            <div>\n                <!-- MODE -->\n                <label for=\"mode\">Mode:</label>\n                <select v-model=\"formData.mode\" id=\"mode\" required>\n                    <option v-for=\"(value, key) in MODE\" :key=\"value\" :value=\"value\">\n                        {{ key }}\n                    </option>\n                </select>\n            </div>\n\n            <div>\n                <label for=\"load-percentage\">Load Percentage:</label>\n                <input type=\"number\" v-model.number=\"formData.loadPercentage\" id=\"load-percentage\" required min=\"0\"\n                    max=\"100\" />\n            </div>\n\n            <!-- Display Setting Data -->\n            <div v-if=\"selectedSetting\">\n                <h3>Setting Details:</h3>\n                <p><strong>Report Id:</strong> {{ selectedSetting.report_id }}</p>\n                <p><strong>Standard:</strong> {{ selectedSetting.standard }}</p>\n                <p><strong>UPS Model:</strong> {{ selectedSetting.ups_model }}</p>\n                <p><strong>Client Name:</strong> {{ selectedSetting.client_name }}</p>\n                <p><strong>Brand Name:</strong> {{ selectedSetting.brand_name }}</p>\n                <p><strong>Test Engineer Name:</strong> {{ selectedSetting.test_engineer_name }}</p>\n                <p><strong>Test Approval Name:</strong> {{ selectedSetting.test_approval_name }}</p>\n                <p><strong>UPS SPEC ID:</strong> {{ selectedSetting.spec_id }}</p>\n            </div>\n\n            <div class=\"buttons\">\n                <button type=\"button\" @click=\"startBackupTest\" :disabled=\"backupTestRunning\">Start Test</button>\n\n                <button type=\"button\" @click=\"stopBackupTest\" :disabled=\"!backupTestRunning\">Stop Test</button>\n            </div>\n        </div>\n\n        <div v-if=\"backupTestRunning\" class=\"test-status\">\n            <p>Test running... Backup time: {{ BackUpTestData.BackupTime }} seconds</p>\n        </div>\n        <div v-if=\"!backupTestRunning && BackUpTestData.BackupTime > 0\" class=\"test-result\">\n            <h2>Test Result</h2>\n            <p>Total Backup Time: {{ BackUpTestData.BackupTime }} seconds</p>\n            <ul>\n                <li v-for=\"(value, key) in BackUpTestData\" :key=\"key\">\n                    {{ key }}: {{ value }}\n                </li>\n            </ul>\n        </div>\n    </div>\n</template>\n\n<script>\nexport default {\n    data() {\n        return {\n            test_duration: 0,\n            test_report: null,\n            latest_settings_id: 0,\n            setting: [],\n            TestResult: {\n                TEST_FAILED: 0,\n                TEST_PENDING: 1,\n                TEST_SUCCESSFUL: 2,\n                USER_OBSERVATION: 3,\n            },\n            loadTypes: {\n                LINEAR: 0,\n                NON_LINEAR: 1,\n            },\n            MODE: {\n                NORMAL_MODE: 0,\n                STORAGE_MODE: 1,\n                FAULT_MODE: 2,\n                ALARM_MODE: 4,\n            },\n            formData: {\n                setting_id: 0,\n                loadType: 0,\n                mode: 0,\n                loadPercentage: 0,\n            },\n            backupTestRunning: false,\n            cmd_mains_input: 1,\n            BackUpTestData: {\n                BackupTime: 0,\n                sense_mains_input: 1,\n                sense_ups_output: 0,\n                alarm_status: 0,\n                inputPdata: {},\n                outputPdata: {},\n            },\n\n            measurements: [],\n        };\n    },\n    computed: {\n        settingOptions() {\n            return this.setting.map((setting) => setting.id || 0).sort((a, b) => a - b);\n        },\n        selectedSetting() {\n            return this.setting.find((setting) => setting.id === this.formData.setting_id) || null;\n        },\n    },\n    methods: {\n\n        // updateBackUpTestData(payload) {\n        //     if (payload && payload.BackUpTestData) {\n        //       this.BackUpTestData = { ...this.BackUpTestData, ...payload.BackUpTestData };\n        //     }\n        //   },\n\n        generateMeasurement() {\n            const uniqueId = Math.floor(Math.random() * 9000000000) + 1000000000;\n            const timestamp = new Date();\n\n            return {\n                m_unique_id: uniqueId,\n                time_stamp: {\n                    seconds: Math.floor(timestamp.getTime() / 1000),\n                    nanos: timestamp.getMilliseconds() * 1000000,\n                },\n                name: \"Measurement Backup test\",\n                mode: this.formData.mode,\n                phase_name: \"Phase A\",\n                load_type: this.formData.loadType,\n                step_id: 0,\n                load_percentage: this.formData.loadPercentage,\n                power_measures: [this.BackUpTestData.inputPdata, this.BackUpTestData.outputPdata],\n                steady_state_voltage_tol: 0,\n                voltage_dc_component: 0,\n                load_pf_deviation: 0,\n                switch_time_ms: 0,\n                run_interval_sec: 10,\n                backup_time_sec: 0,\n                overload_time_sec: 0,\n                temperature_1: 0,\n                temperature_2: 0,\n            };\n        },\n        createTestReport() {\n            const report = {\n                settings: this.selectedSetting || {}, // Use the currently selected settings\n                test_name: 9, // BackupTest enum value\n                test_description: \"Backup Test Report\",\n                measurements: this.measurements, // Use collected measurements\n                test_result: 3, // USER OBSERVATION\n            };\n\n            // Log the report for debugging or send it to the server\n            console.log(\"Generated Test Report:\", report);\n\n            // Emit the report via socket (if required)\n            this.$socket.emit('test-report', { report });\n\n            return report;\n        },\n\n\n        updateBackUpTestData(payload) {\n            if (payload && payload.BackUpTestData) {\n                const { BackUpTestData } = payload;\n\n                // Ensure all properties are updated or set to defaults if undefined\n                this.BackUpTestData = {\n                    BackupTime: BackUpTestData.BackupTime ?? 0,\n                    sense_mains_input: BackUpTestData.sense_mains_input ?? 1,\n                    sense_ups_output: BackUpTestData.sense_ups_output ?? 0,\n                    alarm_status: BackUpTestData.alarm_status ?? 0,\n                    inputPdata: BackUpTestData.inputPdata || {},\n                    outputPdata: BackUpTestData.outputPdata || {},\n                };\n\n                // Log to ensure data was updated properly\n                console.log(\"Updated BackUpTestData:\", this.BackUpTestData);\n            } else {\n                console.warn(\"Invalid payload or missing BackUpTestData:\", payload);\n            }\n        },\n        updateSettingData(payload) {\n            if (payload && payload.SettingData && Array.isArray(payload.SettingData.settings)) {\n                this.setting = payload.SettingData.settings;\n            } else {\n                console.warn(\"No valid settings data received in payload\", payload);\n                this.setting = [];\n            }\n        },\n\n        createRunCmds(overrides = {}) {\n            return {\n                alarm_status: this.BackUpTestData.alarm_status,\n                cmd_mains_input: this.cmd_mains_input,\n                backupTestRunning: this.backupTestRunning,\n                BackupTime: this.BackUpTestData.BackupTime,\n                additionalData: {\n                    setting_id: this.formData.setting_id,\n                    loadType: this.formData.loadType,\n                    stepId: this.formData.stepId,\n                    loadPercentage: this.formData.loadPercentage,\n                },\n                ...overrides,\n            };\n        },\n        sendMessage(payload) {\n            // Emit a message to Node-RED using socket\n            this.$socket.emit('msg-output:' + this.id, { payload });\n        },\n        async delay(ms) {\n            return new Promise((resolve) => setTimeout(resolve, ms));\n        },\n        async startBackupTest() {\n            this.backupTestRunning = true;\n            this.BackUpTestData.alarm_status = 1;\n            this.send({ topic: 'commands', payload: this.createRunCmds() });\n\n            try {\n                await this.delay(2000);\n                this.BackUpTestData.alarm_status = 0;\n                this.send({ payload: this.createRunCmds() });\n\n                this.BackUpTestData.sense_mains_input = 0;\n                this.send({ topic: 'commands', payload: this.createRunCmds() });\n\n                while (this.BackUpTestData.sense_mains_input !== 0) {\n                    await this.delay(100);\n                    if (!this.backupTestRunning) throw new Error(\"Test stopped\");\n                }\n\n                while (this.BackUpTestData.sense_ups_output !== 1) {\n                    await this.delay(100);\n                    if (!this.backupTestRunning) throw new Error(\"Test stopped\");\n                }\n\n                while (this.BackUpTestData.sense_ups_output === 1) {\n                    await this.delay(1000);\n                    this.BackUpTestData.BackupTime++;\n                    this.test_duration++;\n                    if (this.test_duration > 10) {\n                        this.test_duration = 0;\n                        const measurement = this.generateMeasurement();\n                        this.measurements.push(measurement);\n                    }\n\n                    this.send({ topic: 'commands', payload: this.createRunCmds() });\n                }\n            } catch (error) {\n                console.error(error.message);\n            } finally {\n                this.stopBackupTest();\n            }\n        },\n        stopBackupTest() {\n            this.backupTestRunning = false;\n            this.send({\n                payload: this.createRunCmds({\n                    alarm_status: 0,\n                    cmd_mains_input: 1,\n                }),\n            });\n            this.BackUpTestData = {\n                ...this.BackUpTestData,\n                alarm_status: 0,\n                sense_mains_input: 1,\n            };\n            this.testReport = this.createTestReport();\n            this.send({ topic: 'report', payload: this.testReport });\n        },\n    },\n    mounted() {\n        this.$watch(\"msg\", (newMsg) => {\n            if (newMsg && newMsg.payload) {\n                this.updateBackUpTestData(newMsg.payload);\n                this.updateSettingData(newMsg.payload);\n            }\n        });\n    },\n};\n</script>\n\n\n<style scoped>\n.backup-test-ui {\n    max-width: 450px;\n    margin: 30px auto;\n    font-family: 'Arial', sans-serif;\n    background-color: #f4f6f9;\n    padding: 20px;\n    border-radius: 10px;\n    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n}\n\nh1 {\n    font-size: 24px;\n    color: #333;\n    margin-bottom: 20px;\n    text-align: center;\n}\n\nlabel {\n    font-size: 14px;\n    color: #555;\n    display: block;\n    margin-bottom: 5px;\n}\n\ninput,\nselect {\n    width: 100%;\n    padding: 10px;\n    margin-bottom: 15px;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n    font-size: 14px;\n    background-color: #fff;\n    transition: border-color 0.3s, box-shadow 0.3s;\n}\n\ninput:focus,\nselect:focus {\n    border-color: #007bff;\n    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);\n}\n\n.buttons {\n    display: flex;\n    justify-content: space-between;\n    gap: 10px;\n    margin-top: 20px;\n}\n\nbutton {\n    padding: 12px 20px;\n    background-color: #007bff;\n    color: white;\n    border: none;\n    border-radius: 5px;\n    font-size: 16px;\n    cursor: pointer;\n    transition: background-color 0.3s, transform 0.3s;\n}\n\nbutton:disabled {\n    background-color: #ccc;\n    cursor: not-allowed;\n}\n\nbutton:hover {\n    background-color: #0056b3;\n    transform: scale(1.05);\n}\n\nbutton:active {\n    background-color: #004085;\n}\n\n.test-status,\n.test-result {\n    background-color: #ffffff;\n    padding: 15px;\n    border-radius: 8px;\n    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);\n    margin-top: 20px;\n}\n\n.test-status p,\n.test-result p {\n    font-size: 16px;\n    color: #333;\n}\n\n.test-result h2 {\n    font-size: 20px;\n    color: #007bff;\n    margin-bottom: 10px;\n}\n\nul {\n    list-style-type: none;\n    padding-left: 0;\n}\n\nli {\n    font-size: 14px;\n    color: #555;\n    margin-bottom: 8px;\n}\n</style>",
+        "format": "<template>\n    <div class=\"backup-test-ui\">\n        <h1>Backup Test Control</h1>\n        <div>\n            <div>\n                <!-- Setting ID Dropdown -->\n                <label for=\"setting_id\">Report Settings ID:</label>\n                <select v-model=\"formData.setting_id\" id=\"setting_id\" required>\n                    <option v-for=\"id in settingOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n                </select>\n\n                <label for=\"load-type\">Load Type:</label>\n                <select v-model=\"formData.loadType\" id=\"load-type\" required>\n                    <option v-for=\"(value, key) in loadTypes\" :key=\"key\" :value=\"value\">\n                        {{ key }}\n                    </option>\n                </select>\n            </div>\n            <div>\n                <!-- MODE -->\n                <label for=\"mode\">Mode:</label>\n                <select v-model=\"formData.mode\" id=\"mode\" required>\n                    <option v-for=\"(value, key) in MODE\" :key=\"value\" :value=\"value\">\n                        {{ key }}\n                    </option>\n                </select>\n            </div>\n\n            <div>\n                <label for=\"load-percentage\">Load Percentage:</label>\n                <input type=\"number\" v-model.number=\"formData.loadPercentage\" id=\"load-percentage\" required min=\"0\"\n                    max=\"100\" />\n            </div>\n\n            <!-- Display Setting Data -->\n            <div v-if=\"selectedSetting\">\n                <h3>Setting Details:</h3>\n                <p><strong>Report Id:</strong> {{ selectedSetting.report_id }}</p>\n                <p><strong>Standard:</strong> {{ selectedSetting.standard }}</p>\n                <p><strong>UPS Model:</strong> {{ selectedSetting.ups_model }}</p>\n                <p><strong>Client Name:</strong> {{ selectedSetting.client_name }}</p>\n                <p><strong>Brand Name:</strong> {{ selectedSetting.brand_name }}</p>\n                <p><strong>Test Engineer Name:</strong> {{ selectedSetting.test_engineer_name }}</p>\n                <p><strong>Test Approval Name:</strong> {{ selectedSetting.test_approval_name }}</p>\n                <p><strong>UPS SPEC ID:</strong> {{ selectedSetting.spec_id }}</p>\n            </div>\n\n            <div class=\"buttons\">\n                <button type=\"button\" @click=\"startBackupTest\" :disabled=\"backupTestRunning\">Start Test</button>\n\n                <button type=\"button\" @click=\"stopBackupTest\" :disabled=\"!backupTestRunning\">Stop Test</button>\n            </div>\n        </div>\n\n        <div v-if=\"backupTestRunning\" class=\"test-status\">\n            <p>Test running... Backup time: {{ BackUpTestData.BackupTime }} seconds</p>\n        </div>\n        <div v-if=\"!backupTestRunning && BackUpTestData.BackupTime > 0\" class=\"test-result\">\n            <h2>Test Result</h2>\n            <p>Total Backup Time: {{ BackUpTestData.BackupTime }} seconds</p>\n            <ul>\n                <li v-for=\"(value, key) in BackUpTestData\" :key=\"key\">\n                    {{ key }}: {{ value }}\n                </li>\n            </ul>\n        </div>\n    </div>\n</template>\n\n<script>\nexport default {\n    data() {\n        return {\n            test_duration: 0,\n            test_report: null,\n            latest_settings_id: 0,\n            setting: [],\n            TestResult: {\n                TEST_FAILED: 0,\n                TEST_PENDING: 1,\n                TEST_SUCCESSFUL: 2,\n                USER_OBSERVATION: 3,\n            },\n            loadTypes: {\n                LINEAR: 0,\n                NON_LINEAR: 1,\n            },\n            MODE: {\n                NORMAL_MODE: 0,\n                STORAGE_MODE: 1,\n                FAULT_MODE: 2,\n                ALARM_MODE: 4,\n            },\n            formData: {\n                setting_id: 0,\n                loadType: 0,\n                mode: 0,\n                loadPercentage: 0,\n            },\n            backupTestRunning: false,\n            cmd_mains_input: 1,\n            BackUpTestData: {\n                BackupTime: 0,\n                sense_mains_input: 1,\n                sense_ups_output: 0,\n                alarm_status: 0,\n                inputPdata: {},\n                outputPdata: {},\n            },\n\n            measurements: [],\n        };\n    },\n    computed: {\n        settingOptions() {\n            return this.setting.map((setting) => setting.id || 0).sort((a, b) => a - b);\n        },\n        selectedSetting() {\n            return this.setting.find((setting) => setting.id === this.formData.setting_id) || null;\n        },\n    },\n    methods: {\n\n        // updateBackUpTestData(payload) {\n        //     if (payload && payload.BackUpTestData) {\n        //       this.BackUpTestData = { ...this.BackUpTestData, ...payload.BackUpTestData };\n        //     }\n        //   },\n\n        generateMeasurement() {\n            const uniqueId = Math.floor(Math.random() * 9000000000) + 1000000000;\n            const timestamp = new Date();\n\n            return {\n                m_unique_id: uniqueId,\n                time_stamp: timestamp.getTime(),\n                name: \"Measurement Backup test\",\n                mode: this.formData.mode,\n                phase_name: \"Phase A\",\n                load_type: this.formData.loadType,\n                step_id: 0,\n                load_percentage: this.formData.loadPercentage,\n                power_measures: [this.BackUpTestData.inputPdata, this.BackUpTestData.outputPdata],\n                steady_state_voltage_tol: 0,\n                voltage_dc_component: 0,\n                load_pf_deviation: 0,\n                switch_time_ms: 0,\n                run_interval_sec: 10,\n                backup_time_sec: 0,\n                overload_time_sec: 0,\n                temperature_1: 0,\n                temperature_2: 0,\n            };\n        },\n        createTestReport() {\n            const report = {\n                settings: this.selectedSetting || {}, // Use the currently selected settings\n                test_name: 9, // BackupTest enum value\n                test_description: \"Backup Test Report\",\n                measurements: this.measurements, // Use collected measurements\n                test_result: 3, // USER OBSERVATION\n            };\n\n            // Log the report for debugging or send it to the server\n            console.log(\"Generated Test Report:\", report);\n\n            // Emit the report via socket (if required)\n            this.$socket.emit('test-report', { report });\n\n            return report;\n        },\n\n\n        updateBackUpTestData(payload) {\n            if (payload && payload.BackUpTestData) {\n                const { BackUpTestData } = payload;\n\n                // Ensure all properties are updated or set to defaults if undefined\n                this.BackUpTestData = {\n                    BackupTime: BackUpTestData.BackupTime ?? 0,\n                    sense_mains_input: BackUpTestData.sense_mains_input ?? 1,\n                    sense_ups_output: BackUpTestData.sense_ups_output ?? 0,\n                    alarm_status: BackUpTestData.alarm_status ?? 0,\n                    inputPdata: BackUpTestData.inputPdata || {},\n                    outputPdata: BackUpTestData.outputPdata || {},\n                };\n\n                // Log to ensure data was updated properly\n                console.log(\"Updated BackUpTestData:\", this.BackUpTestData);\n            } else {\n                console.warn(\"Invalid payload or missing BackUpTestData:\", payload);\n            }\n        },\n        updateSettingData(payload) {\n            if (payload && payload.SettingData && Array.isArray(payload.SettingData.settings)) {\n                this.setting = payload.SettingData.settings;\n            } else {\n                console.warn(\"No valid settings data received in payload\", payload);\n                this.setting = [];\n            }\n        },\n\n        createRunCmds(overrides = {}) {\n            return {\n                alarm_status: this.BackUpTestData.alarm_status,\n                cmd_mains_input: this.cmd_mains_input,\n                backupTestRunning: this.backupTestRunning,\n                BackupTime: this.BackUpTestData.BackupTime,\n                additionalData: {\n                    setting_id: this.formData.setting_id,\n                    loadType: this.formData.loadType,\n                    stepId: this.formData.stepId,\n                    loadPercentage: this.formData.loadPercentage,\n                },\n                ...overrides,\n            };\n        },\n        sendMessage(payload) {\n            // Emit a message to Node-RED using socket\n            this.$socket.emit('msg-output:' + this.id, { payload });\n        },\n        async delay(ms) {\n            return new Promise((resolve) => setTimeout(resolve, ms));\n        },\n        async startBackupTest() {\n            this.send({\n                topic: 'info', payload: \"starting backup Test\"\n            });\n\n            this.backupTestRunning = true;\n\n\n\n            try {\n                await this.delay(2000);\n                this.BackUpTestData.alarm_status = 1;\n                this.send({\n                    topic: 'commands', payload: this.createRunCmds({\n                        alarm_status: 1,\n\n\n                    })\n                });\n                await this.delay(2000);\n                this.BackUpTestData.alarm_status = 0;\n                this.send({\n                    topic: 'commands', payload: this.createRunCmds({\n                        alarm_status: 0\n\n                    })\n                });\n                await this.delay(2000);\n\n                this.cmd_mains_input = 0;\n                this.send({\n                    topic: 'commands', payload: this.createRunCmds({\n                        cmd_mains_input: 0\n\n                    })\n                })\n                await this.delay(2000);\n                const maxRetries = 100;\n                let retryCount = 0;\n\n                while (this.BackUpTestData.sense_mains_input !== 0) {\n                    await this.delay(100);\n                    retryCount++;\n                    if (retryCount > maxRetries) {\n                        throw new Error(\"Timeout: sense_mains_input did not change to 0\");\n                    }\n                    if (!this.backupTestRunning) throw new Error(\"Test stopped\");\n                }\n\n                retryCount = 0; // Reset for next loop\n                while (this.BackUpTestData.sense_ups_output !== 1) {\n                    await this.delay(100);\n                    retryCount++;\n                    if (retryCount > maxRetries) {\n                        throw new Error(\"Timeout: sense_ups_output did not change to 1\");\n                    }\n                    if (!this.backupTestRunning) throw new Error(\"Test stopped\");\n                }\n\n\n\n\n\n\n                while (this.BackUpTestData.sense_ups_output === 1 && this.BackUpTestData.sense_mains_input === 0) {\n                    if (!this.backupTestRunning) {\n                        this.send({ topic: 'info', payload: \"Stop cmd during run\" });\n                        throw new Error(\"Test stopped during main loop\");\n                    }\n                    this.send({ topic: 'info', payload: \"running backup Test\" });\n                    await this.delay(1000);\n\n\n                    this.BackUpTestData.BackupTime++;\n                    this.test_duration++;\n\n                    if (this.test_duration >= 10) {\n                        this.test_duration = 0;\n                        const measurement = this.generateMeasurement();\n                        if (this.measurements.length > 1000) {\n                            this.measurements.shift();\n                        }\n                        this.measurements.push(measurement);\n                        this.send({ topic: 'info', payload: \"new measurement recorded\" });\n                    }\n\n                    this.send({ topic: 'commands', payload: this.createRunCmds() });\n                }\n\n            } catch (error) {\n                console.error(error.message);\n            } finally {\n                this.stopBackupTest();\n            }\n        },\n        stopBackupTest() {\n            this.send({\n                topic: 'info', payload: \"stopping backup Test \"\n            });\n            this.backupTestRunning = false;\n            this.cmd_mains_input = 1;\n            this.send({\n                payload: this.createRunCmds({\n                    alarm_status: 0,\n                    cmd_mains_input: 1\n\n                }),\n            });\n            this.BackUpTestData = {\n                ...this.BackUpTestData,\n                alarm_status: 0,\n                cmd_mains_input: 1\n            };\n            this.testReport = this.createTestReport();\n            this.send({ topic: 'report', payload: this.testReport });\n        },\n    },\n    mounted() {\n        this.$watch(\"msg\", (newMsg) => {\n            if (newMsg && newMsg.payload) {\n                this.updateBackUpTestData(newMsg.payload);\n                this.updateSettingData(newMsg.payload);\n            }\n        });\n    },\n};\n</script>\n\n\n<style scoped>\n.backup-test-ui {\n    max-width: 450px;\n    margin: 30px auto;\n    font-family: 'Arial', sans-serif;\n    background-color: #f4f6f9;\n    padding: 20px;\n    border-radius: 10px;\n    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n}\n\nh1 {\n    font-size: 24px;\n    color: #333;\n    margin-bottom: 20px;\n    text-align: center;\n}\n\nlabel {\n    font-size: 14px;\n    color: #555;\n    display: block;\n    margin-bottom: 5px;\n}\n\ninput,\nselect {\n    width: 100%;\n    padding: 10px;\n    margin-bottom: 15px;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n    font-size: 14px;\n    background-color: #fff;\n    transition: border-color 0.3s, box-shadow 0.3s;\n}\n\ninput:focus,\nselect:focus {\n    border-color: #007bff;\n    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);\n}\n\n.buttons {\n    display: flex;\n    justify-content: space-between;\n    gap: 10px;\n    margin-top: 20px;\n}\n\nbutton {\n    padding: 12px 20px;\n    background-color: #007bff;\n    color: white;\n    border: none;\n    border-radius: 5px;\n    font-size: 16px;\n    cursor: pointer;\n    transition: background-color 0.3s, transform 0.3s;\n}\n\nbutton:disabled {\n    background-color: #ccc;\n    cursor: not-allowed;\n}\n\nbutton:hover {\n    background-color: #0056b3;\n    transform: scale(1.05);\n}\n\nbutton:active {\n    background-color: #004085;\n}\n\n.test-status,\n.test-result {\n    background-color: #ffffff;\n    padding: 15px;\n    border-radius: 8px;\n    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);\n    margin-top: 20px;\n}\n\n.test-status p,\n.test-result p {\n    font-size: 16px;\n    color: #333;\n}\n\n.test-result h2 {\n    font-size: 20px;\n    color: #007bff;\n    margin-bottom: 10px;\n}\n\nul {\n    list-style-type: none;\n    padding-left: 0;\n}\n\nli {\n    font-size: 14px;\n    color: #555;\n    margin-bottom: 8px;\n}\n</style>",
         "storeOutMessages": true,
         "passthru": false,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
         "x": 700,
-        "y": 340,
+        "y": 360,
         "wires": [
             [
                 "c95fb50fa1487318"
@@ -505,7 +445,7 @@
         "wires": [
             [
                 "149fdb7b24b4b6ac",
-                "30f335139401e409"
+                "d7ed4a435952fd08"
             ]
         ]
     },
@@ -574,43 +514,6 @@
         "wires": []
     },
     {
-        "id": "c79911f721b54e7e",
-        "type": "debug",
-        "z": "46413099658d8708",
-        "name": "debug 8",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload.BackUpTestData",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 680,
-        "y": 440,
-        "wires": []
-    },
-    {
-        "id": "30f335139401e409",
-        "type": "rbe",
-        "z": "46413099658d8708",
-        "name": "",
-        "func": "rbe",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 530,
-        "y": 440,
-        "wires": [
-            [
-                "c79911f721b54e7e"
-            ]
-        ]
-    },
-    {
         "id": "c95fb50fa1487318",
         "type": "switch",
         "z": "46413099658d8708",
@@ -627,11 +530,16 @@
                 "t": "eq",
                 "v": "report",
                 "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "info",
+                "vt": "str"
             }
         ],
         "checkall": "true",
         "repair": false,
-        "outputs": 2,
+        "outputs": 3,
         "x": 930,
         "y": 300,
         "wires": [
@@ -641,6 +549,9 @@
             ],
             [
                 "39303c6098630a32"
+            ],
+            [
+                "2919948f84647257"
             ]
         ]
     },
@@ -662,18 +573,103 @@
         "wires": []
     },
     {
-        "id": "ac18f679c10f1fd0",
-        "type": "ui-group",
-        "name": "UPS_STATUS",
-        "page": "7d0f53039d1540b1",
-        "width": 3,
-        "height": "1",
-        "order": 1,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
+        "id": "9fb4c404e7d2f4ef",
+        "type": "debug",
+        "z": "46413099658d8708",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "75fa05daa403b11c",
+        "type": "change",
+        "z": "46413099658d8708",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "inputPdata",
+                "tot": "global",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 180,
+        "y": 500,
+        "wires": [
+            [
+                "ddde2940ca2fe7fe",
+                "c0cdc61cfda7f36f"
+            ]
+        ]
+    },
+    {
+        "id": "5ac65999df8fdae0",
+        "type": "debug",
+        "z": "46413099658d8708",
+        "name": "debug 12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.BackUpTestData",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "d7ed4a435952fd08",
+        "type": "rbe",
+        "z": "46413099658d8708",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 770,
+        "y": 420,
+        "wires": [
+            [
+                "5ac65999df8fdae0"
+            ]
+        ]
+    },
+    {
+        "id": "2919948f84647257",
+        "type": "debug",
+        "z": "46413099658d8708",
+        "name": "INFO",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1090,
+        "y": 380,
+        "wires": []
     },
     {
         "id": "eaf9e02b16206474",
@@ -683,6 +679,20 @@
         "width": 7,
         "height": "1",
         "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "ac18f679c10f1fd0",
+        "type": "ui-group",
+        "name": "UPS_STATUS",
+        "page": "7d0f53039d1540b1",
+        "width": 3,
+        "height": "1",
+        "order": 1,
         "showTitle": true,
         "className": "",
         "visible": "true",

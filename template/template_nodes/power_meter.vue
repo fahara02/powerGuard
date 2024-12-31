@@ -45,13 +45,14 @@ export default {
   data() {
     return {
       data: {
+        type: 0, // Default to INPUT_POWER
         voltage: 0,
         current: 0,
         power: 0,
         energy: 0,
         pf: 0,
         frequency: 0,
-        type: 0, // Default to INPUT_POWER
+
       },
       dataType: {
         INPUT_POWER: 0,
@@ -69,8 +70,8 @@ export default {
   },
   methods: {
     updatePowerData(payload) {
-      if (payload && payload.data) {
-        this.data = { ...this.data, ...payload.data }; // Merge new data with existing data
+      if (payload) {
+        this.data = { ...this.data, ...payload }; // Merge new data with existing data
       } else {
         console.error("Invalid payload:", payload);
       }

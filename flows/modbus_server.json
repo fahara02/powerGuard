@@ -133,8 +133,8 @@
         ],
         "topic": "topic",
         "topicType": "msg",
-        "x": 120,
-        "y": 520,
+        "x": 400,
+        "y": 480,
         "wires": [
             [
                 "10142d9d3cc8d80a"
@@ -295,7 +295,7 @@
         "shape": "circle",
         "showBorder": true,
         "showGlow": true,
-        "x": 600,
+        "x": 740,
         "y": 880,
         "wires": []
     },
@@ -327,7 +327,7 @@
         "shape": "circle",
         "showBorder": true,
         "showGlow": true,
-        "x": 600,
+        "x": 740,
         "y": 920,
         "wires": []
     },
@@ -436,8 +436,8 @@
         "links": [
             "0dcca1ca9bdc21cd"
         ],
-        "x": 305,
-        "y": 520,
+        "x": 625,
+        "y": 480,
         "wires": []
     },
     {
@@ -541,7 +541,9 @@
         "z": "f63587bd397db4fd",
         "name": "btn_load_bank_2",
         "mode": "link",
-        "links": [],
+        "links": [
+            "1215662ccc8745ad"
+        ],
         "x": 295,
         "y": 660,
         "wires": []
@@ -1070,7 +1072,8 @@
         "y": 1280,
         "wires": [
             [
-                "f54c34302e14930e"
+                "f54c34302e14930e",
+                "cdf6b526463c0f59"
             ],
             [
                 "eb01d8a547251e62"
@@ -1105,10 +1108,10 @@
             ],
             [],
             [
-                "f6ef5ed7574a4b81"
+                "48ee54f35f52d3bc"
             ],
             [
-                "48ee54f35f52d3bc"
+                "f6ef5ed7574a4b81"
             ],
             [],
             [
@@ -1151,10 +1154,10 @@
             ],
             [],
             [
-                "91186b8eb51b1047"
+                "577df906386ed8df"
             ],
             [
-                "577df906386ed8df"
+                "91186b8eb51b1047"
             ],
             [],
             [],
@@ -1345,8 +1348,8 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 600,
-        "y": 1160,
+        "x": 680,
+        "y": 1200,
         "wires": []
     },
     {
@@ -1392,7 +1395,7 @@
         "styleGlow": false,
         "className": "",
         "x": 590,
-        "y": 1200,
+        "y": 1160,
         "wires": []
     },
     {
@@ -1602,7 +1605,7 @@
         "styleGlow": false,
         "className": "",
         "x": 600,
-        "y": 1440,
+        "y": 1500,
         "wires": []
     },
     {
@@ -1648,7 +1651,7 @@
         "styleGlow": false,
         "className": "",
         "x": 590,
-        "y": 1480,
+        "y": 1440,
         "wires": []
     },
     {
@@ -1681,6 +1684,51 @@
         "wires": [
             [
                 "c9275b65a66fa577"
+            ]
+        ]
+    },
+    {
+        "id": "cdf6b526463c0f59",
+        "type": "debug",
+        "z": "f63587bd397db4fd",
+        "name": "debug 10",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 180,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "d0adcf3ad37cd2d5",
+        "type": "inject",
+        "z": "f63587bd397db4fd",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 170,
+        "y": 480,
+        "wires": [
+            [
+                "d40e471b585a6f0b"
             ]
         ]
     },
@@ -1761,10 +1809,10 @@
         "serialConnectionDelay": "100",
         "serialAsciiResponseStartDelimiter": "0x3A",
         "unit_id": "1",
-        "commandDelay": "1",
-        "clientTimeout": "2000",
+        "commandDelay": 1,
+        "clientTimeout": 2000,
         "reconnectOnTimeout": true,
-        "reconnectTimeout": "2000",
+        "reconnectTimeout": 2000,
         "parallelUnitIdsAllowed": true,
         "showErrors": false,
         "showWarnings": true,
