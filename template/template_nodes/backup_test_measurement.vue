@@ -228,16 +228,25 @@ export default {
         async startBackupTest() {
             this.backupTestRunning = true;
             this.BackUpTestData.alarm_status = 1;
-            this.send({ payload: this.createRunCmds() });
+            this.send({ topic: 'commands', payload: this.createRunCmds() });
 
             try {
                 await this.delay(2000);
                 this.BackUpTestData.alarm_status = 0;
-                this.send({ payload: this.createRunCmds() });
+                this.send({
+                    topic: 'commands', payload: this.createRunCmds({
+                        alarm_status: 1
 
-                this.BackUpTestData.sense_mains_input = 0;
-                this.send({ payload: this.createRunCmds() });
-
+                    })
+                });
+                await this.delay(2000);
+                this.send({
+                    topic: 'commands', payload: this.createRunCmds({
+                        alarm_status: 0,
+                        cmd_mains_input: 0,
+                    })
+                });
+                await this.delay(2000);
                 while (this.BackUpTestData.sense_mains_input !== 0) {
                     await this.delay(100);
                     if (!this.backupTestRunning) throw new Error("Test stopped");
@@ -258,7 +267,7 @@ export default {
                         this.measurements.push(measurement);
                     }
 
-                    this.send({ payload: this.createRunCmds() });
+                    this.send({ topic: 'commands', payload: this.createRunCmds() });
                 }
             } catch (error) {
                 console.error(error.message);
@@ -280,7 +289,7 @@ export default {
                 sense_mains_input: 1,
             };
             this.testReport = this.createTestReport();
-            this.send({ payload: this.testReport });
+            this.send({ topic: 'report', payload: this.testReport });
         },
     },
     mounted() {
