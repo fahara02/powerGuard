@@ -289,7 +289,7 @@ export default {
                 });
                 await this.delay(2000);
 
-                this.cmd_mains_input = 0;
+                this.BackUpTestCMDS.cmd_mains_input = 0;
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         cmd_mains_input: 0
@@ -350,30 +350,42 @@ export default {
                 this.stopBackupTest();
             }
         },
-        stopBackupTest() {
+        async stopBackupTest() {
             this.send({
                 topic: 'info', payload: "stopping backup Test "
             });
+
+            // Ensure proper states are set
             this.backupTestRunning = false;
             this.BackUpTestCMDS.backupTestRunning = false;
+
+            // Send command to set cmd_mains_input to 1
             this.BackUpTestCMDS.cmd_mains_input = 1;
-            this.send({
+            await this.send({
+                topic: 'commands',
                 payload: this.createRunCmds({
                     alarm_status: 0,
                     cmd_mains_input: 1,
                     backupTestRunning: false
-
                 }),
             });
-            this.BackUpTestData = {
-                ...this.BackUpTestData,
+
+            // Update internal state to reflect changes
+            this.BackUpTestCMDS = {
+                ...this.BackUpTestCMDS,
                 alarm_status: 0,
                 cmd_mains_input: 1,
-                backupTestRunning: false
+                backupTestRunning: false,
             };
+
+            // Generate and send the test report
             this.testReport = this.createTestReport();
             this.send({ topic: 'report', payload: this.testReport });
-        },
+
+            // Log for debugging
+            console.log("Backup test stopped. CMD mains input set to 1:", this.BackUpTestCMDS);
+        }
+
     },
     mounted() {
         this.$watch("msg", (newMsg) => {
