@@ -1,0 +1,170 @@
+[
+    {
+        "id": "4ec0a7f75863202f",
+        "type": "tab",
+        "label": "REPORT_UPDATE",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b89c21b9c5642159",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "REPORT_IN",
+        "links": [
+            "bb5af27275e2ee33"
+        ],
+        "x": 365,
+        "y": 220,
+        "wires": [
+            [
+                "d45672f67dbbab27"
+            ]
+        ]
+    },
+    {
+        "id": "83e451fc86ef20c7",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "SIMULATE REPORT",
+        "func": "// Simulated payload\nmsg.payload = {\n    \"settings\": {\n        \"id\": 3,\n        \"report_id\": 61749681,\n        \"standard\": \"IEC_62040_1\",\n        \"ups_model\": \"UVA-123\",\n        \"client_name\": \"Walton\",\n        \"brand_name\": \"Walton\",\n        \"test_engineer_name\": \"Engr Atik\",\n        \"test_approval_name\": \"Engr Jhon\",\n        \"spec_id\": 3\n    },\n    \"test_name\": 9,\n    \"test_description\": \"Backup Test Report\",\n    \"measurements\": [\n        {\n            \"m_unique_id\": 2460957260,\n            \"time_stamp\": 1735664426194,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 1180751406,\n            \"time_stamp\": 1735664443466,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 3777666032,\n            \"time_stamp\": 1735664458203,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 6373995473,\n            \"time_stamp\": 1735664478197,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 6010959045,\n            \"time_stamp\": 1735664498200,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        }\n    ],\n    \"test_result\": 3\n};\n\n// Return the message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 40,
+        "wires": [
+            [
+                "d45672f67dbbab27",
+                "d835063f835b621d"
+            ]
+        ]
+    },
+    {
+        "id": "d45672f67dbbab27",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "SORT_REPORT",
+        "func": "\nlet payload = msg.payload;\n\n// Extract Settings Object\nlet settings = payload.settings;\n\n// Extract Measurements Array\nlet measurements = payload.measurements;\n\n// Extract Remaining Data\nlet { settings: _, measurements: __, ...otherObjects } = payload;\n\n// Prepare Outputs\nconst output = [\n    { payload: settings },         // Output 1: Settings Object\n    { payload: measurements },     // Output 2: Measurements Array\n    { payload: otherObjects }      // Output 3: Other Remaining Objects\n];\n\n// Send Result\nreturn output;\n",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 220,
+        "wires": [
+            [
+                "0086034d5d1b5475"
+            ],
+            [
+                "172c261c1913ab30"
+            ],
+            [
+                "fc922076f1ffa401"
+            ]
+        ]
+    },
+    {
+        "id": "0086034d5d1b5475",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "settings",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "172c261c1913ab30",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "measurements",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "fc922076f1ffa401",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "others",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "112848acd093c60f",
+        "type": "inject",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "83e451fc86ef20c7"
+            ]
+        ]
+    },
+    {
+        "id": "d835063f835b621d",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 80,
+        "wires": []
+    }
+]
