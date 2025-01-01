@@ -19,7 +19,9 @@
         "y": 220,
         "wires": [
             [
-                "d45672f67dbbab27"
+                "d45672f67dbbab27",
+                "24687e8eaa6997ca",
+                "ac7df2e2275af626"
             ]
         ]
     },
@@ -28,7 +30,7 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "SIMULATE REPORT",
-        "func": "// Simulated payload\nmsg.payload = {\n    \"settings\": {\n        \"id\": 3,\n        \"report_id\": 61749681,\n        \"standard\": \"IEC_62040_1\",\n        \"ups_model\": \"UVA-123\",\n        \"client_name\": \"Walton\",\n        \"brand_name\": \"Walton\",\n        \"test_engineer_name\": \"Engr Atik\",\n        \"test_approval_name\": \"Engr Jhon\",\n        \"spec_id\": 3\n    },\n    \"test_name\": 9,\n    \"test_description\": \"Backup Test Report\",\n    \"measurements\": [\n        {\n            \"m_unique_id\": 2460957260,\n            \"time_stamp\": 1735664426194,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 1180751406,\n            \"time_stamp\": 1735664443466,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 3777666032,\n            \"time_stamp\": 1735664458203,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 6373995473,\n            \"time_stamp\": 1735664478197,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 6010959045,\n            \"time_stamp\": 1735664498200,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": 0,\n            \"phase_name\": \"Phase A\",\n            \"load_type\": 0,\n            \"step_id\": 0,\n            \"load_percentage\": 0,\n            \"power_measures\": [\n                {\"type\": 0, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0},\n                {\"type\": 1, \"voltage\": 0, \"current\": 0, \"power\": 0, \"energy\": 0, \"pf\": 0, \"frequency\": 0}\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        }\n    ],\n    \"test_result\": 3\n};\n\n// Return the message\nreturn msg;\n",
+        "func": "// Creating the payload based on the provided structure\nlet payload = {\n    \"settings\": {\n        \"id\": 4,\n        \"report_id\": 34300381,\n        \"standard\": \"IEC_62040_1\",\n        \"ups_model\": \"UVA-123\",\n        \"client_name\": \"Walton\",\n        \"brand_name\": \"Walton\",\n        \"test_engineer_name\": \"Engr Atik\",\n        \"test_approval_name\": \"Engr Jhon\",\n        \"spec_id\": 4\n    },\n    \"test_name\": \"BackupTest\",\n    \"test_description\": \"Backup Test Report\",\n    \"measurements\": [\n        {\n            \"m_unique_id\": 6804338082,\n            \"time_stamp\": 1735741904962,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": \"NORMAL_MODE\",\n            \"phase_name\": \"Phase A\",\n            \"load_type\": \"LINEAR\",\n            \"step_id\": 0,\n            \"load_percentage\": 6,\n            \"power_measures\": [\n                {\n                    \"type\": \"UPS_INPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                },\n                {\n                    \"type\": \"UPS_OUTPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                }\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 7908496175,\n            \"time_stamp\": 1735741923950,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": \"NORMAL_MODE\",\n            \"phase_name\": \"Phase A\",\n            \"load_type\": \"LINEAR\",\n            \"step_id\": 0,\n            \"load_percentage\": 6,\n            \"power_measures\": [\n                {\n                    \"type\": \"UPS_INPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                },\n                {\n                    \"type\": \"UPS_OUTPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                }\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        }\n    ],\n    \"test_result\": \"USER_OBSERVATION\"\n};\n\n// Output the payload for the next node in the flow\nmsg.payload = payload;\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -41,7 +43,8 @@
             [
                 "d45672f67dbbab27",
                 "d835063f835b621d",
-                "ac7df2e2275af626"
+                "ac7df2e2275af626",
+                "24687e8eaa6997ca"
             ]
         ]
     },
@@ -57,11 +60,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 250,
-        "y": 220,
+        "x": 330,
+        "y": 180,
         "wires": [
             [
-                "0086034d5d1b5475"
+                "0086034d5d1b5475",
+                "754de0d72315e873"
             ],
             [
                 "172c261c1913ab30"
@@ -93,7 +97,7 @@
         "type": "debug",
         "z": "4ec0a7f75863202f",
         "name": "measurements",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -110,7 +114,7 @@
         "type": "debug",
         "z": "4ec0a7f75863202f",
         "name": "others",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -156,7 +160,7 @@
         "type": "debug",
         "z": "4ec0a7f75863202f",
         "name": "debug 8",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -173,8 +177,8 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "PROCESS MEASUREMENTS",
-        "func": "// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Asynchronous function to process measurements\nasync function processMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        const measurementId = measurement.m_unique_id;\n        const powerMeasures = measurement.power_measures.map(pm => ({\n            ...pm,\n            measurement_id: measurementId\n        }));\n\n        // Send each power measure object with 1-second delay\n        for (let powerMeasure of powerMeasures) {\n            send({ payload: powerMeasure });\n            await delay(1000); // 1-second delay\n        }\n    }\n    done(); // Indicate the function has completed\n}\n\n// Main Function Logic\nlet payload = msg.payload;\n\n// Ensure the input contains measurements\nif (!payload.measurements || !Array.isArray(payload.measurements)) {\n    node.error(\"Invalid input: 'measurements' must be an array.\", msg);\n    return null;\n}\n\n// Start asynchronous processing\nprocessMeasurements(payload.measurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
-        "outputs": 1,
+        "func": "// // Helper function for delaying execution\n// function delay(ms) {\n//     return new Promise(resolve => setTimeout(resolve, ms));\n// }\n\n// // Asynchronous function to process measurements\n// async function processMeasurements(measurements, send, done) {\n//     for (let measurement of measurements) {\n//         const measurementId = measurement.m_unique_id;\n//         const powerMeasures = measurement.power_measures.map(pm => ({\n//             ...pm,\n//             measurement_id: measurementId\n//         }));\n\n//         // Create rest_measurement by excluding the power_measures field\n//         const { power_measures, ...restMeasurement } = measurement;\n\n//         // Iterate over power measures and send alternately with rest_measurement\n//         for (let powerMeasure of powerMeasures) {\n//             // Send power measure first (Output 1)\n//             send([ { payload: powerMeasure }, null ]);\n//             await delay(1000); // 1-second delay\n\n//             // Send the rest of the measurement (Output 2)\n//             send([ null, { payload: restMeasurement } ]);\n//             await delay(1000); // 1-second delay\n//         }\n//     }\n//     done(); // Indicate the function has completed\n// }\n\n// // Main Function Logic\n// let payload = msg.payload;\n\n// // Ensure the input contains measurements\n// if (!payload.measurements || !Array.isArray(payload.measurements)) {\n//     node.error(\"Invalid input: 'measurements' must be an array.\", msg);\n//     return null;\n// }\n\n// // Start asynchronous processing\n// processMeasurements(payload.measurements, node.send, () => node.done());\n\n// // Return null as the function sends messages asynchronously\n// return null;\n// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Asynchronous function to process measurements\nasync function processMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        const measurementId = measurement.m_unique_id;\n        const powerMeasures = measurement.power_measures.map(pm => ({\n            ...pm,\n            measurement_id: measurementId\n        }));\n\n        // Create rest_measurement by excluding the power_measures field\n        const { power_measures, ...restMeasurement } = measurement;\n\n        // Iterate over power measures and send alternately with rest_measurement\n        for (let powerMeasure of powerMeasures) {\n            // Send power measure first (Output 1)\n            send([ \n                { payload: powerMeasure }, \n                null, \n                { payload: false } // Default value for Output 3\n            ]);\n            await delay(1000); // 1-second delay\n\n            // Send the rest of the measurement (Output 2)\n            send([ \n                null, \n                { payload: restMeasurement }, \n                { payload: false } // Default value for Output 3\n            ]);\n            await delay(1000); // 1-second delay\n        }\n    }\n\n    // Send a payload `true` to Output 3 when all processing is done\n    send([ null, null, { payload: true } ]);\n    done(); // Indicate the function has completed\n}\n\n// Main Function Logic\nlet payload = msg.payload;\n\n// Ensure the input contains measurements\nif (!payload.measurements || !Array.isArray(payload.measurements)) {\n    node.error(\"Invalid input: 'measurements' must be an array.\", msg);\n    return null;\n}\n\n// Start asynchronous processing\nprocessMeasurements(payload.measurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "outputs": 3,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
@@ -184,8 +188,15 @@
         "y": 340,
         "wires": [
             [
-                "24a1009b7bdba82f",
-                "20450f4f7a43a947"
+                "24a1009b7bdba82f"
+            ],
+            [
+                "5105a5689c31d313",
+                "ca8987ad0fbb0784"
+            ],
+            [
+                "bd7f18585a56529d",
+                "32965671a41e135c"
             ]
         ]
     },
@@ -203,7 +214,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 550,
-        "y": 340,
+        "y": 280,
         "wires": []
     },
     {
@@ -218,8 +229,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 170,
-        "y": 440,
+        "x": 150,
+        "y": 680,
         "wires": [
             [
                 "519b0cfe351f15ce"
@@ -239,7 +250,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 820,
+        "x": 1200,
         "y": 640,
         "wires": []
     },
@@ -251,8 +262,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 400,
-        "y": 440,
+        "x": 360,
+        "y": 680,
         "wires": [
             [
                 "712512ae60b1cdc9"
@@ -271,8 +282,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 600,
-        "y": 440,
+        "x": 540,
+        "y": 680,
         "wires": [
             [
                 "16e508bdf889111c"
@@ -287,8 +298,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 780,
-        "y": 440,
+        "x": 740,
+        "y": 660,
         "wires": [
             [
                 "72fb27e46012366a"
@@ -307,11 +318,337 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 830,
-        "y": 560,
+        "x": 990,
+        "y": 700,
         "wires": [
             [
                 "b0fe93bafaeabdf8"
+            ]
+        ]
+    },
+    {
+        "id": "5105a5689c31d313",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "rest",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 530,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "24687e8eaa6997ca",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "SAVE LINKS",
+        "func": "// Get the existing report-m_unique_id mapping from flow context\nlet reportLinks = flow.get(\"reportLinks\") || {};\n\n// Ensure `report_id` is always a number\nconst reportId = Number(msg.payload.settings.report_id);\nif (isNaN(reportId)) {\n    node.error(`Invalid report_id in Function 1: ${msg.payload.settings.report_id}`);\n    return null;\n}\n\n// Extract m_unique_id values\nconst measurementIds = msg.payload.measurements.map(measurement => measurement.m_unique_id);\n\n// Add the report_id and associated m_unique_id values\nif (!reportLinks[reportId]) {\n    reportLinks[reportId] = []; // Initialize if not present\n}\n\n// Avoid duplicates by combining arrays and using Set\nreportLinks[reportId] = Array.from(new Set([...reportLinks[reportId], ...measurementIds]));\n\n// Save updated reportLinks in flow context\nflow.set(\"reportLinks\", reportLinks);\n\n// Debug: Log the current state of the flow context\nnode.warn(`Report Links Updated (Function 1): ${JSON.stringify(reportLinks, null, 2)}`);\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 240,
+        "wires": [
+            [
+                "f324b50360a0a3ef"
+            ]
+        ]
+    },
+    {
+        "id": "f324b50360a0a3ef",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "report link",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "ca8987ad0fbb0784",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "Measurement with report  id",
+        "func": "// Retrieve the reportLinks object from flow context\nlet reportLinks = flow.get(\"reportLinks\") || {};\nnode.warn(`Function 2: Retrieved reportLinks = ${JSON.stringify(reportLinks, null, 2)}`);\nlet new_measurement=msg.payload;\n// The measurement ID you are searching for\nconst measurementId = new_measurement.m_unique_id;\nif (!measurementId) {\n    node.error(\"Invalid measurement_id: undefined\", msg);\n    return null;\n}\n\n// Find the report_id for the given measurementId\nlet foundReportId = null;\nfor (const [id, measurementIds] of Object.entries(reportLinks)) {\n    if (measurementIds.includes(measurementId)) {\n        foundReportId = Number(id); // Ensure report_id is returned as a number\n        break;\n    }\n}\n\n// Set the found report_id in the message or indicate not found\nif (foundReportId) {\n   new_measurement.report_id = foundReportId;\n   msg.payload.report_id=foundReportId;\n    node.warn(`Measurement ID ${measurementId} belongs to Report ID ${foundReportId}`);\n} else {\n    msg.payload.error = `Measurement ID ${measurementId} not found in any report.`;\n    node.warn(`Measurement ID ${measurementId} not found.`);\n}\nlet all_measurements=flow.get(\"all_measurements\") || [];\nall_measurements.push(new_measurement);\nflow.set(\"all_measurements\",all_measurements);\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 300,
+        "y": 420,
+        "wires": [
+            [
+                "f6b97959bb3614c9"
+            ]
+        ]
+    },
+    {
+        "id": "f86ffbc386084a89",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "report id",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 340,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "18826b373af39421",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "INSERT measurement",
+        "func": "// Ensure msg.payload contains the necessary data\nif (!msg.payload || typeof msg.payload !== \"object\") {\n    node.error(\"Invalid input: msg.payload must be an object.\");\n    return null;\n}\n\n// Extract measurement object from msg.payload\nvar measurement = msg.payload;\n\n// Validate required fields\nif (\n    measurement.m_unique_id === undefined ||\n    measurement.time_stamp === undefined ||\n    measurement.name === undefined ||\n    measurement.report_id === undefined\n) {\n    node.error(\"Invalid input: msg.payload must contain all required fields (m_unique_id, time_stamp, name, report_id).\");\n    return null;\n}\n\n// Escape string values to prevent SQL injection\nfunction escapeString(str) {\n    return str.replace(/'/g, \"''\");\n}\n\n// Construct the SQL query with proper handling of null values\nvar topic = `\n    INSERT INTO Measurement (\n        m_unique_id, timestamp, name, mode, phase_name, load_type, step_id, \n        load_percentage, steady_state_voltage_tol, voltage_dc_component, \n        load_pf_deviation, switch_time_ms, run_interval_sec, backup_time_sec, \n        overload_time_sec, temperature_1, temperature_2, test_report_id\n    ) VALUES (\n        ${measurement.m_unique_id}, \n        datetime(${measurement.time_stamp} / 1000, 'unixepoch'), \n        '${escapeString(measurement.name)}', \n        ${measurement.mode ? `'${escapeString(measurement.mode)}'` : 'NULL'}, \n        ${measurement.phase_name ? `'${escapeString(measurement.phase_name)}'` : 'NULL'}, \n        ${measurement.load_type ? `'${escapeString(measurement.load_type)}'` : 'NULL'}, \n        ${measurement.step_id !== undefined ? measurement.step_id : 'NULL'}, \n        ${measurement.load_percentage !== undefined ? measurement.load_percentage : 'NULL'}, \n        ${measurement.steady_state_voltage_tol !== undefined ? measurement.steady_state_voltage_tol : 'NULL'}, \n        ${measurement.voltage_dc_component !== undefined ? measurement.voltage_dc_component : 'NULL'}, \n        ${measurement.load_pf_deviation !== undefined ? measurement.load_pf_deviation : 'NULL'}, \n        ${measurement.switch_time_ms !== undefined ? measurement.switch_time_ms : 'NULL'}, \n        ${measurement.run_interval_sec !== undefined ? measurement.run_interval_sec : 'NULL'}, \n        ${measurement.backup_time_sec !== undefined ? measurement.backup_time_sec : 'NULL'}, \n        ${measurement.overload_time_sec !== undefined ? measurement.overload_time_sec : 'NULL'}, \n        ${measurement.temperature_1 !== undefined ? measurement.temperature_1 : 'NULL'}, \n        ${measurement.temperature_2 !== undefined ? measurement.temperature_2 : 'NULL'}, \n        ${measurement.report_id}\n    );\n`;\n\n// Return the query to be executed by the SQLite node\nreturn { topic: topic };\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 560,
+        "wires": [
+            [
+                "5f1f3198bcee0d63"
+            ]
+        ]
+    },
+    {
+        "id": "5f1f3198bcee0d63",
+        "type": "sqlite",
+        "z": "4ec0a7f75863202f",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 660,
+        "y": 560,
+        "wires": [
+            [
+                "0e1b7fd7829d8533"
+            ]
+        ]
+    },
+    {
+        "id": "0e1b7fd7829d8533",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "get measurement id",
+        "func": "msg.topic=\"SELECT last_insert_rowid()\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 560,
+        "wires": [
+            [
+                "cb6be12251a7102f"
+            ]
+        ]
+    },
+    {
+        "id": "cb6be12251a7102f",
+        "type": "sqlite",
+        "z": "4ec0a7f75863202f",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 1020,
+        "y": 560,
+        "wires": [
+            [
+                "1a31d7bd6a90d2d8"
+            ]
+        ]
+    },
+    {
+        "id": "1a31d7bd6a90d2d8",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "save measurement id",
+        "func": "// Ensure msg.payload contains the ID from the query result\nif (!msg.payload || !msg.payload[0] || !msg.payload[0]['last_insert_rowid()']) {\n    node.error(\"Invalid input: msg.payload must contain the result of last_insert_rowid().\");\n    return null;\n}\n\n// Extract the last inserted row ID\nlet lastInsertId = msg.payload[0]['last_insert_rowid()'];\n\n// Retrieve the existing array from flow context or initialize it\nlet allMeasurementIds = flow.get(\"all_measurement_id\") || [];\n\n// Add the new ID to the array\nallMeasurementIds.push(lastInsertId);\n\n// Save the updated array back to the flow context\nflow.set(\"all_measurement_id\", allMeasurementIds);\n\n// Log the updated array for debugging (optional)\nnode.warn(`Updated all_measurement_id: ${JSON.stringify(allMeasurementIds)}`);\n\n// Pass through the message for further processing\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 140,
+        "y": 620,
+        "wires": [
+            [
+                "f86ffbc386084a89"
+            ]
+        ]
+    },
+    {
+        "id": "f6b97959bb3614c9",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "bd7f18585a56529d",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "PROCESS_COMPLETE",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 590,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "754de0d72315e873",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "SET_LATEST_REPORT_ID",
+        "func": "let settings=msg.payload;\nflow.set(\"latest_report_id\",settings.report_id||0);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7126aec203523eaf",
+        "type": "change",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "latest_report_id",
+                "tot": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 200,
+        "y": 480,
+        "wires": [
+            [
+                "8234f43a6332c074",
+                "d56511342a6aa80d"
+            ]
+        ]
+    },
+    {
+        "id": "8234f43a6332c074",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "latest_report_id",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "32965671a41e135c",
+        "type": "switch",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 70,
+        "y": 440,
+        "wires": [
+            [],
+            [
+                "7126aec203523eaf"
+            ]
+        ]
+    },
+    {
+        "id": "d56511342a6aa80d",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "FETCH MEASUREMENTS",
+        "func": "// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Retrieve all measurements from flow context\nlet all_measurements = flow.get(\"all_measurements\") || [];\nnode.warn(`Retrieved all_measurements: ${JSON.stringify(all_measurements, null, 2)}`);\n\n// Get the desired report_id from the incoming message\nlet reportId = msg.payload.report_id;\nif (reportId === undefined || reportId === null) {\n    node.error(\"Invalid report_id: undefined or null\", msg);\n    return null;\n}\n\n// Filter measurements for the given report_id\nlet filteredMeasurements = all_measurements.filter(m => m.report_id === reportId);\n\nif (filteredMeasurements.length === 0) {\n    node.warn(`No measurements found for report_id: ${reportId}`);\n    return null;\n}\n\n// Async function to send measurements one by one\nasync function sendMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        send({ payload: measurement }); // Send each measurement\n        await delay(1000); // 1-second delay between each message\n    }\n    done(); // Indicate processing is complete\n}\n\n// Start sending measurements asynchronously\nsendMeasurements(filteredMeasurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 560,
+        "wires": [
+            [
+                "18826b373af39421"
             ]
         ]
     },

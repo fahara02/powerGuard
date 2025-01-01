@@ -16,7 +16,7 @@
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
-        "initialize": "// Code added here will be run once\n// whenever the node is started.\nconst cmd_mains_input = 0;\nconst sense_mains_input = 0;\nconst sense_ups_output = 0;\n\nconst cmd_load1_connect = 0;\nconst cmd_load2_connect = 0;\nconst cmd_load3_connect = 0;\nconst alarm_status = 0;\nconst BackupTime = 0;\n\n// Input and output power data\nconst input_voltage = 0;\nconst input_current = 0;\nconst input_power = 0;\nconst input_energy = 0;\nconst input_pf = 0;\nconst input_frequency = 0;\n\nconst output_voltage = 0;\nconst output_current = 0;\nconst output_power = 0;\nconst output_energy = 0;\nconst output_pf = 0;\nconst output_frequency = 0;\nlet dataType= {\n    INPUT_POWER: 0,\n    OUTPUT_POWER: 1,\n};\nlet inputPdata={\n    type:0,\n    voltage:0,\n    current:0,\n    power:0,\n    energy:0,\n    pf:0,\n    frequency:0\n}\nlet outputPdata = {\n    type:1,\n    voltage: 0,\n    current: 0,\n    power: 0,\n    energy: 0,\n    pf: 0,\n    frequency: 0\n}\nglobal.set('inputPdata', inputPdata);\nglobal.set('outputPdata', outputPdata);\n// Set global variables\nglobal.set('cmd_mains_input', cmd_mains_input);\nglobal.set('sense_mains_input', sense_mains_input);\nglobal.set('sense_ups_output', sense_ups_output);\nglobal.set('cmd_load1_connect', cmd_load1_connect);\nglobal.set('cmd_load2_connect', cmd_load2_connect);\nglobal.set('cmd_load3_connect', cmd_load3_connect);\nglobal.set('alarm_status', alarm_status);\nglobal.set('BackupTime', BackupTime);\nglobal.set('backupTestRunning', false);\n\n// Set global variables for input power data\nglobal.set('input_voltage', input_voltage);\nglobal.set('input_current', input_current);\nglobal.set('input_power', input_power);\nglobal.set('input_energy', input_energy);\nglobal.set('input_pf', input_pf);\nglobal.set('input_frequency', input_frequency);\n\n// Set global variables for output power data\nglobal.set('output_voltage', output_voltage);\nglobal.set('output_current', output_current);\nglobal.set('output_power', output_power);\nglobal.set('output_energy', output_energy);\nglobal.set('output_pf', output_pf);\nglobal.set('output_frequency', output_frequency);\n\n\n",
+        "initialize": "// // Code added here will be run once\n// // whenever the node is started.\n// const cmd_mains_input = 0;\n// const sense_mains_input = 0;\n// const sense_ups_output = 0;\n\n// const cmd_load1_connect = 0;\n// const cmd_load2_connect = 0;\n// const cmd_load3_connect = 0;\n// const alarm_status = 0;\n// const BackupTime = 0;\n\n// // Input and output power data\n// const input_voltage = 0;\n// const input_current = 0;\n// const input_power = 0;\n// const input_energy = 0;\n// const input_pf = 0;\n// const input_frequency = 0;\n\n// const output_voltage = 0;\n// const output_current = 0;\n// const output_power = 0;\n// const output_energy = 0;\n// const output_pf = 0;\n// const output_frequency = 0;\n// let dataType= {\n//     UPS_INPUT: 0,\n//     UPS_OUTPUT: 1,\n//     MAINS:2,\n// };\n// let inputPdata={\n//     type:0,\n//     voltage:0,\n//     current:0,\n//     power:0,\n//     energy:0,\n//     pf:0,\n//     frequency:0\n// }\n// let outputPdata = {\n//     type:1,\n//     voltage: 0,\n//     current: 0,\n//     power: 0,\n//     energy: 0,\n//     pf: 0,\n//     frequency: 0\n// }\n// global.set('inputPdata', inputPdata);\n// global.set('outputPdata', outputPdata);\n// // Set global variables\n// global.set('cmd_mains_input', cmd_mains_input);\n// global.set('sense_mains_input', sense_mains_input);\n// global.set('sense_ups_output', sense_ups_output);\n// global.set('cmd_load1_connect', cmd_load1_connect);\n// global.set('cmd_load2_connect', cmd_load2_connect);\n// global.set('cmd_load3_connect', cmd_load3_connect);\n// global.set('alarm_status', alarm_status);\n// global.set('BackupTime', BackupTime);\n// global.set('backupTestRunning', false);\n\n// // Set global variables for input power data\n// global.set('input_voltage', input_voltage);\n// global.set('input_current', input_current);\n// global.set('input_power', input_power);\n// global.set('input_energy', input_energy);\n// global.set('input_pf', input_pf);\n// global.set('input_frequency', input_frequency);\n\n// // Set global variables for output power data\n// global.set('output_voltage', output_voltage);\n// global.set('output_current', output_current);\n// global.set('output_power', output_power);\n// global.set('output_energy', output_energy);\n// global.set('output_pf', output_pf);\n// global.set('output_frequency', output_frequency);\n\n\n// Code added here will be run once whenever the node is started.\n\n// Enum for data types\nconst dataType = {\n    UPS_INPUT: \"UPS_INPUT\",\n    UPS_OUTPUT: \"UPS_OUTPUT\",\n    MAINS: \"MAINS\",\n};\n\n// Default input and output power data\nconst defaultPowerData = {\n    voltage: 0,\n    current: 0,\n    power: 0,\n    energy: 0,\n    pf: 0,\n    frequency: 0,\n};\n\n// Input power data\nlet inputPdata = {\n    type: dataType.UPS_INPUT, // Use the enum for type\n    ...defaultPowerData,\n};\n\n// Output power data\nlet outputPdata = {\n    type: dataType.UPS_OUTPUT, // Use the enum for type\n    ...defaultPowerData,\n};\n\n// Set global variables\nglobal.set('inputPdata', inputPdata);\nglobal.set('outputPdata', outputPdata);\n\nglobal.set('cmd_mains_input', 0);\nglobal.set('sense_mains_input', 0);\nglobal.set('sense_ups_output', 0);\n\nglobal.set('cmd_load1_connect', 0);\nglobal.set('cmd_load2_connect', 0);\nglobal.set('cmd_load3_connect', 0);\nglobal.set('alarm_status', 0);\nglobal.set('BackupTime', 0);\nglobal.set('backupTestRunning', false);\n\n// Set global variables for input power data\nObject.keys(defaultPowerData).forEach((key) => {\n    global.set(`input_${key}`, inputPdata[key]);\n});\n\n// Set global variables for output power data\nObject.keys(defaultPowerData).forEach((key) => {\n    global.set(`output_${key}`, outputPdata[key]);\n});\n",
         "finalize": "",
         "libs": [],
         "x": 320,
@@ -98,7 +98,7 @@
         "links": [
             "10142d9d3cc8d80a"
         ],
-        "x": 45,
+        "x": 125,
         "y": 100,
         "wires": [
             [
@@ -114,7 +114,7 @@
         "links": [
             "935e37cdfae7fe48"
         ],
-        "x": 45,
+        "x": 125,
         "y": 140,
         "wires": [
             [
@@ -148,7 +148,7 @@
         "links": [
             "aa2f0b5d403b73be"
         ],
-        "x": 45,
+        "x": 125,
         "y": 180,
         "wires": [
             [
@@ -197,8 +197,10 @@
         "type": "link in",
         "z": "6906193139893272",
         "name": "SET_LOAD3",
-        "links": [],
-        "x": 45,
+        "links": [
+            "27f54e557290e626"
+        ],
+        "x": 125,
         "y": 220,
         "wires": [
             [
@@ -211,8 +213,10 @@
         "type": "link in",
         "z": "6906193139893272",
         "name": "SET_ALARM_STATUS",
-        "links": [],
-        "x": 45,
+        "links": [
+            "706e406ae479f458"
+        ],
+        "x": 125,
         "y": 260,
         "wires": [
             [
@@ -815,8 +819,8 @@
         "topic": "",
         "payload": "0",
         "payloadType": "num",
-        "x": 410,
-        "y": 280,
+        "x": 430,
+        "y": 300,
         "wires": [
             [
                 "e6eb508467f378fa"

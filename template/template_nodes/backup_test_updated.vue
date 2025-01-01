@@ -263,11 +263,8 @@ export default {
             this.send({
                 topic: 'commands', payload: this.createRunCmds({
                     backupTestRunning: true,
-
-
                 })
             });
-
 
             try {
                 await this.delay(2000);
@@ -275,8 +272,6 @@ export default {
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         alarm_status: 1,
-
-
                     })
                 });
                 await this.delay(2000);
@@ -284,7 +279,6 @@ export default {
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         alarm_status: 0
-
                     })
                 });
                 await this.delay(2000);
@@ -293,9 +287,8 @@ export default {
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         cmd_mains_input: 0
-
                     })
-                })
+                });
                 await this.delay(2000);
                 const maxRetries = 100;
                 let retryCount = 0;
@@ -319,20 +312,21 @@ export default {
                     if (!this.backupTestRunning) throw new Error("Test stopped");
                 }
 
+                // Start main backup test loop
                 while (this.BackUpTestSense.sense_ups_output === 1 && this.BackUpTestSense.sense_mains_input === 0) {
                     if (!this.backupTestRunning) {
                         this.send({ topic: 'info', payload: "Stop cmd during run" });
                         throw new Error("Test stopped during main loop");
                     }
+
                     this.send({ topic: 'info', payload: "running backup Test" });
                     await this.delay(1000);
 
-
-                    this.BackUpTestData.BackupTime++;
+                    this.BackUpTestData.BackupTime++; // Increment backup time
                     this.test_duration++;
 
-                    if (this.test_duration >= 10) {
-                        this.test_duration = 0;
+                    // Record measurement every 10 seconds without duplication
+                    if (this.test_duration % 10 === 0) {
                         const measurement = this.generateMeasurement();
                         if (this.measurements.length > 1000) {
                             this.measurements.shift();
@@ -342,14 +336,35 @@ export default {
                     }
 
                     this.send({ topic: 'commands', payload: this.createRunCmds() });
-                }
 
+                    // Check for sense_ups_output changing from 1 to 0
+                    if (this.BackUpTestSense.sense_ups_output === 0) {
+                        this.send({
+                            topic: 'info',
+                            payload: `UPS output stopped. Recording final backup time: ${this.BackUpTestData.BackupTime} seconds`,
+                        });
+
+                        // Generate and record the final measurement
+                        const finalMeasurement = this.generateMeasurement();
+                        if (this.measurements.length === 0 ||
+                            this.measurements[this.measurements.length - 1].backup_time_sec !== finalMeasurement.backup_time_sec) {
+                            this.measurements.push(finalMeasurement);
+                        }
+
+                        this.send({
+                            topic: 'info',
+                            payload: "Final measurement recorded",
+                        });
+                        break; // Exit loop after recording the final measurement
+                    }
+                }
             } catch (error) {
                 console.error(error.message);
             } finally {
                 this.stopBackupTest();
             }
         },
+
         async stopBackupTest() {
             this.send({
                 topic: 'info', payload: "stopping backup Test "
