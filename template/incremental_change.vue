@@ -78,6 +78,7 @@ export default {
     data() {
         return {
             test_duration: 0,
+
             measurementIdCounter: 0,
             subreport_id: 0,
             first_measurement_taken: false,
@@ -122,8 +123,8 @@ export default {
             },
             formData: {
                 setting_id: 0,
-                loadType: "LINEAR",  // default load type as string
-                mode: "NORMAL_MODE", // default mode as string
+                loadType: "LINEAR",
+                mode: "NORMAL_MODE",
                 loadPercentage: 0,
                 runInterval: 0,
                 stepId: 0,
@@ -185,8 +186,50 @@ export default {
             const subReportId = Number(`${mainReportId}${testType.toString().padStart(2, '0')}`);
             return subReportId;
         },
-        generateMeasurement() {
-            const uniqueId = Math.floor(Math.random() * 9000000000) + 1000000000;
+        generateMeasurementId(testType, mainReportId) {
+
+
+
+
+            // Validate that mainReportId is a valid integer and is exactly 8 digits
+            if (!Number.isInteger(mainReportId) || mainReportId.toString().length !== 8) {
+                throw new Error("Invalid mainReportId: must be an 8-digit number.");
+            }
+
+
+
+            // Validate testType against the defined TestType values
+            const validTestTypes = [
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17,
+            ];
+            if (!validTestTypes.includes(testType)) {
+                throw new Error(`Invalid testType: ${testType} is not a valid test type.`);
+            }
+
+            // Increment the counter for unique measurement IDs
+            this.measurementIdCounter += 1;
+
+            // Ensure measurementIdCounter stays within a range to maintain 2 digits
+            if (this.measurementIdCounter > 99) {
+                this.measurementIdCounter = 1; // Reset counter to avoid overflow
+            }
+
+            // Construct each part of the measurement ID
+            const testTypePart = String(testType).padStart(2, "0"); // Always 2 digits
+            const reportPart = String(mainReportId).slice(-5); // Last 5 digits of mainReportId
+            const counterPart = String(this.measurementIdCounter).padStart(2, "0"); // Always 2 digits
+
+            // Combine to form the full measurement ID
+            const measurementId = Number(`${testTypePart}${reportPart}${counterPart}`);
+
+            // Return the measurement ID
+            return measurementId;
+        },
+
+
+
+        generateMeasurement(testType, mainReportId) {
+            const uniqueId = this.generateMeasurementId(testType, mainReportId);
             const timestamp = new Date();
 
             return {
@@ -212,14 +255,15 @@ export default {
         },
         createTestReport() {
             const report = {
-                settings: this.selectedSetting || {}, // Use the currently selected settings
-                test_name: "BackupTest", // BackupTest as string
+                settings: this.selectedSetting || {},
+                subreport_id: this.subreport_id,
+                test_name: "BackupTest",
                 test_description: "Backup Test Report",
-                measurements: this.measurements, // Use collected measurements
-                test_result: "USER_OBSERVATION", // USER_OBSERVATION as string
+                measurements: this.measurements,
+                test_result: "USER_OBSERVATION",
             };
 
-            // Log the report for debugging or send it to the server
+
             console.log("Generated Test Report:", report);
             return report;
         },
@@ -227,16 +271,11 @@ export default {
         updateBackUptestSense(payload) {
             if (payload && payload.BackUpTestSense) {
                 const { BackUpTestSense } = payload;
-
-                // Ensure all properties are updated or set to defaults if undefined
                 this.BackUpTestSense = {
-
                     sense_mains_input: BackUpTestSense.sense_mains_input ?? 1,
                     sense_ups_output: BackUpTestSense.sense_ups_output ?? 0,
-
                 };
 
-                // Log to ensure data was updated properly
                 console.log("Updated  BackUpTestSense:", this.BackUpTestSense);
             } else {
                 console.warn("Invalid payload or missing  BackUpTestSense:", payload);
@@ -246,15 +285,11 @@ export default {
         updateBackUpTestData(payload) {
             if (payload && payload.BackUpTestData) {
                 const { BackUpTestData } = payload;
-
-                // Ensure all properties are updated or set to defaults if undefined
                 this.BackUpTestData = {
                     BackupTime: BackUpTestData.BackupTime ?? 0,
                     inputPdata: BackUpTestData.inputPdata || {},
                     outputPdata: BackUpTestData.outputPdata || {},
                 };
-
-                // Log to ensure data was updated properly
                 console.log("Updated BackUpTestData:", this.BackUpTestData);
             } else {
                 console.warn("Invalid payload or missing BackUpTestData:", payload);
@@ -286,7 +321,7 @@ export default {
             };
         },
         sendMessage(payload) {
-            // Emit a message to Node-RED using socket
+
             this.$socket.emit('msg-output:' + this.id, { payload });
         },
         async delay(ms) {
@@ -299,15 +334,10 @@ export default {
                 topic: 'commands', payload: this.createRunCmds()
             });
             await this.delay(1000);
-            const mainReportId = this.setting.report_id || 10000000; // Ensure fallback is valid
-            try {
-                this.subreport_id = this.generateSubReportId(9, mainReportId);
-            } catch (error) {
-                this.send({
-                    topic: 'info', payload: "error generating report id"
-                });
-                throw error; // Rethrow or handle appropriately
-            }
+            const mainReportId = this.selectedSetting.report_id || 10000000; // Ensure fallback is valid
+
+            this.subreport_id = this.generateSubReportId(9, mainReportId);
+
             this.send({
                 topic: 'info', payload: "starting backup Test"
             });
@@ -366,7 +396,7 @@ export default {
                     if (!this.backupTestRunning) throw new Error("Test stopped");
                 }
 
-                // Start main backup test loop
+
                 while (this.BackUpTestSense.sense_ups_output === 1 && this.BackUpTestSense.sense_mains_input === 0) {
                     if (!this.backupTestRunning) {
                         this.send({ topic: 'info', payload: "Stop cmd during run" });
@@ -376,10 +406,10 @@ export default {
                     this.send({ topic: 'info', payload: "running backup Test" });
                     await this.delay(1000);
 
-                    this.BackUpTestData.BackupTime++; // Increment backup time
+                    this.BackUpTestData.BackupTime++;
                     this.test_duration++;
                     if (!this.first_measurement_taken) {
-                        const measurement = this.generateMeasurement();
+                        const measurement = this.generateMeasurement(9, mainReportId);
                         if (this.measurements.length > 1000) {
                             this.measurements.shift();
                         }
@@ -387,10 +417,10 @@ export default {
                         this.send({ topic: 'info', payload: "first measurement recorded" });
                         this.first_measurement_taken = true;
                     }
+                    let run_interval = this.formData.runInterval;
 
-                    // Record measurement every 10 seconds without duplication
-                    if (this.test_duration % 10 === 0) {
-                        const measurement = this.generateMeasurement();
+                    if (this.test_duration % run_interval === 0) {
+                        const measurement = this.generateMeasurement(9, mainReportId);
                         if (this.measurements.length > 1000) {
                             this.measurements.shift();
                         }
@@ -400,7 +430,7 @@ export default {
 
                     this.send({ topic: 'commands', payload: this.createRunCmds() });
 
-                    // Check for sense_ups_output changing from 1 to 0
+
                     if (this.BackUpTestSense.sense_ups_output === 0) {
                         this.send({
                             topic: 'info',
@@ -408,7 +438,7 @@ export default {
                         });
 
                         // Generate and record the final measurement
-                        const finalMeasurement = this.generateMeasurement();
+                        const finalMeasurement = this.generateMeasurement(9, mainReportId);
                         if (this.measurements.length === 0 ||
                             this.measurements[this.measurements.length - 1].backup_time_sec !== finalMeasurement.backup_time_sec) {
                             this.measurements.push(finalMeasurement);
@@ -418,7 +448,7 @@ export default {
                             topic: 'info',
                             payload: "Final measurement recorded",
                         });
-                        break; // Exit loop after recording the final measurement
+                        break;
                     }
                 }
             } catch (error) {
