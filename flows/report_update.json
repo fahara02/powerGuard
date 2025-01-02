@@ -15,8 +15,8 @@
         "links": [
             "bb5af27275e2ee33"
         ],
-        "x": 75,
-        "y": 220,
+        "x": 35,
+        "y": 120,
         "wires": [
             [
                 "d45672f67dbbab27",
@@ -42,7 +42,6 @@
         "wires": [
             [
                 "d45672f67dbbab27",
-                "d835063f835b621d",
                 "ac7df2e2275af626",
                 "24687e8eaa6997ca"
             ]
@@ -60,8 +59,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 330,
-        "y": 180,
+        "x": 290,
+        "y": 120,
         "wires": [
             [
                 "0086034d5d1b5475",
@@ -147,8 +146,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 140,
-        "y": 140,
+        "x": 80,
+        "y": 40,
         "wires": [
             [
                 "83e451fc86ef20c7"
@@ -156,82 +155,44 @@
         ]
     },
     {
-        "id": "d835063f835b621d",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "debug 8",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 580,
-        "y": 80,
-        "wires": []
-    },
-    {
         "id": "ac7df2e2275af626",
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "PROCESS MEASUREMENTS",
-        "func": "// // Helper function for delaying execution\n// function delay(ms) {\n//     return new Promise(resolve => setTimeout(resolve, ms));\n// }\n\n// // Asynchronous function to process measurements\n// async function processMeasurements(measurements, send, done) {\n//     for (let measurement of measurements) {\n//         const measurementId = measurement.m_unique_id;\n//         const powerMeasures = measurement.power_measures.map(pm => ({\n//             ...pm,\n//             measurement_id: measurementId\n//         }));\n\n//         // Create rest_measurement by excluding the power_measures field\n//         const { power_measures, ...restMeasurement } = measurement;\n\n//         // Iterate over power measures and send alternately with rest_measurement\n//         for (let powerMeasure of powerMeasures) {\n//             // Send power measure first (Output 1)\n//             send([ { payload: powerMeasure }, null ]);\n//             await delay(1000); // 1-second delay\n\n//             // Send the rest of the measurement (Output 2)\n//             send([ null, { payload: restMeasurement } ]);\n//             await delay(1000); // 1-second delay\n//         }\n//     }\n//     done(); // Indicate the function has completed\n// }\n\n// // Main Function Logic\n// let payload = msg.payload;\n\n// // Ensure the input contains measurements\n// if (!payload.measurements || !Array.isArray(payload.measurements)) {\n//     node.error(\"Invalid input: 'measurements' must be an array.\", msg);\n//     return null;\n// }\n\n// // Start asynchronous processing\n// processMeasurements(payload.measurements, node.send, () => node.done());\n\n// // Return null as the function sends messages asynchronously\n// return null;\n// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Asynchronous function to process measurements\nasync function processMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        const measurementId = measurement.m_unique_id;\n        const powerMeasures = measurement.power_measures.map(pm => ({\n            ...pm,\n            measurement_id: measurementId\n        }));\n\n        // Create rest_measurement by excluding the power_measures field\n        const { power_measures, ...restMeasurement } = measurement;\n\n        // Iterate over power measures and send alternately with rest_measurement\n        for (let powerMeasure of powerMeasures) {\n            // Send power measure first (Output 1)\n            send([ \n                { payload: powerMeasure }, \n                null, \n                { payload: false } // Default value for Output 3\n            ]);\n            await delay(1000); // 1-second delay\n\n            // Send the rest of the measurement (Output 2)\n            send([ \n                null, \n                { payload: restMeasurement }, \n                { payload: false } // Default value for Output 3\n            ]);\n            await delay(1000); // 1-second delay\n        }\n    }\n\n    // Send a payload `true` to Output 3 when all processing is done\n    send([ null, null, { payload: true } ]);\n    done(); // Indicate the function has completed\n}\n\n// Main Function Logic\nlet payload = msg.payload;\n\n// Ensure the input contains measurements\nif (!payload.measurements || !Array.isArray(payload.measurements)) {\n    node.error(\"Invalid input: 'measurements' must be an array.\", msg);\n    return null;\n}\n\n// Start asynchronous processing\nprocessMeasurements(payload.measurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "func": "\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n  const allPowerData = [];\n// Asynchronous function to process measurements\nasync function processMeasurements(measurements, send, done) {\n    // Array to hold all power data\n  \n\n    for (let measurement of measurements) {\n        const measurementId = measurement.m_unique_id;\n        const powerMeasures = measurement.power_measures.map(pm => ({\n            ...pm,\n            measurement_id: measurementId\n        }));\n\n        // Create rest_measurement by excluding the power_measures field\n        const { power_measures, ...restMeasurement } = measurement;\n\n        // Iterate over power measures\n        for (let powerMeasure of powerMeasures) {\n            // Add to aggregated power data\n            allPowerData.push(powerMeasure);\n\n            // Send power measure (Output 1)\n            send([\n                { payload: powerMeasure }, \n                null, \n                { payload: false } // Default value for Output 3\n            ]);\n            await delay(1000); // 1-second delay\n        }\n\n        // Send the rest of the measurement (Output 2) only once\n        send([\n            null, \n            { payload: restMeasurement }, \n            { payload: false } // Default value for Output 3\n        ]);\n        await delay(1000); // 1-second delay\n    }\n\n    // Store all power data in flow context\n    flow.set(\"all_power_data\", allPowerData);\n\n    // Send a payload `true` to Output 3 when all processing is done\n    send([null, null, { payload: true }]);\n    done(); // Indicate the function has completed\n}\n\n// Main Function Logic\nlet payload = msg.payload;\n\n// Ensure the input contains measurements\nif (!payload.measurements || !Array.isArray(payload.measurements)) {\n    node.error(\"Invalid input: 'measurements' must be an array.\", msg);\n    return null;\n}\n\n// Start asynchronous processing\nprocessMeasurements(payload.measurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
         "outputs": 3,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 210,
-        "y": 340,
+        "x": 310,
+        "y": 300,
         "wires": [
+            [],
             [
-                "24a1009b7bdba82f"
-            ],
-            [
-                "5105a5689c31d313",
                 "ca8987ad0fbb0784"
             ],
             [
-                "bd7f18585a56529d",
-                "32965671a41e135c",
-                "bc8e9479fde69e7d"
+                "bc8e9479fde69e7d",
+                "934392df93190d41"
             ]
         ]
-    },
-    {
-        "id": "24a1009b7bdba82f",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "power data",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 550,
-        "y": 280,
-        "wires": []
     },
     {
         "id": "20450f4f7a43a947",
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "insert _power_measures",
-        "func": "// Ensure msg.payload contains the necessary data\nif (!msg.payload || typeof msg.payload !== \"object\") {\n    node.error(\"Invalid input: msg.payload must be an object.\");\n    return null;\n}\n\n// Extract powerMeasure object from msg.payload\nvar powerMeasure = msg.payload;\n\n// Validate required fields\nif (\n    powerMeasure.type === undefined ||\n    powerMeasure.voltage === undefined ||\n    powerMeasure.current === undefined ||\n    powerMeasure.power === undefined ||\n    powerMeasure.energy === undefined ||\n    powerMeasure.pf === undefined ||\n    powerMeasure.frequency === undefined ||\n    powerMeasure.measurement_id === undefined\n) {\n    node.error(\"Invalid input: msg.payload must contain all required fields.\");\n    return null;\n}\n\n// Construct the SQL query\nvar topic = `INSERT INTO PowerMeasure (type, voltage, current, power, energy, pf, frequency, measurement_id) \nVALUES (${powerMeasure.type}, ${powerMeasure.voltage}, ${powerMeasure.current}, ${powerMeasure.power}, \n${powerMeasure.energy}, ${powerMeasure.pf}, ${powerMeasure.frequency}, ${powerMeasure.measurement_id});`;\n\n// Return the query to be executed by the SQLite node\nreturn { topic: topic };\n",
+        "func": "// Ensure msg.payload contains the necessary data\nif (!msg.payload || typeof msg.payload !== \"object\") {\n    node.error(\"Invalid input: msg.payload must be an object.\");\n    return null;\n}\n\n// Extract powerMeasure object from msg.payload\nvar powerMeasure = msg.payload;\n\n// Validate required fields\nif (\n    powerMeasure.type === undefined ||\n    powerMeasure.voltage === undefined ||\n    powerMeasure.current === undefined ||\n    powerMeasure.power === undefined ||\n    powerMeasure.energy === undefined ||\n    powerMeasure.pf === undefined ||\n    powerMeasure.frequency === undefined ||\n    powerMeasure.measurement_id === undefined\n) {\n    node.error(\"Invalid input: msg.payload must contain all required fields.\");\n    return null;\n}\n\n// Construct the SQL query\nvar topic = `\n    INSERT INTO PowerMeasure (type, voltage, current, power, energy, pf, frequency, measurement_id) \n    VALUES (\n        '${powerMeasure.type}', \n        ${powerMeasure.voltage}, \n        ${powerMeasure.current}, \n        ${powerMeasure.power}, \n        ${powerMeasure.energy}, \n        ${powerMeasure.pf}, \n        ${powerMeasure.frequency}, \n        ${powerMeasure.measurement_id}\n    );\n`;\n\n// Return the query to be executed by the SQLite node\nreturn { topic: topic };\n\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 150,
-        "y": 680,
+        "x": 310,
+        "y": 840,
         "wires": [
             [
                 "519b0cfe351f15ce"
@@ -251,8 +212,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1200,
-        "y": 640,
+        "x": 1280,
+        "y": 840,
         "wires": []
     },
     {
@@ -263,8 +224,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 360,
-        "y": 680,
+        "x": 500,
+        "y": 840,
         "wires": [
             [
                 "712512ae60b1cdc9"
@@ -283,8 +244,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 540,
-        "y": 680,
+        "x": 680,
+        "y": 840,
         "wires": [
             [
                 "16e508bdf889111c"
@@ -299,8 +260,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 740,
-        "y": 660,
+        "x": 860,
+        "y": 840,
         "wires": [
             [
                 "72fb27e46012366a"
@@ -319,30 +280,14 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 990,
-        "y": 700,
+        "x": 1050,
+        "y": 840,
         "wires": [
             [
-                "b0fe93bafaeabdf8"
+                "b0fe93bafaeabdf8",
+                "a78403635e03631e"
             ]
         ]
-    },
-    {
-        "id": "5105a5689c31d313",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "rest",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 590,
-        "y": 320,
-        "wires": []
     },
     {
         "id": "24687e8eaa6997ca",
@@ -356,7 +301,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 330,
+        "x": 270,
         "y": 240,
         "wires": [
             [
@@ -385,7 +330,7 @@
         "id": "ca8987ad0fbb0784",
         "type": "function",
         "z": "4ec0a7f75863202f",
-        "name": "Measurement with report  id",
+        "name": "SAVE Measurement with report  id",
         "func": "// // Retrieve the reportLinks object from flow context\nlet reportLinks = flow.get(\"reportLinks\") || {};\nnode.warn(`Function 2: Retrieved reportLinks = ${JSON.stringify(reportLinks, null, 2)}`);\n\n// Extract the new measurement from the message payload\nlet new_measurement = msg.payload;\n\n// Validate the measurement ID\nconst measurementId = new_measurement.m_unique_id;\nif (!measurementId) {\n    node.error(\"Invalid measurement_id: undefined\", msg);\n    return null;\n}\n\n// Find the report_id for the given measurementId\nlet foundReportId = null;\nfor (const [id, measurementIds] of Object.entries(reportLinks)) {\n    if (measurementIds.includes(measurementId)) {\n        foundReportId = Number(id); // Ensure report_id is returned as a number\n        break;\n    }\n}\n\n// Update the measurement with the found report_id or log an error\nif (foundReportId) {\n    new_measurement.report_id = foundReportId;\n    msg.payload.report_id = foundReportId;\n    node.warn(`Measurement ID ${measurementId} belongs to Report ID ${foundReportId}`);\n} else {\n    msg.payload.error = `Measurement ID ${measurementId} not found in any report.`;\n    node.warn(`Measurement ID ${measurementId} not found.`);\n}\n\n// Retrieve or initialize the all_measurements array in the flow context\nlet all_measurements = flow.get(\"all_measurements\") || [];\n\n// Check for duplicates before adding the new measurement\nlet isDuplicate = all_measurements.some(\n    measurement =>\n        measurement.m_unique_id === new_measurement.m_unique_id &&\n        measurement.report_id === new_measurement.report_id\n);\n\nif (!isDuplicate) {\n    all_measurements.push(new_measurement);\n    flow.set(\"all_measurements\", all_measurements);\n    node.warn(`Added new measurement: ${JSON.stringify(new_measurement, null, 2)}`);\n} else {\n    node.warn(`Duplicate measurement detected. Skipping addition: ${JSON.stringify(new_measurement, null, 2)}`);\n}\n\n// Return the message object\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
@@ -393,30 +338,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 300,
-        "y": 420,
+        "x": 820,
+        "y": 320,
         "wires": [
-            [
-                "f6b97959bb3614c9"
-            ]
+            []
         ]
-    },
-    {
-        "id": "f86ffbc386084a89",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "report id",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 340,
-        "y": 620,
-        "wires": []
     },
     {
         "id": "18826b373af39421",
@@ -430,8 +356,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 460,
-        "y": 560,
+        "x": 430,
+        "y": 620,
         "wires": [
             [
                 "5f1f3198bcee0d63"
@@ -446,8 +372,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 660,
-        "y": 560,
+        "x": 610,
+        "y": 620,
         "wires": [
             [
                 "0e1b7fd7829d8533"
@@ -466,8 +392,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 840,
-        "y": 560,
+        "x": 790,
+        "y": 620,
         "wires": [
             [
                 "cb6be12251a7102f"
@@ -482,8 +408,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 1020,
-        "y": 560,
+        "x": 970,
+        "y": 620,
         "wires": [
             [
                 "1a31d7bd6a90d2d8"
@@ -495,53 +421,20 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "save measurement id",
-        "func": "// Ensure msg.payload contains the ID from the query result\nif (!msg.payload || !msg.payload[0] || !msg.payload[0]['last_insert_rowid()']) {\n    node.error(\"Invalid input: msg.payload must contain the result of last_insert_rowid().\");\n    return null;\n}\n\n// Extract the last inserted row ID\nlet lastInsertId = msg.payload[0]['last_insert_rowid()'];\n\n// Retrieve the existing array from flow context or initialize it\nlet allMeasurementIds = flow.get(\"all_measurement_id\") || [];\n\n// Add the new ID to the array\nallMeasurementIds.push(lastInsertId);\n\n// Save the updated array back to the flow context\nflow.set(\"all_measurement_id\", allMeasurementIds);\n\n// Log the updated array for debugging (optional)\nnode.warn(`Updated all_measurement_id: ${JSON.stringify(allMeasurementIds)}`);\n\n// Pass through the message for further processing\nreturn msg;\n",
+        "func": "// Ensure msg.payload contains the ID from the query result\nif (!msg.payload || !msg.payload[0] || !msg.payload[0]['last_insert_rowid()']) {\n    node.error(\"Invalid input: msg.payload must contain the result of last_insert_rowid().\");\n    return null;\n}\n\n// Extract the last inserted row ID\nlet lastInsertId = msg.payload[0]['last_insert_rowid()'];\n\n// Retrieve the existing array from flow context or initialize it\nlet allMeasurementIds = flow.get(\"all_measurement_id\") || [];\n\n// Add the new ID to the array\nallMeasurementIds.push(lastInsertId);\n\n// Save the updated array back to the flow context\nflow.set(\"all_measurement_id\", allMeasurementIds);\n\n// Log the updated array for debugging (optional)\nnode.warn(`Updated all_measurement_id: ${JSON.stringify(allMeasurementIds)}`);\nreturn msg;\n\n\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 140,
+        "x": 1150,
         "y": 620,
         "wires": [
             [
-                "f86ffbc386084a89"
+                "35db5fecab113913"
             ]
         ]
-    },
-    {
-        "id": "f6b97959bb3614c9",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "debug 13",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 520,
-        "y": 440,
-        "wires": []
-    },
-    {
-        "id": "bd7f18585a56529d",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "PROCESS_COMPLETE",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 630,
-        "y": 360,
-        "wires": []
     },
     {
         "id": "754de0d72315e873",
@@ -580,8 +473,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 200,
-        "y": 480,
+        "x": 330,
+        "y": 540,
         "wires": [
             [
                 "8234f43a6332c074",
@@ -602,8 +495,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 520,
-        "y": 480,
+        "x": 590,
+        "y": 540,
         "wires": []
     },
     {
@@ -624,8 +517,8 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 70,
-        "y": 440,
+        "x": 160,
+        "y": 540,
         "wires": [
             [],
             [
@@ -645,8 +538,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 200,
-        "y": 560,
+        "x": 190,
+        "y": 620,
         "wires": [
             [
                 "18826b373af39421"
@@ -681,9 +574,238 @@
         "shape": "circle",
         "showBorder": true,
         "showGlow": true,
-        "x": 630,
+        "x": 770,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "934392df93190d41",
+        "type": "link out",
+        "z": "4ec0a7f75863202f",
+        "name": "process_complete_out",
+        "mode": "link",
+        "links": [
+            "6280dae54e650fe6"
+        ],
+        "x": 695,
         "y": 400,
         "wires": []
+    },
+    {
+        "id": "6280dae54e650fe6",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "process_complete_in",
+        "links": [
+            "934392df93190d41"
+        ],
+        "x": 55,
+        "y": 540,
+        "wires": [
+            [
+                "32965671a41e135c"
+            ]
+        ]
+    },
+    {
+        "id": "35db5fecab113913",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "watch dog",
+        "func": "// Get the timestamp of the last update\nlet lastUpdateTime = flow.get(\"last_update_time\") || 0;\n\n// Update the timestamp to the current time\nlet currentTime = Date.now();\nflow.set(\"last_update_time\", currentTime);\n\n// Initialize the watchdog timeout (in milliseconds)\nlet timeoutDuration = 3000; // 3 seconds (adjust as needed)\n\n// Clear any existing timeout\nlet watchdogTimer = flow.get(\"watchdog_timer\");\nif (watchdogTimer) {\n    clearTimeout(watchdogTimer);\n}\n\n// Set a new timeout to check if updates have stopped\nwatchdogTimer = setTimeout(() => {\n    // Check the current timestamp\n    let lastUpdate = flow.get(\"last_update_time\") || 0;\n    let now = Date.now();\n\n    // If no updates occurred within the timeout duration, send a \"true\" payload\n    if (now - lastUpdate >= timeoutDuration) {\n        node.send({ payload: true });\n    }\n}, timeoutDuration);\n\n// Store the new timeout in flow context\nflow.set(\"watchdog_timer\", watchdogTimer);\n\n// Send a \"false\" payload when updates are ongoing\nreturn { payload: false };\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 160,
+        "y": 680,
+        "wires": [
+            [
+                "9e2edbf349151202",
+                "59c3b5b515ebf47b"
+            ]
+        ]
+    },
+    {
+        "id": "9e2edbf349151202",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB Measurement",
+        "group": "ac18f679c10f1fd0",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "DB Measurement",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 690,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "964cf7e05606d27a",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "fetch powers",
+        "func": "// Retrieve all_power_data from flow context\nconst allPowerData = flow.get(\"all_power_data\");\n\nif (!allPowerData || !Array.isArray(allPowerData)) {\n    node.warn(\"No power data available or data is not an array.\");\n    return null;\n}\n\n// Function to send data one by one with a delay\nasync function sendDataWithDelay(dataArray) {\n    for (const item of dataArray) {\n        node.send({ payload: item }); // Send the data\n        await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay\n    }\n}\n\n// Start the async process\nsendDataWithDelay(allPowerData)\n    .then(() => node.done()) // Mark node as done after sending all data\n    .catch(err => node.error(\"Error sending data: \" + err));\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 110,
+        "y": 840,
+        "wires": [
+            [
+                "20450f4f7a43a947"
+            ]
+        ]
+    },
+    {
+        "id": "a78403635e03631e",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "watch dog",
+        "func": "// Get the timestamp of the last update\nlet lastUpdateTime = flow.get(\"last_update_time\") || 0;\n\n// Update the timestamp to the current time\nlet currentTime = Date.now();\nflow.set(\"last_update_time\", currentTime);\n\n// Initialize the watchdog timeout (in milliseconds)\nlet timeoutDuration = 3000; // 3 seconds (adjust as needed)\n\n// Clear any existing timeout\nlet watchdogTimer = flow.get(\"watchdog_timer\");\nif (watchdogTimer) {\n    clearTimeout(watchdogTimer);\n}\n\n// Set a new timeout to check if updates have stopped\nwatchdogTimer = setTimeout(() => {\n    // Check the current timestamp\n    let lastUpdate = flow.get(\"last_update_time\") || 0;\n    let now = Date.now();\n\n    // If no updates occurred within the timeout duration, send a \"true\" payload\n    if (now - lastUpdate >= timeoutDuration) {\n        node.send({ payload: true });\n    }\n}, timeoutDuration);\n\n// Store the new timeout in flow context\nflow.set(\"watchdog_timer\", watchdogTimer);\n\n// Send a \"false\" payload when updates are ongoing\nreturn { payload: false };\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1210,
+        "y": 900,
+        "wires": [
+            [
+                "c7407683108bb297"
+            ]
+        ]
+    },
+    {
+        "id": "c7407683108bb297",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB Power",
+        "group": "ac18f679c10f1fd0",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "label": "DB Powers",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1380,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "59c3b5b515ebf47b",
+        "type": "switch",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 150,
+        "y": 760,
+        "wires": [
+            [],
+            [
+                "964cf7e05606d27a"
+            ]
+        ]
+    },
+    {
+        "id": "417ec4018e3df706",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "backup_test_reset_in",
+        "links": [
+            "62eb936d918d3302"
+        ],
+        "x": 455,
+        "y": 360,
+        "wires": [
+            [
+                "bc8e9479fde69e7d"
+            ]
+        ]
+    },
+    {
+        "id": "2498d1acf7fb0c00",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "backup_test_reset_in2",
+        "links": [
+            "62eb936d918d3302"
+        ],
+        "x": 355,
+        "y": 760,
+        "wires": [
+            [
+                "9e2edbf349151202"
+            ]
+        ]
+    },
+    {
+        "id": "3bb33a88dfacf747",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "backup_test_reset3",
+        "links": [
+            "62eb936d918d3302"
+        ],
+        "x": 1215,
+        "y": 940,
+        "wires": [
+            [
+                "c7407683108bb297"
+            ]
+        ]
     },
     {
         "id": "0d4c44b815a8faab",

@@ -333,6 +333,9 @@ export default {
             this.send({
                 topic: 'commands', payload: this.createRunCmds()
             });
+            this.send({
+                topic: 'reset', payload: false
+            });
             await this.delay(1000);
             const mainReportId = this.selectedSetting.report_id || 10000000; // Ensure fallback is valid
 
