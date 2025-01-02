@@ -14,7 +14,8 @@ from powerguard.data.fetcher import Fetcher
 from powerguard.data.inserter import Inserter
 from powerguard.data.validator import Validator
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
-from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
+from proto.report_pb2 import (Measurement, ReportSettings, TestReport,
+                              TestStandard)
 from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 from proto.ups_test_pb2 import TestResult, TestType
 
@@ -157,6 +158,7 @@ class DataManager(BaseModel):
                 temperature_2 INTEGER,
                 test_report_id INTEGER NOT NULL, -- Links to TestReport
                 FOREIGN KEY (test_report_id) REFERENCES TestReport (id) ON DELETE CASCADE
+                UNIQUE (m_unique_id, test_report_id)
             )
             """,
             # TestReport table

@@ -196,7 +196,8 @@
             ],
             [
                 "bd7f18585a56529d",
-                "32965671a41e135c"
+                "32965671a41e135c",
+                "bc8e9479fde69e7d"
             ]
         ]
     },
@@ -339,8 +340,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 530,
-        "y": 340,
+        "x": 590,
+        "y": 320,
         "wires": []
     },
     {
@@ -385,7 +386,7 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "Measurement with report  id",
-        "func": "// Retrieve the reportLinks object from flow context\nlet reportLinks = flow.get(\"reportLinks\") || {};\nnode.warn(`Function 2: Retrieved reportLinks = ${JSON.stringify(reportLinks, null, 2)}`);\nlet new_measurement=msg.payload;\n// The measurement ID you are searching for\nconst measurementId = new_measurement.m_unique_id;\nif (!measurementId) {\n    node.error(\"Invalid measurement_id: undefined\", msg);\n    return null;\n}\n\n// Find the report_id for the given measurementId\nlet foundReportId = null;\nfor (const [id, measurementIds] of Object.entries(reportLinks)) {\n    if (measurementIds.includes(measurementId)) {\n        foundReportId = Number(id); // Ensure report_id is returned as a number\n        break;\n    }\n}\n\n// Set the found report_id in the message or indicate not found\nif (foundReportId) {\n   new_measurement.report_id = foundReportId;\n   msg.payload.report_id=foundReportId;\n    node.warn(`Measurement ID ${measurementId} belongs to Report ID ${foundReportId}`);\n} else {\n    msg.payload.error = `Measurement ID ${measurementId} not found in any report.`;\n    node.warn(`Measurement ID ${measurementId} not found.`);\n}\nlet all_measurements=flow.get(\"all_measurements\") || [];\nall_measurements.push(new_measurement);\nflow.set(\"all_measurements\",all_measurements);\nreturn msg;\n",
+        "func": "// // Retrieve the reportLinks object from flow context\nlet reportLinks = flow.get(\"reportLinks\") || {};\nnode.warn(`Function 2: Retrieved reportLinks = ${JSON.stringify(reportLinks, null, 2)}`);\n\n// Extract the new measurement from the message payload\nlet new_measurement = msg.payload;\n\n// Validate the measurement ID\nconst measurementId = new_measurement.m_unique_id;\nif (!measurementId) {\n    node.error(\"Invalid measurement_id: undefined\", msg);\n    return null;\n}\n\n// Find the report_id for the given measurementId\nlet foundReportId = null;\nfor (const [id, measurementIds] of Object.entries(reportLinks)) {\n    if (measurementIds.includes(measurementId)) {\n        foundReportId = Number(id); // Ensure report_id is returned as a number\n        break;\n    }\n}\n\n// Update the measurement with the found report_id or log an error\nif (foundReportId) {\n    new_measurement.report_id = foundReportId;\n    msg.payload.report_id = foundReportId;\n    node.warn(`Measurement ID ${measurementId} belongs to Report ID ${foundReportId}`);\n} else {\n    msg.payload.error = `Measurement ID ${measurementId} not found in any report.`;\n    node.warn(`Measurement ID ${measurementId} not found.`);\n}\n\n// Retrieve or initialize the all_measurements array in the flow context\nlet all_measurements = flow.get(\"all_measurements\") || [];\n\n// Check for duplicates before adding the new measurement\nlet isDuplicate = all_measurements.some(\n    measurement =>\n        measurement.m_unique_id === new_measurement.m_unique_id &&\n        measurement.report_id === new_measurement.report_id\n);\n\nif (!isDuplicate) {\n    all_measurements.push(new_measurement);\n    flow.set(\"all_measurements\", all_measurements);\n    node.warn(`Added new measurement: ${JSON.stringify(new_measurement, null, 2)}`);\n} else {\n    node.warn(`Duplicate measurement detected. Skipping addition: ${JSON.stringify(new_measurement, null, 2)}`);\n}\n\n// Return the message object\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -538,8 +539,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 590,
-        "y": 380,
+        "x": 630,
+        "y": 360,
         "wires": []
     },
     {
@@ -637,7 +638,7 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "FETCH MEASUREMENTS",
-        "func": "// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Retrieve all measurements from flow context\nlet all_measurements = flow.get(\"all_measurements\") || [];\nnode.warn(`Retrieved all_measurements: ${JSON.stringify(all_measurements, null, 2)}`);\n\n// Get the desired report_id from the incoming message\nlet reportId = msg.payload.report_id;\nif (reportId === undefined || reportId === null) {\n    node.error(\"Invalid report_id: undefined or null\", msg);\n    return null;\n}\n\n// Filter measurements for the given report_id\nlet filteredMeasurements = all_measurements.filter(m => m.report_id === reportId);\n\nif (filteredMeasurements.length === 0) {\n    node.warn(`No measurements found for report_id: ${reportId}`);\n    return null;\n}\n\n// Async function to send measurements one by one\nasync function sendMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        send({ payload: measurement }); // Send each measurement\n        await delay(1000); // 1-second delay between each message\n    }\n    done(); // Indicate processing is complete\n}\n\n// Start sending measurements asynchronously\nsendMeasurements(filteredMeasurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "func": "// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Retrieve all measurements from flow context\nlet all_measurements = flow.get(\"all_measurements\") || [];\nnode.warn(`Retrieved all_measurements: ${JSON.stringify(all_measurements, null, 2)}`);\n\n// Get the desired report_id from the incoming message\nlet reportId = msg.payload;\nif (reportId === undefined || reportId === null) {\n    node.error(\"Invalid report_id: undefined or null\", msg);\n    return null;\n}\n\n// Filter measurements for the given report_id\nlet filteredMeasurements = all_measurements.filter(m => m.report_id === reportId);\n\nif (filteredMeasurements.length === 0) {\n    node.warn(`No measurements found for report_id: ${reportId}`);\n    return null;\n}\n\n// Async function to send measurements one by one\nasync function sendMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        send({ payload: measurement }); // Send each measurement\n        await delay(1000); // 1-second delay between each message\n    }\n    done(); // Indicate processing is complete\n}\n\n// Start sending measurements asynchronously\nsendMeasurements(filteredMeasurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -653,9 +654,129 @@
         ]
     },
     {
+        "id": "bc8e9479fde69e7d",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DATA Processed",
+        "group": "ac18f679c10f1fd0",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "DATA Processed",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 630,
+        "y": 400,
+        "wires": []
+    },
+    {
         "id": "0d4c44b815a8faab",
         "type": "sqlitedb",
         "db": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\db\\test_reports.db",
         "mode": "RWC"
+    },
+    {
+        "id": "ac18f679c10f1fd0",
+        "type": "ui-group",
+        "name": "UPS_STATUS",
+        "page": "7d0f53039d1540b1",
+        "width": 3,
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "7d0f53039d1540b1",
+        "type": "ui-page",
+        "name": "BACKUP_TEST",
+        "ui": "6bb6879aa70631ea",
+        "path": "/backup_test",
+        "icon": "battery-clock",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
+    },
+    {
+        "id": "f51f9a07212ff54b",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#d1479f",
+            "primary": "#0094ce",
+            "bgPage": "#ededed",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
     }
 ]
