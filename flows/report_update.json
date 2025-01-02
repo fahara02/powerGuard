@@ -37,7 +37,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 280,
+        "x": 440,
         "y": 40,
         "wires": [
             [
@@ -52,8 +52,8 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "SORT_REPORT",
-        "func": "let payload = msg.payload;\n\n// Extract Settings Object\nlet settings = payload.settings;\n\n// Extract Measurements Array\nlet measurements = payload.measurements;\n\n// Extract Remaining Data\nlet { settings: _, measurements: __, ...otherObjects } = payload;\n\n// Extract all measurement IDs\nlet measurement_ids = measurements.map(measurement => measurement.m_unique_id);\n\n// Store the measurement_ids array in flow context\nflow.set(\"measurement_ids\", measurement_ids);\n\n// Prepare Outputs\nconst output = [\n    { payload: settings },         // Output 1: Settings Object\n    { payload: measurements },     // Output 2: Measurements Array\n    { payload: otherObjects }      // Output 3: Other Remaining Objects\n];\n\n// Send Result\nreturn output;\n\n",
-        "outputs": 3,
+        "func": "let payload = msg.payload;\n\n// Extract Measurements Array\nlet measurements = payload.measurements;\n\n// Extract Remaining Data and Combine Settings with Other Data\nlet { settings, measurements: _, ...otherData } = payload;\nlet rest_report = { settings, ...otherData };\n\n// Extract all measurement IDs\nlet measurement_ids = measurements.map(measurement => measurement.m_unique_id);\n\n// Store the measurement_ids array in flow context\nflow.set(\"measurement_ids\", measurement_ids);\n\n// Prepare Outputs\nconst output = [\n    { payload: measurements }, // Output 1: Measurements Array\n    { payload: rest_report }   // Output 2: Combined Rest Report\n];\n\n// Send Result\nreturn output;\n\n\n",
+        "outputs": 2,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
@@ -63,67 +63,13 @@
         "y": 120,
         "wires": [
             [
-                "0086034d5d1b5475",
-                "754de0d72315e873"
+                "ed0573ddae590b22"
             ],
             [
-                "172c261c1913ab30"
-            ],
-            [
-                "fc922076f1ffa401"
+                "754de0d72315e873",
+                "ef1c0aa150a88ea5"
             ]
         ]
-    },
-    {
-        "id": "0086034d5d1b5475",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "settings",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 580,
-        "y": 140,
-        "wires": []
-    },
-    {
-        "id": "172c261c1913ab30",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "measurements",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 600,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "fc922076f1ffa401",
-        "type": "debug",
-        "z": "4ec0a7f75863202f",
-        "name": "others",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 570,
-        "y": 220,
-        "wires": []
     },
     {
         "id": "112848acd093c60f",
@@ -146,7 +92,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 80,
+        "x": 240,
         "y": 40,
         "wires": [
             [
@@ -440,18 +386,20 @@
         "id": "754de0d72315e873",
         "type": "function",
         "z": "4ec0a7f75863202f",
-        "name": "SET_LATEST_REPORT_ID",
-        "func": "let settings=msg.payload;\nflow.set(\"latest_report_id\",settings.report_id||0);\nreturn msg;",
+        "name": "PROCESS_REST_REPORT",
+        "func": "let rest_report=msg.payload;\n\n\nlet settings=rest_report.settings;\nflow.set(\"latest_report_id\",settings.report_id||0);\nflow.set(\"latest_report\",rest_report);\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 820,
-        "y": 80,
+        "x": 540,
+        "y": 140,
         "wires": [
-            []
+            [
+                "5de1707360de3ca3"
+            ]
         ]
     },
     {
@@ -696,7 +644,8 @@
         "y": 900,
         "wires": [
             [
-                "c7407683108bb297"
+                "c7407683108bb297",
+                "66805343908213ee"
             ]
         ]
     },
@@ -803,7 +752,229 @@
         "y": 940,
         "wires": [
             [
-                "c7407683108bb297"
+                "c7407683108bb297",
+                "9e8152aa906f4172"
+            ]
+        ]
+    },
+    {
+        "id": "5de1707360de3ca3",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "report",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "ed0573ddae590b22",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "measurements",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "8377d01d949c7ab9",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "fetch and insert_rest report",
+        "func": "\n// Extract the rest_report object from msg.payload\nlet rest_report = flow.get(\"latest_report\");\n\n// Validate required fields\nif (\n    !rest_report.settings ||\n    !rest_report.test_name ||\n    typeof rest_report.test_name !== \"string\"\n) {\n    node.error(\"Invalid input: rest_report must contain 'settings' and 'test_name'.\");\n    return null;\n}\n\n// Optional fields\nlet test_description = rest_report.test_description || null;\nlet test_result = rest_report.test_result || null;\n\n// Construct the SQL query\nlet topic = `\n    INSERT INTO TestReport (settings_id, test_name, test_description, test_result)\n    VALUES (\n        ${rest_report.settings.id}, \n        '${rest_report.test_name.replace(/'/g, \"''\")}', \n        ${test_description ? `'${test_description.replace(/'/g, \"''\")}'` : \"NULL\"},\n        ${test_result ? `'${test_result.replace(/'/g, \"''\")}'` : \"NULL\"}\n    );\n`;\n\n// Return the query to be executed by the SQLite node\nreturn { topic: topic };\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 1020,
+        "wires": [
+            [
+                "5502c5c79a1b0122"
+            ]
+        ]
+    },
+    {
+        "id": "5502c5c79a1b0122",
+        "type": "sqlite",
+        "z": "4ec0a7f75863202f",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 480,
+        "y": 1020,
+        "wires": [
+            [
+                "2efcccf1b6ca503a"
+            ]
+        ]
+    },
+    {
+        "id": "2efcccf1b6ca503a",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "get report id",
+        "func": "msg.topic=\"SELECT last_insert_rowid()\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 1020,
+        "wires": [
+            [
+                "712f1790b2209428"
+            ]
+        ]
+    },
+    {
+        "id": "712f1790b2209428",
+        "type": "sqlite",
+        "z": "4ec0a7f75863202f",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 800,
+        "y": 1020,
+        "wires": [
+            [
+                "751ce3614ab124c4"
+            ]
+        ]
+    },
+    {
+        "id": "751ce3614ab124c4",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "save test report",
+        "func": "// Ensure msg.payload contains the ID from the query result\nif (!msg.payload || !msg.payload[0] || !msg.payload[0]['last_insert_rowid()']) {\n    node.error(\"Invalid input: msg.payload must contain the result of last_insert_rowid().\");\n    return null;\n}\n\n// Extract the last inserted row ID\nlet lastInsertId = msg.payload[0]['last_insert_rowid()'];\n\n// Retrieve the existing array from flow context or initialize it\nlet allTestReportIds = flow.get(\"all_test_report_id\") || [];\n\n// Add the new ID to the array\nallTestReportIds.push(lastInsertId);\n\n// Save the updated array back to the flow context\nflow.set(\"all_test_report_id\", allTestReportIds);\n\n// Log the updated array for debugging (optional)\nnode.warn(`Updated all_test_report_id: ${JSON.stringify(allTestReportIds)}`);\n\n// Pass through the message for further processing\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 1020,
+        "wires": [
+            [
+                "29bfe566133d163a"
+            ]
+        ]
+    },
+    {
+        "id": "29bfe566133d163a",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "watch dog",
+        "func": "// Get the timestamp of the last update\nlet lastUpdateTime = flow.get(\"last_update_time\") || 0;\n\n// Update the timestamp to the current time\nlet currentTime = Date.now();\nflow.set(\"last_update_time\", currentTime);\n\n// Initialize the watchdog timeout (in milliseconds)\nlet timeoutDuration = 1000; // 3 seconds (adjust as needed)\n\n// Clear any existing timeout\nlet watchdogTimer = flow.get(\"watchdog_timer\");\nif (watchdogTimer) {\n    clearTimeout(watchdogTimer);\n}\n\n// Set a new timeout to check if updates have stopped\nwatchdogTimer = setTimeout(() => {\n    // Check the current timestamp\n    let lastUpdate = flow.get(\"last_update_time\") || 0;\n    let now = Date.now();\n\n    // If no updates occurred within the timeout duration, send a \"true\" payload\n    if (now - lastUpdate >= timeoutDuration) {\n        node.send({ payload: true });\n    }\n}, timeoutDuration);\n\n// Store the new timeout in flow context\nflow.set(\"watchdog_timer\", watchdogTimer);\n\n// Send a \"false\" payload when updates are ongoing\nreturn { payload: false };\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 1020,
+        "wires": [
+            [
+                "9e8152aa906f4172"
+            ]
+        ]
+    },
+    {
+        "id": "9e8152aa906f4172",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB REPORT",
+        "group": "ac18f679c10f1fd0",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "label": "DB REPORT",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1390,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "ef1c0aa150a88ea5",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "66805343908213ee",
+        "type": "switch",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 150,
+        "y": 960,
+        "wires": [
+            [],
+            [
+                "8377d01d949c7ab9"
             ]
         ]
     },
