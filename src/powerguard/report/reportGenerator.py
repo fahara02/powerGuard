@@ -652,7 +652,7 @@ if __name__ == "__main__":
     )
 
     # Generate a report
-    report = data_manager.generate_mock_data(112, "ABB", "maxgreen2", "FHR")
+    report = data_manager.generate_mock_data(3119231,903119231, "walton", "maxgreen", "fhr")
     report_id = data_manager.insert_test_report(report)
     # print(f"Got report id: {report_id}")
     # print("-------------------report object----------------------")

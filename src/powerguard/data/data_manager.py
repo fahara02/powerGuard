@@ -3,7 +3,7 @@ import sqlite3
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from google.protobuf.timestamp_pb2 import Timestamp
 from pydantic import BaseModel, PrivateAttr, field_validator
@@ -165,10 +165,20 @@ class DataManager(BaseModel):
             """
             CREATE TABLE IF NOT EXISTS TestReport (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sub_report_id INTEGER NOT NULL UNIQUE,
                 settings_id INTEGER NOT NULL,
                 test_name TEXT NOT NULL,
                 test_description TEXT,
                 test_result TEXT,
+                FOREIGN KEY (settings_id) REFERENCES ReportSettings (id) ON DELETE CASCADE
+            )
+            """,
+              # FinalTestReport table
+            """
+            CREATE TABLE IF NOT EXISTS FinalTestReport (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,               
+                settings_id INTEGER NOT NULL,             
+                final_test_result TEXT,
                 FOREIGN KEY (settings_id) REFERENCES ReportSettings (id) ON DELETE CASCADE
             )
             """,
@@ -507,7 +517,7 @@ class DataManager(BaseModel):
             logging.error(f"Unexpected error during database cleanup: {e}")
             raise Exception(f"Unexpected error during database cleanup: {e}")
 
-    def generate_mock_data(self, report_id, client_name, brand_name, engineer_name):
+    def generate_mock_data(self, report_id,subreportid, client_name, brand_name, engineer_name):
         now = datetime.now(tz=timezone.utc)
         timestamp_proto = Timestamp()
         timestamp_proto.FromDatetime(now)
@@ -795,6 +805,7 @@ class DataManager(BaseModel):
         # Create the TestReport object
         test_report = TestReport(
             settings=report_settings,
+            sub_report_id=subreportid,
             test_name=TestType.LIGHT_LOAD_AND_FUNCTION_TEST,
             test_description="Normal opration in rated load with varying input voltage",
             measurements=measurements,
@@ -808,7 +819,7 @@ class DataManager(BaseModel):
 # Example Usage
 if __name__ == "__main__":
     data_manager = DataManager()
-    report = data_manager.generate_mock_data(3119, "walton", "maxgreen", "fhr")
+    report = data_manager.generate_mock_data(31192311,9031192311, "walton", "maxgreen", "fhr")
 
     report_id = data_manager.insert_test_report(report)
     unique_id = report.settings.report_id

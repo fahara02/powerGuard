@@ -45,10 +45,17 @@ message Measurement{
 
 message TestReport{
 	ReportSettings settings=1;
-	Test.TestType test_name=2; 
-	string test_description=3;
-    repeated Measurement  measurements=4;
-	Test.TestResult test_result=5;
+	uint32 sub_report_id=2;
+	Test.TestType test_name=3; 
+	string test_description=4;
+    repeated Measurement  measurements=5;
+	Test.TestResult test_result=6;
+}
+
+message FinalTestReport{
+	ReportSettings settings=1;	
+    repeated TestReport  test_reports=2;
+	Test.TestResult final_test_result=3;
 }
 
 

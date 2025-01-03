@@ -2,8 +2,7 @@ import logging
 import sqlite3
 
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
-from proto.report_pb2 import (Measurement, ReportSettings, TestReport,
-                              TestStandard)
+from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 from proto.ups_test_pb2 import TestResult, TestType
 
@@ -350,9 +349,12 @@ class Inserter:
                     "ReportSettings with report_id %d found.", report.settings.report_id
                 )
 
-                # Check if TestReport exists for this settings_id
-                query_test_report = "SELECT id FROM TestReport WHERE settings_id = ?"
-                self._cursor.execute(query_test_report, (settings_id,))
+                # Check if TestReport exists for this sub_report_id
+                query_test_report = """
+                    SELECT id FROM TestReport 
+                    WHERE settings_id = ? AND sub_report_id = ?
+                """
+                self._cursor.execute(query_test_report, (settings_id, report.sub_report_id))
                 test_report_row = self._cursor.fetchone()
 
                 if test_report_row:
@@ -379,18 +381,20 @@ class Inserter:
                 else:
                     # Insert a new TestReport for existing settings_id
                     logging.debug(
-                        "Inserting new TestReport for existing settings_id %d.",
+                        "Inserting new TestReport for existing settings_id %d and sub_report_id %d.",
                         settings_id,
+                        report.sub_report_id,
                     )
                     self._cursor.execute(
                         """
                         INSERT INTO TestReport (
-                            settings_id, test_name, test_description, test_result
+                            settings_id, sub_report_id, test_name, test_description, test_result
                         )
-                        VALUES (?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?)
                         """,
                         (
                             settings_id,
+                            report.sub_report_id,
                             test_name,
                             report.test_description,
                             TestResult.Name(report.test_result),
@@ -406,17 +410,20 @@ class Inserter:
                 settings_id = self.insert_report_settings(report.settings)
 
                 logging.debug(
-                    "Inserting new TestReport for new settings_id %d.", settings_id
+                    "Inserting new TestReport for new settings_id %d and sub_report_id %d.",
+                    settings_id,
+                    report.sub_report_id,
                 )
                 self._cursor.execute(
                     """
                     INSERT INTO TestReport (
-                        settings_id, test_name, test_description, test_result
+                        settings_id, sub_report_id, test_name, test_description, test_result
                     )
-                    VALUES (?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?)
                     """,
                     (
                         settings_id,
+                        report.sub_report_id,
                         test_name,
                         report.test_description,
                         TestResult.Name(report.test_result),
@@ -431,9 +438,7 @@ class Inserter:
                 )
                 for measurement in report.measurements:
                     try:
-                        measurement_savepoint_name = (
-                            f"measurement_{measurement.m_unique_id}"
-                        )
+                        measurement_savepoint_name = f"measurement_{measurement.m_unique_id}"
                         self._conn.execute(f"SAVEPOINT {measurement_savepoint_name}")
                         self.insert_measurement(
                             measurement,
@@ -467,3 +472,4 @@ class Inserter:
             logging.error(f"Unexpected error inserting/updating TestReport: {e}")
             self._conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
             raise
+
