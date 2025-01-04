@@ -189,40 +189,24 @@ export default {
         generateMeasurementId(testType, mainReportId) {
 
 
-
-
-            // Validate that mainReportId is a valid integer and is exactly 8 digits
             if (!Number.isInteger(mainReportId) || mainReportId.toString().length !== 8) {
                 throw new Error("Invalid mainReportId: must be an 8-digit number.");
             }
-
-
-
-            // Validate testType against the defined TestType values
             const validTestTypes = [
                 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17,
             ];
             if (!validTestTypes.includes(testType)) {
                 throw new Error(`Invalid testType: ${testType} is not a valid test type.`);
             }
-
-            // Increment the counter for unique measurement IDs
             this.measurementIdCounter += 1;
 
-            // Ensure measurementIdCounter stays within a range to maintain 2 digits
             if (this.measurementIdCounter > 99) {
-                this.measurementIdCounter = 1; // Reset counter to avoid overflow
+                this.measurementIdCounter = 1;
             }
-
-            // Construct each part of the measurement ID
-            const testTypePart = String(testType).padStart(2, "0"); // Always 2 digits
-            const reportPart = String(mainReportId).slice(-5); // Last 5 digits of mainReportId
-            const counterPart = String(this.measurementIdCounter).padStart(2, "0"); // Always 2 digits
-
-            // Combine to form the full measurement ID
+            const testTypePart = String(testType).padStart(2, "0");
+            const reportPart = String(mainReportId).slice(-5);
+            const counterPart = String(this.measurementIdCounter).padStart(2, "0");
             const measurementId = Number(`${testTypePart}${reportPart}${counterPart}`);
-
-            // Return the measurement ID
             return measurementId;
         },
 
@@ -332,6 +316,9 @@ export default {
 
             this.send({
                 topic: 'commands', payload: this.createRunCmds()
+            });
+            this.send({
+                topic: 'reset', payload: false
             });
             await this.delay(1000);
             const mainReportId = this.selectedSetting.report_id || 10000000; // Ensure fallback is valid

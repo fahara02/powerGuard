@@ -158,7 +158,7 @@ class DataManager(BaseModel):
                 temperature_2 INTEGER,
                 test_report_id INTEGER NOT NULL, -- Links to TestReport
                 FOREIGN KEY (test_report_id) REFERENCES TestReport (id) ON DELETE CASCADE
-                UNIQUE (m_unique_id, test_report_id)
+                UNIQUE (m_unique_id)
             )
             """,
             # TestReport table
