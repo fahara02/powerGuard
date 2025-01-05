@@ -112,8 +112,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 310,
-        "y": 300,
+        "x": 290,
+        "y": 320,
         "wires": [
             [],
             [
@@ -284,8 +284,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 830,
-        "y": 320,
+        "x": 1110,
+        "y": 300,
         "wires": [
             []
         ]
@@ -367,7 +367,7 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "save measurement id",
-        "func": "// Ensure msg.payload contains the ID from the query result\nif (!msg.payload || !msg.payload[0] || !msg.payload[0]['last_insert_rowid()']) {\n    node.error(\"Invalid input: msg.payload must contain the result of last_insert_rowid().\");\n    return null;\n}\n\n// Extract the last inserted row ID\nlet lastInsertId = msg.payload[0]['last_insert_rowid()'];\n\n// Retrieve the existing array from flow context or initialize it\nlet allMeasurementIds = flow.get(\"all_measurement_id\") || [];\n\n// Add the new ID to the array\nallMeasurementIds.push(lastInsertId);\n\n// Save the updated array back to the flow context\nflow.set(\"all_measurement_id\", allMeasurementIds);\n\n// Log the updated array for debugging (optional)\nnode.warn(`Updated all_measurement_id: ${JSON.stringify(allMeasurementIds)}`);\nreturn msg;\n\n\n",
+        "func": "// Ensure msg.payload contains the ID from the query result\nif (!msg.payload || !msg.payload[0] || !msg.payload[0]['last_insert_rowid()']) {\n    node.error(\"Invalid input: msg.payload must contain the result of last_insert_rowid().\");\n    return null;\n}\n\n// Extract the last inserted row ID\nlet lastInsertId = msg.payload[0]['last_insert_rowid()'];\nlet latest_measurement=flow.get(\"latest_measurement\");\nlet all_measurement_in_db=flow.get(\"all_measurement_in_db\")||[];\n\nlet measurement_in_db={\n    m_unique_id:null,\n    m_db_row_id:null,\n}\nmeasurement_in_db.m_unique_id=latest_measurement.m_unique_id;\nmeasurement_in_db.m_db_row_id=lastInsertId;\nall_measurement_in_db.push(measurement_in_db);\nflow.set(\"all_measurement_in_db\",all_measurement_in_db);\nnode.warn(`Updated all_measurement_in_db: ${JSON.stringify(all_measurement_in_db)} where the latest unique id ${latest_measurement.m_unique_id} maps to row id ${lastInsertId}` );\nreturn msg;\n\n\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -394,11 +394,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 510,
+        "x": 650,
         "y": 140,
         "wires": [
             [
-                "5de1707360de3ca3"
+                "5de1707360de3ca3",
+                "c3958a34eb8f60eb"
             ]
         ]
     },
@@ -479,14 +480,14 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "FETCH MEASUREMENTS",
-        "func": "// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Retrieve all measurements from flow context\nlet all_measurements = flow.get(\"all_measurements\") || [];\nnode.warn(`Retrieved all_measurements: ${JSON.stringify(all_measurements, null, 2)}`);\n\n// Get the desired report_id from the incoming message\nlet subreport_id = msg.payload;\nif (subreport_id === undefined || subreport_id === null) {\n    node.error(\"Invalid subreport_id: undefined or null\", msg);\n    return null;\n}\n\n// Filter measurements for the given report_id\nlet filteredMeasurements = all_measurements.filter(m => m.report_id === subreport_id);\n\nif (filteredMeasurements.length === 0) {\n    node.warn(`No measurements found for report_id: ${subreport_id}`);\n    return null;\n}\n\n// Async function to send measurements one by one\nasync function sendMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        send({ payload: measurement }); // Send each measurement\n        await delay(1000); // 1-second delay between each message\n    }\n    done(); // Indicate processing is complete\n}\n\n// Start sending measurements asynchronously\nsendMeasurements(filteredMeasurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "func": "// Helper function for delaying execution\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Retrieve all measurements from flow context\nlet all_measurements = flow.get(\"all_measurements\") || [];\nlet latest_measurement={};\nnode.warn(`Retrieved all_measurements: ${JSON.stringify(all_measurements, null, 2)}`);\n\n// Get the desired report_id from the incoming message\nlet subreport_id = msg.payload;\nif (subreport_id === undefined || subreport_id === null) {\n    node.error(\"Invalid subreport_id: undefined or null\", msg);\n    return null;\n}\n\n// Filter measurements for the given report_id\nlet filteredMeasurements = all_measurements.filter(m => m.report_id === subreport_id);\n\nif (filteredMeasurements.length === 0) {\n    node.warn(`No measurements found for report_id: ${subreport_id}`);\n    return null;\n}\n\n// Async function to send measurements one by one\nasync function sendMeasurements(measurements, send, done) {\n    for (let measurement of measurements) {\n        send({ payload: measurement }); // Send each measurement\n        flow.set(\"latest_measurement\",measurement);\n        await delay(1000); // 1-second delay between each message\n    }\n    done(); // Indicate processing is complete\n}\n\n// Start sending measurements asynchronously\nsendMeasurements(filteredMeasurements, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 190,
+        "x": 160,
         "y": 620,
         "wires": [
             [
@@ -522,38 +523,22 @@
         "shape": "circle",
         "showBorder": true,
         "showGlow": true,
-        "x": 770,
-        "y": 360,
+        "x": 1570,
+        "y": 340,
         "wires": []
     },
     {
         "id": "934392df93190d41",
         "type": "link out",
         "z": "4ec0a7f75863202f",
-        "name": "process_complete_out",
+        "name": "measurement_process_complete_out",
         "mode": "link",
         "links": [
-            "6280dae54e650fe6"
+            "298c4fe9afd4dd9c"
         ],
-        "x": 695,
-        "y": 400,
+        "x": 765,
+        "y": 380,
         "wires": []
-    },
-    {
-        "id": "6280dae54e650fe6",
-        "type": "link in",
-        "z": "4ec0a7f75863202f",
-        "name": "process_complete_in",
-        "links": [
-            "934392df93190d41"
-        ],
-        "x": 35,
-        "y": 480,
-        "wires": [
-            [
-                "8377d01d949c7ab9"
-            ]
-        ]
     },
     {
         "id": "35db5fecab113913",
@@ -582,7 +567,7 @@
         "z": "4ec0a7f75863202f",
         "name": "DB Measurement",
         "group": "ac18f679c10f1fd0",
-        "order": 5,
+        "order": 6,
         "width": 0,
         "height": 0,
         "label": "DB Measurement",
@@ -613,7 +598,7 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "fetch powers",
-        "func": "// Retrieve all_power_data from flow context\nconst allPowerData = flow.get(\"all_power_data\");\n\nif (!allPowerData || !Array.isArray(allPowerData)) {\n    node.warn(\"No power data available or data is not an array.\");\n    return null;\n}\n\n// Function to send data one by one with a delay\nasync function sendDataWithDelay(dataArray) {\n    for (const item of dataArray) {\n        node.send({ payload: item }); // Send the data\n        await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay\n    }\n}\n\n// Start the async process\nsendDataWithDelay(allPowerData)\n    .then(() => node.done()) // Mark node as done after sending all data\n    .catch(err => node.error(\"Error sending data: \" + err));\n",
+        "func": "// Retrieve all_power_data from flow context\nconst allPowerData = flow.get(\"all_power_data\");\n\nif (!allPowerData || !Array.isArray(allPowerData)) {\n    node.warn(\"No power data available or data is not an array.\");\n    return null;\n}\n\n// Retrieve all_measurement_in_db from flow context\nconst allMeasurementInDb = flow.get(\"all_measurement_in_db\") || [];\n\n// Function to map m_unique_id to SQLite row ID\nfunction getDbRowIdForUniqueId(m_unique_id) {\n    const measurement = allMeasurementInDb.find(entry => entry.m_unique_id === m_unique_id);\n    return measurement ? measurement.m_db_row_id : null;\n}\n\n// Update all_power_data to replace m_unique_id with m_db_row_id\nfor (let powerData of allPowerData) {\n    if (powerData.measurement_id) {\n        const dbRowId = getDbRowIdForUniqueId(powerData.measurement_id);\n        if (dbRowId !== null) {\n            powerData.measurement_id = dbRowId;\n        } else {\n            node.warn(`No matching database row ID found for m_unique_id: ${powerData.measurement_id}`);\n        }\n    }\n}\n\n// Function to send data one by one with a delay\nasync function sendDataWithDelay(dataArray) {\n    for (const item of dataArray) {\n        node.send({ payload: item }); // Send the data\n        await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay\n    }\n}\n\n// Start the async process\nsendDataWithDelay(allPowerData)\n    .then(() => node.done()) // Mark node as done after sending all data\n    .catch(err => node.error(\"Error sending data: \" + err));\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -655,7 +640,7 @@
         "z": "4ec0a7f75863202f",
         "name": "DB Power",
         "group": "ac18f679c10f1fd0",
-        "order": 6,
+        "order": 7,
         "width": 0,
         "height": 0,
         "label": "DB Powers",
@@ -716,8 +701,8 @@
         "links": [
             "62eb936d918d3302"
         ],
-        "x": 455,
-        "y": 360,
+        "x": 1445,
+        "y": 400,
         "wires": [
             [
                 "bc8e9479fde69e7d"
@@ -769,7 +754,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1030,
+        "x": 1210,
         "y": 140,
         "wires": []
     },
@@ -843,7 +828,7 @@
         "width": 0,
         "height": 0,
         "head": "",
-        "format": "<template>\n    <div class=\"report-container\">\n        <!-- Dropdown for selecting sub-report ID -->\n        <div class=\"dropdown-container\">\n            <label for=\"subreport-dropdown\">Select Sub-Report ID:</label>\n            <select id=\"subreport-dropdown\" v-model=\"formData.report.id\">\n                <option value=\"\" disabled>Select a Sub-Report</option>\n                <option v-for=\"id in reportOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n            </select>\n        </div>\n\n        <!-- Button to fetch the selected report -->\n        <div class=\"button-container\">\n            <button @click=\"fetchReport\">Fetch Report</button>\n        </div>\n\n        <!-- Display selected report details -->\n        <div v-if=\"selectedReport\" class=\"report-display\">\n            <h2>Test Report: {{ selectedReport.test_name }}</h2>\n            <div class=\"report-section\">\n                <h3>Test Details</h3>\n                <p><strong>Description:</strong> {{ selectedReport.test_description }}</p>\n                <p><strong>Result:</strong> {{ selectedReport.test_result }}</p>\n            </div>\n            <div class=\"report-section\">\n                <h3>Client Information</h3>\n                <p><strong>Client Name:</strong> {{ selectedReport.settings.client_name }}</p>\n                <p><strong>Standard:</strong> {{ selectedReport.settings.standard }}</p>\n                <p><strong>UPS Model:</strong> {{ selectedReport.settings.ups_model }}</p>\n            </div>\n        </div>\n    </div>\n</template>\n\n<script>\nexport default {\n    data: function () {\n        return {\n            reports: [], // Holds full report data\n            reportIDs: [], // Holds the list of report IDs\n            formData: {\n                report: {\n                    id: null, // Currently selected report ID\n                },\n            },\n        };\n    },\n    computed: {\n        // Extract subreport_id for dropdown options\n        reportOptions: function () {\n            return this.reportIDs.sort((a, b) => a - b); // Sort IDs numerically\n        },\n\n        // Find the selected report object based on subreport_id\n        selectedReport: function () {\n            return this.reports.find(\n                (report) => report.id === this.formData.report.id\n            ) || null;\n        },\n    },\n    methods: {\n        // Update all report IDs from incoming data\n        updateAllReportID: function (payload) {\n            if (Array.isArray(payload)) {\n                this.reportIDs = payload; // Update the list of report IDs\n            } else {\n                console.error(\"Invalid payload format for report IDs. Expected an array.\");\n            }\n        },\n\n        // Update all report data from incoming data\n        updateAllReport: function (payload) {\n            if (Array.isArray(payload)) {\n                this.reports = payload; // Update the full reports array\n            } else {\n                console.error(\"Invalid payload format for reports. Expected an array.\");\n            }\n        },\n\n        async fetchReport() {\n            const selectedId = this.formData.report.id; // Get selected report ID\n\n            if (!selectedId) {\n                console.error(\"No Sub-Report ID selected.\");\n                this.send({\n                    topic: \"error\",\n                    payload: \"No Sub-Report ID selected.\",\n                });\n                return;\n            }\n\n            // Debug: Inform Node-RED of the selected report ID\n            this.send({\n                topic: \"info\",\n                payload: `Fetching test report for reportid: ${selectedId}`,\n            });\n\n            // Prepare the query for SQLite\n            const query = `\n        SELECT \n            TestReport.id AS test_report_id,\n            TestReport.sub_report_id,\n            TestReport.test_name,\n            TestReport.test_description,\n            TestReport.test_result,\n            ReportSettings.client_name,\n            ReportSettings.standard,\n            ReportSettings.ups_model,\n            Measurement.m_unique_id AS measurement_unique_id,\n            Measurement.name AS measurement_name,\n            Measurement.timestamp AS measurement_timestamp\n        FROM TestReport\n        JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id\n        LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id\n        WHERE TestReport.id = '${selectedId}'\n    `;\n\n            // Send the complete query as the `topic`\n            this.send({\n                topic: query, // Query is fully embedded here\n            });\n\n            try {\n                // Wait for the database response\n                const result = await this.waitForResponse();\n                if (result && result.payload) {\n                    this.updateAllReport(result.payload); // Update report data\n                } else {\n                    console.error(\"Failed to fetch report data or no data returned.\", result);\n                    this.send({\n                        topic: \"error\",\n                        payload: \"Failed to fetch report data.\",\n                    });\n                }\n            } catch (err) {\n                console.error(\"Error while fetching report:\", err);\n                this.send({\n                    topic: \"error\",\n                    payload: `Error while fetching report: ${err.message}`,\n                });\n            }\n        }\n\n    },\n    mounted: function () {\n        // Watch for incoming messages to update report data\n        this.$watch(\n            \"msg\",\n            function (newMsg) {\n                if (newMsg && newMsg.payload) {\n                    if (Array.isArray(newMsg.payload)) {\n                        this.updateAllReportID(newMsg.payload); // Handle ID array\n                    } else {\n                        this.updateAllReport(newMsg.payload); // Handle report data\n                    }\n                }\n            },\n            { deep: true }\n        );\n    },\n};\n\n</script>\n\n<style scoped>\n.report-container {\n    padding: 20px;\n    background: #f4f4f9;\n    border-radius: 10px;\n    max-width: 800px;\n    margin: auto;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);\n}\n\n.dropdown-container {\n    margin-bottom: 20px;\n}\n\n.dropdown-container label {\n    margin-right: 10px;\n}\n\n#subreport-dropdown {\n    padding: 8px;\n    font-size: 16px;\n}\n\n.button-container {\n    margin-bottom: 20px;\n}\n\nbutton {\n    padding: 10px 20px;\n    font-size: 16px;\n    background-color: #007bff;\n    color: white;\n    border: none;\n    border-radius: 5px;\n    cursor: pointer;\n}\n\nbutton:hover {\n    background-color: #0056b3;\n}\n\n.report-display h2 {\n    font-size: 1.5rem;\n    margin-bottom: 20px;\n}\n\n.report-section {\n    margin-bottom: 20px;\n}\n\n.report-section h3 {\n    font-size: 1.2rem;\n    margin-bottom: 10px;\n}\n\n.report-section p {\n    margin: 5px 0;\n    line-height: 1.5;\n}\n</style>",
+        "format": "<template>\n    <div class=\"report-container\">\n        <!-- Dropdown for selecting sub-report ID -->\n        <div class=\"dropdown-container\">\n            <label for=\"subreport-dropdown\">Select Sub-Report ID:</label>\n            <select id=\"subreport-dropdown\" v-model=\"formData.report.id\">\n                <option value=\"\" disabled>Select a Sub-Report</option>\n                <option v-for=\"id in reportOptions\" :key=\"id\" :value=\"id\">{{ id }}</option>\n            </select>\n        </div>\n\n        <!-- Button to fetch the selected report -->\n        <div class=\"button-container\">\n            <button @click=\"fetchReport\">Fetch Report</button>\n        </div>\n\n        <!-- Display selected report details -->\n        <div v-if=\"selectedReport\" class=\"report-display\">\n            <h2>Test Report: {{ selectedReport.test_name }}</h2>\n            <div class=\"report-section\">\n                <h3>Test Details</h3>\n                <p><strong>Description:</strong> {{ selectedReport.test_description }}</p>\n                <p><strong>Result:</strong> {{ selectedReport.test_result }}</p>\n            </div>\n            <div class=\"report-section\">\n                <h3>Client Information</h3>\n                <p><strong>Client Name:</strong> {{ selectedReport.settings.client_name }}</p>\n                <p><strong>Standard:</strong> {{ selectedReport.settings.standard }}</p>\n                <p><strong>UPS Model:</strong> {{ selectedReport.settings.ups_model }}</p>\n            </div>\n        </div>\n    </div>\n</template>\n\n<script>\nexport default {\n    data: function () {\n        return {\n            reports: [], // Holds full report data\n            reportIDs: [], // Holds the list of report IDs\n            formData: {\n                report: {\n                    id: null, // Currently selected report ID\n                },\n            },\n            responseTimeout: 10000, // Timeout for waiting for DB response in ms\n        };\n    },\n    computed: {\n        // Extract subreport_id for dropdown options\n        reportOptions: function () {\n            return this.reportIDs.sort((a, b) => a - b); // Sort IDs numerically\n        },\n\n        // Find the selected report object based on subreport_id\n        selectedReport: function () {\n            return this.reports.find(\n                (report) => report.id === this.formData.report.id\n            ) || null;\n        },\n    },\n    methods: {\n        // Update all report IDs from incoming data\n        updateAllReportID: function (payload) {\n            if (Array.isArray(payload)) {\n                this.reportIDs = payload; // Update the list of report IDs\n            } else {\n                console.error(\"Invalid payload format for report IDs. Expected an array.\");\n            }\n        },\n\n        // Update all report data from incoming data\n        updateAllReport: function (payload) {\n            if (payload && payload.subreport_id) {\n                // Transform payload into a report object and update the reports array\n                const report = {\n                    id: payload.subreport_id,\n                    test_name: payload.test_name,\n                    test_description: payload.test_description,\n                    test_result: payload.test_result,\n                    settings: payload.settings,\n                    measurements: payload.measurements,\n                };\n\n                // Update the reports array\n                this.reports = [report];\n\n                // Log received report information\n                this.send({\n                    topic: \"info\",\n                    payload: `Received report for reportid: ${report.id} for test ${report.test_name}`,\n                });\n            } else {\n                console.error(\"Invalid payload format for reports.\");\n                this.send({\n                    topic: \"error\",\n                    payload: \"Invalid payload format for reports.\",\n                });\n            }\n        },\n\n        // Wait for response from the database\n        waitForResponse() {\n            return new Promise((resolve, reject) => {\n                const timeout = setTimeout(() => {\n                    reject(new Error(\"Timeout while waiting for database response.\"));\n                }, this.responseTimeout);\n\n                this.$watch(\n                    \"msg\",\n                    function (newMsg) {\n                        if (newMsg && newMsg.topic === \"db_reply\") {\n                            clearTimeout(timeout);\n                            resolve(newMsg);\n                        }\n                    },\n                    { immediate: false, deep: true }\n                );\n            });\n        },\n\n        async fetchReport() {\n            const selectedId = this.formData.report.id; // Get selected report ID\n\n            if (!selectedId) {\n                console.error(\"No Sub-Report ID selected.\");\n                this.send({\n                    topic: \"error\",\n                    payload: \"No Sub-Report ID selected.\",\n                });\n                return;\n            }\n\n            // Debug: Inform Node-RED of the selected report ID\n            this.send({\n                topic: \"info\",\n                payload: `Fetching test report for reportid: ${selectedId}`,\n            });\n\n            // Prepare the query for SQLite\n            const query = `\n        SELECT \n            TestReport.id AS test_report_id,\n            TestReport.sub_report_id,\n            TestReport.test_name,\n            TestReport.test_description,\n            TestReport.test_result,\n            ReportSettings.client_name,\n            ReportSettings.standard,\n            ReportSettings.ups_model,\n            Measurement.m_unique_id AS measurement_unique_id,\n            Measurement.name AS measurement_name,\n            Measurement.timestamp AS measurement_timestamp,\n            Measurement.mode AS mode,\n            Measurement.phase_name AS phase_name,\n            Measurement.load_type AS load_type,\n            Measurement.load_percentage AS load_percentage ,\n            Measurement.step_id AS step_id,\n            Measurement.load_type AS load_type,\n            Measurement.run_interval_sec AS run_interval_sec,\n            Measurement.backup_time_sec AS backup_time_sec,\n            PowerMeasure.type AS power_measure_type,\n            PowerMeasure.voltage AS power_measure_voltage,\n            PowerMeasure.current AS power_measure_current,\n            PowerMeasure.power AS power_measure_power,\n            PowerMeasure.energy AS power_measure_energy,\n            PowerMeasure.pf AS power_measure_pf,\n            PowerMeasure.frequency AS power_measure_frequency\n        FROM TestReport\n        JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id\n        LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id\n        LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id\n        WHERE TestReport.id = '${selectedId}'\n        ORDER BY Measurement.id, PowerMeasure.id\n    `;\n\n\n            this.send({ topic: query });\n\n            try {\n                // Wait for the database response\n                const result = await this.waitForResponse();\n                if (result && result.payload) {\n                    // Pass the payload to updateAllReport\n                    this.updateAllReport(result.payload);\n                } else {\n                    console.error(\"Failed to fetch report data or no data returned.\", result);\n                    this.send({\n                        topic: \"error\",\n                        payload: \"Failed to fetch report data.\",\n                    });\n                }\n            } catch (err) {\n                console.error(\"Error while fetching report:\", err);\n                this.send({\n                    topic: \"error\",\n                    payload: `Error while fetching report: ${err.message}`,\n                });\n            }\n\n        },\n    },\n    mounted: function () {\n        // Watch for incoming messages to update report data\n        this.$watch(\n            \"msg\",\n            function (newMsg) {\n                if (newMsg && newMsg.payload) {\n                    if (Array.isArray(newMsg.payload)) {\n                        this.updateAllReportID(newMsg.payload); // Handle ID array\n                    } else if (newMsg.topic === \"db_reply\") {\n                        this.updateAllReport([newMsg.payload]); // Handle report data\n                    }\n                }\n            },\n            { deep: true }\n        );\n    },\n};\n</script>\n\n\n<style scoped>\n.report-container {\n    padding: 20px;\n    background: #f4f4f9;\n    border-radius: 10px;\n    max-width: 800px;\n    margin: auto;\n    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);\n}\n\n.dropdown-container {\n    margin-bottom: 20px;\n}\n\n.dropdown-container label {\n    margin-right: 10px;\n}\n\n#subreport-dropdown {\n    padding: 8px;\n    font-size: 16px;\n}\n\n.button-container {\n    margin-bottom: 20px;\n}\n\nbutton {\n    padding: 10px 20px;\n    font-size: 16px;\n    background-color: #007bff;\n    color: white;\n    border: none;\n    border-radius: 5px;\n    cursor: pointer;\n}\n\nbutton:hover {\n    background-color: #0056b3;\n}\n\n.report-display h2 {\n    font-size: 1.5rem;\n    margin-bottom: 20px;\n}\n\n.report-section {\n    margin-bottom: 20px;\n}\n\n.report-section h3 {\n    font-size: 1.2rem;\n    margin-bottom: 10px;\n}\n\n.report-section p {\n    margin: 5px 0;\n    line-height: 1.5;\n}\n</style>",
         "storeOutMessages": true,
         "passthru": false,
         "resendOnRefresh": true,
@@ -942,7 +927,8 @@
         "y": 1260,
         "wires": [
             [
-                "7f984f4f04961b2a"
+                "7f984f4f04961b2a",
+                "c5a219b7e3f53b61"
             ]
         ]
     },
@@ -1031,8 +1017,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 180,
-        "y": 480,
+        "x": 360,
+        "y": 420,
         "wires": [
             [
                 "5502c5c79a1b0122"
@@ -1047,8 +1033,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 400,
-        "y": 480,
+        "x": 560,
+        "y": 420,
         "wires": [
             [
                 "2efcccf1b6ca503a"
@@ -1067,8 +1053,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 570,
-        "y": 480,
+        "x": 710,
+        "y": 420,
         "wires": [
             [
                 "712f1790b2209428"
@@ -1083,8 +1069,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 740,
-        "y": 480,
+        "x": 880,
+        "y": 420,
         "wires": [
             [
                 "751ce3614ab124c4"
@@ -1103,8 +1089,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 900,
-        "y": 480,
+        "x": 1060,
+        "y": 420,
         "wires": [
             [
                 "29bfe566133d163a"
@@ -1123,12 +1109,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1090,
-        "y": 480,
+        "x": 1230,
+        "y": 420,
         "wires": [
             [
-                "9e8152aa906f4172",
-                "55a173babcd99313"
+                "9e8152aa906f4172"
             ]
         ]
     },
@@ -1138,7 +1123,7 @@
         "z": "4ec0a7f75863202f",
         "name": "DB REPORT",
         "group": "ac18f679c10f1fd0",
-        "order": 7,
+        "order": 8,
         "width": 0,
         "height": 0,
         "label": "DB REPORT",
@@ -1160,7 +1145,7 @@
         "shape": "circle",
         "showBorder": true,
         "showGlow": true,
-        "x": 1330,
+        "x": 1430,
         "y": 480,
         "wires": []
     },
@@ -1172,8 +1157,8 @@
         "links": [
             "62eb936d918d3302"
         ],
-        "x": 1145,
-        "y": 520,
+        "x": 1285,
+        "y": 540,
         "wires": [
             [
                 "9e8152aa906f4172"
@@ -1181,33 +1166,105 @@
         ]
     },
     {
-        "id": "55a173babcd99313",
-        "type": "link out",
-        "z": "4ec0a7f75863202f",
-        "name": "test_report_insert_out",
-        "mode": "link",
-        "links": [
-            "298c4fe9afd4dd9c"
-        ],
-        "x": 1285,
-        "y": 440,
-        "wires": []
-    },
-    {
         "id": "298c4fe9afd4dd9c",
         "type": "link in",
         "z": "4ec0a7f75863202f",
         "name": "measurement_insert_in",
         "links": [
-            "55a173babcd99313"
+            "934392df93190d41"
         ],
-        "x": 35,
+        "x": 75,
         "y": 540,
         "wires": [
             [
                 "32965671a41e135c"
             ]
         ]
+    },
+    {
+        "id": "c3958a34eb8f60eb",
+        "type": "link out",
+        "z": "4ec0a7f75863202f",
+        "name": "latest_report_saved",
+        "mode": "link",
+        "links": [
+            "0b7afe0f4e1071f3"
+        ],
+        "x": 1185,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "0b7afe0f4e1071f3",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "test_report_insert_in",
+        "links": [
+            "c3958a34eb8f60eb"
+        ],
+        "x": 45,
+        "y": 420,
+        "wires": [
+            [
+                "8377d01d949c7ab9"
+            ]
+        ]
+    },
+    {
+        "id": "940311875c599d23",
+        "type": "rbe",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 150,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c5a219b7e3f53b61",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "Process Db repy",
+        "func": "function processReportData(msg) {\n    const payload = msg.payload;\n\n    // Validate payload\n    if (!Array.isArray(payload) || payload.length === 0) {\n        console.error(\"Invalid or empty payload received.\");\n        return null;\n    }\n\n    // Extract common report details from the first entry\n    const firstEntry = payload[0];\n    const report = {\n        settings: {\n            client_name: firstEntry.client_name,\n            standard: firstEntry.standard,\n            ups_model: firstEntry.ups_model,\n        },\n        subreport_id: firstEntry.sub_report_id,\n        test_name: firstEntry.test_name,\n        test_description: firstEntry.test_description,\n        test_result: firstEntry.test_result,\n        measurements: [],\n    };\n\n    // Group data by measurement_unique_id\n    const measurementMap = new Map();\n\n    payload.forEach(entry => {\n        const measurementId = entry.measurement_unique_id;\n\n        // Check if measurement already exists\n        if (!measurementMap.has(measurementId)) {\n            measurementMap.set(measurementId, {\n                m_unique_id: measurementId,\n                time_stamp: new Date(entry.measurement_timestamp).getTime(),\n                name: entry.measurement_name,\n                mode: entry.mode,\n                phase_name: entry.phase_name,\n                load_type: entry.load_type,\n                step_id: entry.step_id,\n                load_percentage: entry.load_percentage,\n                power_measures: [],\n                steady_state_voltage_tol: null, // Placeholder\n                voltage_dc_component: null, // Placeholder\n                load_pf_deviation: null, // Placeholder\n                switch_time_ms: null, // Placeholder\n                run_interval_sec: entry.run_interval_sec,\n                backup_time_sec: entry.backup_time_sec,\n                overload_time_sec: null, // Placeholder\n                temperature_1: null, // Placeholder\n                temperature_2: null, // Placeholder\n            });\n        }\n\n        // Add PowerMeasure to the appropriate measurement\n        const powerMeasure = {\n            type: entry.power_measure_type,\n            voltage: entry.power_measure_voltage,\n            current: entry.power_measure_current,\n            power: entry.power_measure_power,\n            energy: entry.power_measure_energy,\n            pf: entry.power_measure_pf,\n            frequency: entry.power_measure_frequency,\n        };\n\n        measurementMap.get(measurementId).power_measures.push(powerMeasure);\n    });\n\n    // Convert measurementMap to an array and assign to report\n    report.measurements = Array.from(measurementMap.values());\n\n    return report;\n}\n\n\n\nconst transformedReport = processReportData(msg);\nmsg.topic=\"db_reply\";\nmsg.payload=transformedReport;\n\nnode.warn(JSON.stringify(transformedReport, null, 2));\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 1300,
+        "wires": [
+            [
+                "61ee3f812080ce79",
+                "078d2e820b431c10"
+            ]
+        ]
+    },
+    {
+        "id": "61ee3f812080ce79",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "DB REPLY",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 970,
+        "y": 1300,
+        "wires": []
     },
     {
         "id": "0d4c44b815a8faab",
@@ -1310,7 +1367,7 @@
                 "cols": "12"
             }
         ],
-        "order": 1,
+        "order": 2,
         "className": "",
         "visible": "true",
         "disabled": "false"

@@ -43,6 +43,7 @@ export default {
                     id: null, // Currently selected report ID
                 },
             },
+            responseTimeout: 10000, // Timeout for waiting for DB response in ms
         };
     },
     computed: {
@@ -70,11 +71,52 @@ export default {
 
         // Update all report data from incoming data
         updateAllReport: function (payload) {
-            if (Array.isArray(payload)) {
-                this.reports = payload; // Update the full reports array
+            if (payload && payload.subreport_id) {
+                // Transform payload into a report object and update the reports array
+                const report = {
+                    id: payload.subreport_id,
+                    test_name: payload.test_name,
+                    test_description: payload.test_description,
+                    test_result: payload.test_result,
+                    settings: payload.settings,
+                    measurements: payload.measurements,
+                };
+
+                // Update the reports array
+                this.reports = [report];
+
+                // Log received report information
+                this.send({
+                    topic: "info",
+                    payload: `Received report for reportid: ${report.id} for test ${report.test_name}`,
+                });
             } else {
-                console.error("Invalid payload format for reports. Expected an array.");
+                console.error("Invalid payload format for reports.");
+                this.send({
+                    topic: "error",
+                    payload: "Invalid payload format for reports.",
+                });
             }
+        },
+
+        // Wait for response from the database
+        waitForResponse() {
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error("Timeout while waiting for database response."));
+                }, this.responseTimeout);
+
+                this.$watch(
+                    "msg",
+                    function (newMsg) {
+                        if (newMsg && newMsg.topic === "db_reply") {
+                            clearTimeout(timeout);
+                            resolve(newMsg);
+                        }
+                    },
+                    { immediate: false, deep: true }
+                );
+            });
         },
 
         async fetchReport() {
@@ -132,16 +174,15 @@ export default {
         ORDER BY Measurement.id, PowerMeasure.id
     `;
 
-            // Send the complete query as the `topic`
-            this.send({
-                topic: query, // Query is fully embedded here
-            });
+
+            this.send({ topic: query });
 
             try {
                 // Wait for the database response
                 const result = await this.waitForResponse();
                 if (result && result.payload) {
-                    this.updateAllReport(result.payload); // Update report data
+                    // Pass the payload to updateAllReport
+                    this.updateAllReport(result.payload);
                 } else {
                     console.error("Failed to fetch report data or no data returned.", result);
                     this.send({
@@ -156,9 +197,8 @@ export default {
                     payload: `Error while fetching report: ${err.message}`,
                 });
             }
-        }
 
-
+        },
     },
     mounted: function () {
         // Watch for incoming messages to update report data
@@ -168,8 +208,8 @@ export default {
                 if (newMsg && newMsg.payload) {
                     if (Array.isArray(newMsg.payload)) {
                         this.updateAllReportID(newMsg.payload); // Handle ID array
-                    } else {
-                        this.updateAllReport(newMsg.payload); // Handle report data
+                    } else if (newMsg.topic === "db_reply") {
+                        this.updateAllReport([newMsg.payload]); // Handle report data
                     }
                 }
             },
@@ -177,8 +217,8 @@ export default {
         );
     },
 };
-
 </script>
+
 
 <style scoped>
 .report-container {
