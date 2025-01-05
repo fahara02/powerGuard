@@ -1,80 +1,197 @@
 <template>
-    <div class="report-container">
-        <!-- Dropdown for selecting sub-report ID -->
-        <div class="dropdown-container">
-            <label for="subreport-dropdown">Select Sub-Report ID:</label>
-            <select id="subreport-dropdown" v-model="formData.report.id">
-                <option value="" disabled>Select a Sub-Report</option>
-                <option v-for="id in reportOptions" :key="id" :value="id">{{ id }}</option>
+    <div>
+        <!-- Report Selection Dropdown -->
+        <div class="report-selector">
+            <label for="report-id">Select Report:</label>
+            <select id="report-id" v-model="formData.report.id" @change="onReportChange">
+                <option value="" disabled>Select a Report</option>
+                <option v-for="id in reportOptions" :key="id" :value="id">
+                    Report {{ id }}
+                </option>
             </select>
         </div>
 
-        <!-- Button to fetch the selected report -->
-        <div class="button-container">
-            <button @click="fetchReport">Fetch Report</button>
+        <!-- Loading State -->
+        <div v-if="isLoading" class="loading-container">
+            Loading report data...
         </div>
 
-        <!-- Display selected report details -->
-        <div v-if="selectedReport" class="report-display">
-            <h2>Test Report: {{ selectedReport.test_name }}</h2>
-            <div class="report-section">
-                <h3>Test Details</h3>
-                <p><strong>Description:</strong> {{ selectedReport.test_description }}</p>
-                <p><strong>Result:</strong> {{ selectedReport.test_result }}</p>
+        <!-- Error or No Data -->
+        <div v-else-if="!currentSelectedReport" class="error-container">
+            <p>No report selected or available. Please select a valid report.</p>
+        </div>
+
+        <!-- Test Report Details -->
+        <div v-else class="test-report-container">
+            <!-- Common Test Information -->
+            <div class="common-info">
+                <h2>{{ currentSelectedReport.test_name }}</h2>
+                <p><strong>Description:</strong> {{ currentSelectedReport.test_description }}</p>
+                <p><strong>Test Result:</strong> {{ currentSelectedReport.test_result }}</p>
+                <p><strong>Client Name:</strong> {{ currentSelectedReport.settings.client_name }}</p>
+                <p><strong>Standard:</strong> {{ currentSelectedReport.settings.standard }}</p>
+                <p><strong>UPS Model:</strong> {{ currentSelectedReport.settings.ups_model }}</p>
             </div>
-            <div class="report-section">
-                <h3>Client Information</h3>
-                <p><strong>Client Name:</strong> {{ selectedReport.settings.client_name }}</p>
-                <p><strong>Standard:</strong> {{ selectedReport.settings.standard }}</p>
-                <p><strong>UPS Model:</strong> {{ selectedReport.settings.ups_model }}</p>
+
+            <!-- Common Measurement Information -->
+            <div class="measurement-common-info">
+                <h3>Measurement Overview</h3>
+                <p><strong>Load Type:</strong> {{ measurementCommonData.load_type || "N/A" }}</p>
+                <p><strong>Load Percentage:</strong> {{ measurementCommonData.load_percentage || 0 }}</p>
+                <p><strong>Run Interval (s):</strong> {{ measurementCommonData.run_interval_sec || 0 }}</p>
+                <p><strong>Phase Name:</strong> {{ measurementCommonData.phase_name || "Unknown" }}</p>
+                <p><strong>Step ID:</strong> {{ measurementCommonData.step_id || "N/A" }}</p>
             </div>
+
+            <!-- Measurement Table -->
+            <!-- Measurement Table -->
+            <div class="measurement-table-container"
+                v-if="currentSelectedReport && currentSelectedReport.measurements.length">
+                <h3>Measurements Table</h3>
+                <table class="measurement-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Measurement Name</th>
+                            <th>Type</th>
+                            <th>Voltage (V)</th>
+                            <th>Current (A)</th>
+                            <th>Power (W)</th>
+                            <th>Energy (kWh)</th>
+                            <th>Power Factor</th>
+                            <th>Frequency (Hz)</th>
+                            <th>Backup Time (s)</th>
+                            <th>Load Percentage</th>
+                            <th>Phase Name</th>
+                            <th>Step ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template v-for="(measurement, index) in currentSelectedReport.measurements"
+                            :key="measurement.m_unique_id">
+                            <tr>
+                                <!-- Display the first power measure -->
+                                <td :rowspan="measurement.power_measures.length">{{ index + 1 }}</td>
+                                <td :rowspan="measurement.power_measures.length">{{ measurement.name }}</td>
+                                <td>{{ measurement.power_measures[0].type }}</td>
+                                <td>{{ measurement.power_measures[0].voltage }}</td>
+                                <td>{{ measurement.power_measures[0].current }}</td>
+                                <td>{{ measurement.power_measures[0].power }}</td>
+                                <td>{{ measurement.power_measures[0].energy }}</td>
+                                <td>{{ measurement.power_measures[0].pf }}</td>
+                                <td>{{ measurement.power_measures[0].frequency }}</td>
+                                <td :rowspan="measurement.power_measures.length">{{ measurement.backup_time_sec }}</td>
+                                <td :rowspan="measurement.power_measures.length">{{ measurement.load_percentage }}</td>
+                                <td :rowspan="measurement.power_measures.length">{{ measurement.phase_name }}</td>
+                                <td :rowspan="measurement.power_measures.length">{{ measurement.step_id }}</td>
+                            </tr>
+                            <!-- Additional rows for remaining power measures -->
+                            <tr v-for="(powerMeasure, pmIndex) in measurement.power_measures.slice(1)"
+                                :key="measurement.m_unique_id + '-' + pmIndex">
+                                <td>{{ powerMeasure.type }}</td>
+                                <td>{{ powerMeasure.voltage }}</td>
+                                <td>{{ powerMeasure.current }}</td>
+                                <td>{{ powerMeasure.power }}</td>
+                                <td>{{ powerMeasure.energy }}</td>
+                                <td>{{ powerMeasure.pf }}</td>
+                                <td>{{ powerMeasure.frequency }}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Error Handling -->
+            <div v-else class="error-container">
+                <p>No measurements available for the selected report.</p>
+            </div>
+
+
         </div>
     </div>
 </template>
 
+
+
 <script>
 export default {
+    props: {
+        selectedReport: {
+            type: Object,
+            required: false, // Optional, now handled via computed property
+        },
+    },
     data: function () {
         return {
             reports: [], // Holds full report data
-            reportIDs: [], // Holds the list of report IDs
+            reportIDs: [], // Holds the list of report IDs (DB row IDs)
+
             formData: {
                 report: {
-                    id: null, // Currently selected report ID
+                    id: null, // Selected report ID (DB row ID)
                 },
             },
+            isLoading: false,
             responseTimeout: 10000, // Timeout for waiting for DB response in ms
         };
     },
     computed: {
-        // Extract subreport_id for dropdown options
-        reportOptions: function () {
+        // Dropdown options (based on DB row IDs)
+        reportOptions() {
             return this.reportIDs.sort((a, b) => a - b); // Sort IDs numerically
         },
 
-        // Find the selected report object based on subreport_id
-        selectedReport: function () {
+
+        currentSelectedReport() {
             return this.reports.find(
                 (report) => report.id === this.formData.report.id
             ) || null;
         },
+        measurementCommonData() {
+            if (!this.currentSelectedReport || !this.currentSelectedReport.measurements.length) {
+                return {};
+            }
+
+            const firstMeasurement = this.currentSelectedReport.measurements[0];
+            return {
+                load_type: firstMeasurement.load_type,
+                load_percentage: firstMeasurement.load_percentage,
+                run_interval_sec: firstMeasurement.run_interval_sec,
+                phase_name: firstMeasurement.phase_name,
+                step_id: firstMeasurement.step_id,
+            };
+        },
     },
     methods: {
+
+        onReportChange() {
+            if (!this.formData.report.id) return;
+
+            this.isLoading = true;
+            this.fetchReport()
+                .then(() => (this.isLoading = false))
+                .catch((error) => {
+                    console.error("Error fetching report:", error);
+                    this.isLoading = false;
+                });
+        },
+
+
         // Update all report IDs from incoming data
-        updateAllReportID: function (payload) {
+        updateAllReportID(payload) {
             if (Array.isArray(payload)) {
-                this.reportIDs = payload; // Update the list of report IDs
+                this.reportIDs = payload; // Populate the dropdown with DB row IDs
             } else {
                 console.error("Invalid payload format for report IDs. Expected an array.");
             }
         },
 
-        // Update all report data from incoming data
-        updateAllReport: function (payload) {
-            if (payload && payload.subreport_id) {
-                // Transform payload into a report object and update the reports array
+        // Update or add a report in the `reports` array
+        updateAllReport(payload) {
+            if (payload && payload.test_report_id) {
                 const report = {
-                    id: payload.subreport_id,
+                    id: payload.test_report_id, // Use the DB row ID as `id`
+                    subreport_id: payload.sub_report_id, // Keep subreport_id separate
                     test_name: payload.test_name,
                     test_description: payload.test_description,
                     test_result: payload.test_result,
@@ -82,13 +199,18 @@ export default {
                     measurements: payload.measurements,
                 };
 
-                // Update the reports array
-                this.reports = [report];
+                // Find index of the report with the same DB row ID
+                const index = this.reports.findIndex((r) => r.id === report.id);
+                if (index >= 0) {
+                    this.$set(this.reports, index, report); // Update existing report
+                } else {
+                    this.reports.push(report); // Add new report
+                }
 
-                // Log received report information
+                // Log update
                 this.send({
                     topic: "info",
-                    payload: `Received report for reportid: ${report.id} for test ${report.test_name}`,
+                    payload: `Report updated: ${report.id}`,
                 });
             } else {
                 console.error("Invalid payload format for reports.");
@@ -99,7 +221,7 @@ export default {
             }
         },
 
-        // Wait for response from the database
+        // Wait for the database response
         waitForResponse() {
             return new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => {
@@ -119,72 +241,67 @@ export default {
             });
         },
 
+        // Fetch the selected report from the database
         async fetchReport() {
-            const selectedId = this.formData.report.id; // Get selected report ID
+            const selectedId = this.formData.report.id;
 
             if (!selectedId) {
-                console.error("No Sub-Report ID selected.");
+                console.error("No Report ID selected.");
                 this.send({
                     topic: "error",
-                    payload: "No Sub-Report ID selected.",
+                    payload: "No Report ID selected.",
                 });
                 return;
             }
 
-            // Debug: Inform Node-RED of the selected report ID
             this.send({
                 topic: "info",
-                payload: `Fetching test report for reportid: ${selectedId}`,
+                payload: `Fetching test report for report ID: ${selectedId}`,
             });
 
-            // Prepare the query for SQLite
             const query = `
-        SELECT 
-            TestReport.id AS test_report_id,
-            TestReport.sub_report_id,
-            TestReport.test_name,
-            TestReport.test_description,
-            TestReport.test_result,
-            ReportSettings.client_name,
-            ReportSettings.standard,
-            ReportSettings.ups_model,
-            Measurement.m_unique_id AS measurement_unique_id,
-            Measurement.name AS measurement_name,
-            Measurement.timestamp AS measurement_timestamp,
-            Measurement.mode AS mode,
-            Measurement.phase_name AS phase_name,
-            Measurement.load_type AS load_type,
-            Measurement.load_percentage AS load_percentage ,
-            Measurement.step_id AS step_id,
-            Measurement.load_type AS load_type,
-            Measurement.run_interval_sec AS run_interval_sec,
-            Measurement.backup_time_sec AS backup_time_sec,
-            PowerMeasure.type AS power_measure_type,
-            PowerMeasure.voltage AS power_measure_voltage,
-            PowerMeasure.current AS power_measure_current,
-            PowerMeasure.power AS power_measure_power,
-            PowerMeasure.energy AS power_measure_energy,
-            PowerMeasure.pf AS power_measure_pf,
-            PowerMeasure.frequency AS power_measure_frequency
-        FROM TestReport
-        JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
-        LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
-        LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id
-        WHERE TestReport.id = '${selectedId}'
-        ORDER BY Measurement.id, PowerMeasure.id
-    `;
-
+                SELECT 
+                    TestReport.id AS test_report_id, -- Row ID
+                    TestReport.sub_report_id, -- Subreport ID
+                    TestReport.test_name,
+                    TestReport.test_description,
+                    TestReport.test_result,
+                    ReportSettings.client_name,
+                    ReportSettings.standard,
+                    ReportSettings.ups_model,
+                    Measurement.m_unique_id AS measurement_unique_id,
+                    Measurement.name AS measurement_name,
+                    Measurement.timestamp AS measurement_timestamp,
+                    Measurement.mode AS mode,
+                    Measurement.phase_name AS phase_name,
+                    Measurement.load_type AS load_type,
+                    Measurement.load_percentage AS load_percentage,
+                    Measurement.step_id AS step_id,
+                    Measurement.run_interval_sec AS run_interval_sec,
+                    Measurement.backup_time_sec AS backup_time_sec,
+                    PowerMeasure.type AS power_measure_type,
+                    PowerMeasure.voltage AS power_measure_voltage,
+                    PowerMeasure.current AS power_measure_current,
+                    PowerMeasure.power AS power_measure_power,
+                    PowerMeasure.energy AS power_measure_energy,
+                    PowerMeasure.pf AS power_measure_pf,
+                    PowerMeasure.frequency AS power_measure_frequency
+                FROM TestReport
+                JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
+                LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
+                LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id
+                WHERE TestReport.id = '${selectedId}'
+                ORDER BY Measurement.id, PowerMeasure.id
+            `;
 
             this.send({ topic: query });
 
             try {
-                // Wait for the database response
                 const result = await this.waitForResponse();
                 if (result && result.payload) {
-                    // Pass the payload to updateAllReport
                     this.updateAllReport(result.payload);
                 } else {
-                    console.error("Failed to fetch report data or no data returned.", result);
+                    console.error("Failed to fetch report data or no data returned.");
                     this.send({
                         topic: "error",
                         payload: "Failed to fetch report data.",
@@ -197,17 +314,15 @@ export default {
                     payload: `Error while fetching report: ${err.message}`,
                 });
             }
-
         },
     },
-    mounted: function () {
-        // Watch for incoming messages to update report data
+    mounted() {
         this.$watch(
             "msg",
             function (newMsg) {
                 if (newMsg && newMsg.payload) {
                     if (Array.isArray(newMsg.payload)) {
-                        this.updateAllReportID(newMsg.payload); // Handle ID array
+                        this.updateAllReportID(newMsg.payload); // Update report IDs
                     }
                 }
             },
@@ -218,63 +333,62 @@ export default {
 </script>
 
 
+
 <style scoped>
-.report-container {
+.test-report-container {
     padding: 20px;
-    background: #f4f4f9;
+    background-color: #f9f9f9;
     border-radius: 10px;
-    max-width: 800px;
+    max-width: 1000px;
     margin: auto;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
 }
 
-.dropdown-container {
+.common-info,
+.measurement-common-info {
     margin-bottom: 20px;
 }
 
-.dropdown-container label {
-    margin-right: 10px;
+.common-info h2 {
+    font-size: 1.8rem;
+    color: #333;
 }
 
-#subreport-dropdown {
+.common-info p,
+.measurement-common-info p {
+    font-size: 1rem;
+    color: #555;
+    margin: 5px 0;
+}
+
+.measurement-table-container {
+    margin-top: 20px;
+}
+
+.measurement-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.measurement-table th,
+.measurement-table td {
+    border: 1px solid #ddd;
     padding: 8px;
-    font-size: 16px;
+    text-align: center;
 }
 
-.button-container {
-    margin-bottom: 20px;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
+.measurement-table th {
     background-color: #007bff;
     color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    font-weight: bold;
 }
 
-button:hover {
-    background-color: #0056b3;
+.measurement-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
 }
 
-.report-display h2 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-}
-
-.report-section {
-    margin-bottom: 20px;
-}
-
-.report-section h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-}
-
-.report-section p {
-    margin: 5px 0;
-    line-height: 1.5;
+.measurement-table tbody tr:hover {
+    background-color: #e8f8ff;
 }
 </style>
