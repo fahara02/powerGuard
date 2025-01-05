@@ -10,7 +10,9 @@
                 </option>
             </select>
         </div>
-
+        <div class="print-button-container">
+            <button @click="printReport">Print Report</button>
+        </div>
         <!-- Loading State -->
         <div v-if="isLoading" class="loading-container">
             Loading report data...
@@ -22,7 +24,7 @@
         </div>
 
         <!-- Test Report Details -->
-        <div v-else class="test-report-container">
+        <div v-else class="test-report-container" id="report-content">
             <!-- Common Test Information -->
             <div class="common-info">
                 <h2>{{ currentSelectedReport.test_name }}</h2>
@@ -163,6 +165,28 @@ export default {
         },
     },
     methods: {
+        printReport() {
+            const printContent = document.getElementById("report-content");
+            if (!printContent) {
+                console.error("No report content found to print.");
+                return;
+            }
+
+            // Save the current HTML and styles
+            const originalContent = document.body.innerHTML;
+            const originalStyles = document.head.innerHTML;
+
+            // Replace body content with the report content
+            document.body.innerHTML = printContent.outerHTML;
+
+            // Trigger print dialog
+            window.print();
+
+            // Restore original content and styles
+            document.body.innerHTML = originalContent;
+            document.head.innerHTML = originalStyles;
+            window.location.reload(); // Reload the page to reinitialize the dashboard
+        },
 
         onReportChange() {
             if (!this.formData.report.id) return;
