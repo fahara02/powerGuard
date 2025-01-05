@@ -37,22 +37,23 @@ export default {
     data: function () {
         return {
             reports: [], // Holds full report data
-            reportIDs: [], // Holds the list of report IDs
+            reportIDs: [], // Holds the list of report IDs (DB row IDs)
             formData: {
                 report: {
-                    id: null, // Currently selected report ID
+                    id: null, // Selected report ID (DB row ID)
                 },
             },
+            responseTimeout: 10000, // Timeout for waiting for DB response in ms
         };
     },
     computed: {
-        // Extract subreport_id for dropdown options
-        reportOptions: function () {
+        // Dropdown options (based on DB row IDs)
+        reportOptions() {
             return this.reportIDs.sort((a, b) => a - b); // Sort IDs numerically
         },
 
-        // Find the selected report object based on subreport_id
-        selectedReport: function () {
+        // Find the selected report object based on `formData.report.id`
+        selectedReport() {
             return this.reports.find(
                 (report) => report.id === this.formData.report.id
             ) || null;
@@ -60,90 +61,130 @@ export default {
     },
     methods: {
         // Update all report IDs from incoming data
-        updateAllReportID: function (payload) {
+        updateAllReportID(payload) {
             if (Array.isArray(payload)) {
-                this.reportIDs = payload; // Update the list of report IDs
+                this.reportIDs = payload; // Populate the dropdown with DB row IDs
             } else {
                 console.error("Invalid payload format for report IDs. Expected an array.");
             }
         },
 
-        // Update all report data from incoming data
-        updateAllReport: function (payload) {
-            if (Array.isArray(payload)) {
-                this.reports = payload; // Update the full reports array
+        // Update or add a report in the `reports` array
+        updateAllReport(payload) {
+            if (payload && payload.test_report_id) {
+                const report = {
+                    id: payload.test_report_id, // Use the DB row ID as `id`
+                    subreport_id: payload.sub_report_id, // Keep subreport_id separate
+                    test_name: payload.test_name,
+                    test_description: payload.test_description,
+                    test_result: payload.test_result,
+                    settings: payload.settings,
+                    measurements: payload.measurements,
+                };
+
+                // Find index of the report with the same DB row ID
+                const index = this.reports.findIndex((r) => r.id === report.id);
+                if (index >= 0) {
+                    this.$set(this.reports, index, report); // Update existing report
+                } else {
+                    this.reports.push(report); // Add new report
+                }
+
+                // Log update
+                this.send({
+                    topic: "info",
+                    payload: `Report updated: ${report.id}`,
+                });
             } else {
-                console.error("Invalid payload format for reports. Expected an array.");
+                console.error("Invalid payload format for reports.");
+                this.send({
+                    topic: "error",
+                    payload: "Invalid payload format for reports.",
+                });
             }
         },
 
+        // Wait for the database response
+        waitForResponse() {
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error("Timeout while waiting for database response."));
+                }, this.responseTimeout);
+
+                this.$watch(
+                    "msg",
+                    function (newMsg) {
+                        if (newMsg && newMsg.topic === "db_reply") {
+                            clearTimeout(timeout);
+                            resolve(newMsg);
+                        }
+                    },
+                    { immediate: false, deep: true }
+                );
+            });
+        },
+
+        // Fetch the selected report from the database
         async fetchReport() {
-            const selectedId = this.formData.report.id; // Get selected report ID
+            const selectedId = this.formData.report.id;
 
             if (!selectedId) {
-                console.error("No Sub-Report ID selected.");
+                console.error("No Report ID selected.");
                 this.send({
                     topic: "error",
-                    payload: "No Sub-Report ID selected.",
+                    payload: "No Report ID selected.",
                 });
                 return;
             }
 
-            // Debug: Inform Node-RED of the selected report ID
             this.send({
                 topic: "info",
-                payload: `Fetching test report for reportid: ${selectedId}`,
+                payload: `Fetching test report for report ID: ${selectedId}`,
             });
 
-            // Prepare the query for SQLite
             const query = `
-        SELECT 
-            TestReport.id AS test_report_id,
-            TestReport.sub_report_id,
-            TestReport.test_name,
-            TestReport.test_description,
-            TestReport.test_result,
-            ReportSettings.client_name,
-            ReportSettings.standard,
-            ReportSettings.ups_model,
-            Measurement.m_unique_id AS measurement_unique_id,
-            Measurement.name AS measurement_name,
-            Measurement.timestamp AS measurement_timestamp,
-            Measurement.mode AS mode,
-            Measurement.phase_name AS phase_name,
-            Measurement.load_type AS load_type,
-            Measurement.load_percentage AS load_percentage ,
-            Measurement.step_id AS step_id,
-            Measurement.load_type AS load_type,
-            Measurement.run_interval_sec AS run_interval_sec,
-            Measurement.backup_time_sec AS backup_time_sec,
-            PowerMeasure.type AS power_measure_type,
-            PowerMeasure.voltage AS power_measure_voltage,
-            PowerMeasure.current AS power_measure_current,
-            PowerMeasure.power AS power_measure_power,
-            PowerMeasure.energy AS power_measure_energy,
-            PowerMeasure.pf AS power_measure_pf,
-            PowerMeasure.frequency AS power_measure_frequency
-        FROM TestReport
-        JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
-        LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
-        LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id
-        WHERE TestReport.id = '${selectedId}'
-        ORDER BY Measurement.id, PowerMeasure.id
-    `;
+                SELECT 
+                    TestReport.id AS test_report_id, -- Row ID
+                    TestReport.sub_report_id, -- Subreport ID
+                    TestReport.test_name,
+                    TestReport.test_description,
+                    TestReport.test_result,
+                    ReportSettings.client_name,
+                    ReportSettings.standard,
+                    ReportSettings.ups_model,
+                    Measurement.m_unique_id AS measurement_unique_id,
+                    Measurement.name AS measurement_name,
+                    Measurement.timestamp AS measurement_timestamp,
+                    Measurement.mode AS mode,
+                    Measurement.phase_name AS phase_name,
+                    Measurement.load_type AS load_type,
+                    Measurement.load_percentage AS load_percentage,
+                    Measurement.step_id AS step_id,
+                    Measurement.run_interval_sec AS run_interval_sec,
+                    Measurement.backup_time_sec AS backup_time_sec,
+                    PowerMeasure.type AS power_measure_type,
+                    PowerMeasure.voltage AS power_measure_voltage,
+                    PowerMeasure.current AS power_measure_current,
+                    PowerMeasure.power AS power_measure_power,
+                    PowerMeasure.energy AS power_measure_energy,
+                    PowerMeasure.pf AS power_measure_pf,
+                    PowerMeasure.frequency AS power_measure_frequency
+                FROM TestReport
+                JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
+                LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
+                LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id
+                WHERE TestReport.id = '${selectedId}'
+                ORDER BY Measurement.id, PowerMeasure.id
+            `;
 
-            // Send the complete query as the `topic`
-            this.send({
-                topic: query, // Query is fully embedded here
-            });
+            this.send({ topic: query });
 
             try {
-                // Wait for the database response
                 const result = await this.waitForResponse();
                 if (result && result.payload) {
-                    this.updateAllReport(result.payload); // Update report data
+                    this.updateAllReport(result.payload);
                 } else {
-                    console.error("Failed to fetch report data or no data returned.", result);
+                    console.error("Failed to fetch report data or no data returned.");
                     this.send({
                         topic: "error",
                         payload: "Failed to fetch report data.",
@@ -156,20 +197,15 @@ export default {
                     payload: `Error while fetching report: ${err.message}`,
                 });
             }
-        }
-
-
+        },
     },
-    mounted: function () {
-        // Watch for incoming messages to update report data
+    mounted() {
         this.$watch(
             "msg",
             function (newMsg) {
                 if (newMsg && newMsg.payload) {
                     if (Array.isArray(newMsg.payload)) {
-                        this.updateAllReportID(newMsg.payload); // Handle ID array
-                    } else {
-                        this.updateAllReport(newMsg.payload); // Handle report data
+                        this.updateAllReportID(newMsg.payload); // Update report IDs
                     }
                 }
             },
@@ -177,8 +213,9 @@ export default {
         );
     },
 };
-
 </script>
+
+
 
 <style scoped>
 .report-container {

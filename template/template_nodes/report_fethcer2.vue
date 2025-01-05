@@ -208,8 +208,6 @@ export default {
                 if (newMsg && newMsg.payload) {
                     if (Array.isArray(newMsg.payload)) {
                         this.updateAllReportID(newMsg.payload); // Handle ID array
-                    } else if (newMsg.topic === "db_reply") {
-                        this.updateAllReport([newMsg.payload]); // Handle report data
                     }
                 }
             },
