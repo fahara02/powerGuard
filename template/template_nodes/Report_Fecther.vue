@@ -378,62 +378,150 @@ export default {
 </script>
 
 
-
 <style scoped>
-.test-report-container {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    max-width: 1000px;
-    margin: auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-}
-
-.common-info,
-.measurement-common-info {
-    margin-bottom: 20px;
-}
-
-.common-info h2 {
-    font-size: 1.8rem;
+/* General Styling */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
     color: #333;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f9;
 }
 
+/* Container Styling */
+.test-report-container {
+    padding: 20px 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    max-width: 1000px;
+    margin: 30px auto;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Titles */
+.common-info h2,
+.measurement-common-info h3 {
+    font-size: 1.8rem;
+    color: #004085;
+    margin-bottom: 10px;
+    border-left: 4px solid #007bff;
+    padding-left: 10px;
+}
+
+/* Paragraph Styling */
 .common-info p,
 .measurement-common-info p {
     font-size: 1rem;
     color: #555;
-    margin: 5px 0;
+    margin: 8px 0;
+    line-height: 1.6;
 }
 
+/* Dropdown Styling */
+.report-selector {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-selector label {
+    font-weight: bold;
+    color: #555;
+}
+
+.report-selector select {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #495057;
+    background-color: #ffffff;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+}
+
+/* Buttons */
+.print-button-container {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    background-color: #004085;
+}
+
+/* Loading and Error Containers */
+.loading-container,
+.error-container {
+    padding: 20px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Measurement Table */
 .measurement-table-container {
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 .measurement-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 0.9rem;
 }
 
 .measurement-table th,
 .measurement-table td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px;
     text-align: center;
 }
 
 .measurement-table th {
-    background-color: #007bff;
-    color: white;
+    background-color: #343a40;
+    color: #ffffff;
     font-weight: bold;
+
 }
 
 .measurement-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #f8f9fa;
 }
 
 .measurement-table tbody tr:hover {
-    background-color: #e8f8ff;
+    background-color: #eaf2f8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .test-report-container {
+        padding: 15px;
+    }
+
+    .measurement-table th,
+    .measurement-table td {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
 }
 </style>
