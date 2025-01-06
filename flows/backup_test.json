@@ -295,8 +295,8 @@
         "ui": "",
         "name": "POWER_METER_INPUTPOWER",
         "order": 1,
-        "width": 3,
-        "height": "6",
+        "width": 4,
+        "height": null,
         "head": "",
         "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        type: 0, // Default to INPUT_POWER\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n\n      },\n      dataType: {\n        INPUT_POWER: \"UPS_INPUT\",\n        OUTPUT_POWER: \"UPS_OUTPUT\",\n        MAINS: \"MAINS\",\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload) {\n        this.data = { ...this.data, ...payload }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
         "storeOutMessages": true,
@@ -307,7 +307,9 @@
         "x": 660,
         "y": 780,
         "wires": [
-            []
+            [
+                "9feae0311f0771f8"
+            ]
         ]
     },
     {
@@ -391,8 +393,8 @@
         "ui": "",
         "name": "POWER_METER_OUTPUT POWER",
         "order": 2,
-        "width": 4,
-        "height": "6",
+        "width": 5,
+        "height": null,
         "head": "",
         "format": "<template>\n  <div class=\"meter-container\">\n    <!-- Dynamic Header -->\n    <div class=\"meter-header\">\n      <h2>{{ headerText }}</h2>\n    </div>\n    <!-- Multi-function Meter -->\n    <div class=\"meter-display\">\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Voltage</h3>\n          <h1>{{ data.voltage }} V</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Current</h3>\n          <h1>{{ data.current }} A</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power</h3>\n          <h1>{{ data.power }} W</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Energy</h3>\n          <h1>{{ data.energy }} kWh</h1>\n        </div>\n      </div>\n      <div class=\"meter-row\">\n        <div class=\"meter-item\">\n          <h3>Power Factor</h3>\n          <h1>{{ data.pf }}</h1>\n        </div>\n        <div class=\"meter-item\">\n          <h3>Frequency</h3>\n          <h1>{{ data.frequency }} Hz</h1>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      data: {\n        type: 0, // Default to INPUT_POWER\n        voltage: 0,\n        current: 0,\n        power: 0,\n        energy: 0,\n        pf: 0,\n        frequency: 0,\n\n      },\n      dataType: {\n        INPUT_POWER: \"UPS_INPUT\",\n        OUTPUT_POWER: \"UPS_OUTPUT\",\n        MAINS: \"MAINS\",\n      },\n    };\n  },\n  computed: {\n    // Determine header text based on data type\n    headerText() {\n      return this.data.type === this.dataType.INPUT_POWER\n        ? \"Input Power\"\n        : \"Output Power\";\n    },\n  },\n  methods: {\n    updatePowerData(payload) {\n      if (payload) {\n        this.data = { ...this.data, ...payload }; // Merge new data with existing data\n      } else {\n        console.error(\"Invalid payload:\", payload);\n      }\n    },\n  },\n  mounted() {\n    this.$watch(\n      \"msg\",\n      (newMsg) => {\n        if (newMsg && newMsg.payload) {\n          this.updatePowerData(newMsg.payload);\n        }\n      },\n      { deep: true }\n    );\n  },\n};\n</script>\n\n<style scoped>\n/* Outer Container */\n.meter-container {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  padding: 20px;\n  background-color: #222;\n  border-radius: 10px;\n  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);\n  max-width: 600px;\n  margin: auto;\n}\n\n/* Header Styling */\n.meter-header {\n  margin-bottom: 15px;\n  text-align: center;\n}\n\n.meter-header h2 {\n  color: #fff;\n  font-family: \"Courier New\", Courier, monospace;\n  font-size: 1.5rem;\n  margin: 0;\n}\n\n/* Inner Display */\n.meter-display {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  font-family: \"Courier New\", Courier, monospace;\n  color: #fff;\n}\n\n/* Rows for Data */\n.meter-row {\n  display: flex;\n  justify-content: space-between;\n  gap: 10px;\n}\n\n/* Individual Items */\n.meter-item {\n  background-color: #333;\n  flex: 1;\n  padding: 15px;\n  border-radius: 8px;\n  text-align: center;\n  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);\n}\n\n/* Heading and Value Styling */\n.meter-item h3 {\n  margin: 0;\n  font-size: 1rem;\n  color: #aaa;\n}\n\n.meter-item h1 {\n  margin: 5px 0 0;\n  font-size: 1.5rem;\n  color: #fff;\n}\n</style>\n",
         "storeOutMessages": true,
@@ -860,15 +862,77 @@
         "wires": []
     },
     {
+        "id": "9feae0311f0771f8",
+        "type": "ui-chart",
+        "z": "46413099658d8708",
+        "group": "eaf9e02b16206474",
+        "name": "",
+        "label": "VOLTAGE VARIATION",
+        "order": 4,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "volatge",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": 1,
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 9,
+        "height": 10,
+        "className": "",
+        "interpolation": "linear",
+        "x": 980,
+        "y": 780,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "eaf9e02b16206474",
         "type": "ui-group",
         "name": "OUTPUT_DATA",
         "page": "7d0f53039d1540b1",
-        "width": 7,
+        "width": 9,
         "height": "1",
         "order": 2,
         "showTitle": true,
-        "className": "",
+        "className": "output_data",
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
@@ -876,13 +940,13 @@
     {
         "id": "ac18f679c10f1fd0",
         "type": "ui-group",
-        "name": "UPS_STATUS",
+        "name": "TEST_CONTROL",
         "page": "7d0f53039d1540b1",
         "width": 3,
         "height": "1",
         "order": 1,
         "showTitle": true,
-        "className": "",
+        "className": "test_control",
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
@@ -919,7 +983,7 @@
             }
         ],
         "order": 3,
-        "className": "",
+        "className": "backup_test",
         "visible": "true",
         "disabled": "false"
     },
