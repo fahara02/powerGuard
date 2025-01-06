@@ -59,7 +59,6 @@
                             <th>Voltage (V)</th>
                             <th>Current (A)</th>
                             <th>Power (W)</th>
-                            <th>Energy (kWh)</th>
                             <th>Power Factor</th>
                             <th>Frequency (Hz)</th>
                             <th>Backup Time (s)</th>
@@ -79,7 +78,6 @@
                                 <td>{{ measurement.power_measures[0].voltage }}</td>
                                 <td>{{ measurement.power_measures[0].current }}</td>
                                 <td>{{ measurement.power_measures[0].power }}</td>
-                                <td>{{ measurement.power_measures[0].energy }}</td>
                                 <td>{{ measurement.power_measures[0].pf }}</td>
                                 <td>{{ measurement.power_measures[0].frequency }}</td>
                                 <td :rowspan="measurement.power_measures.length">{{ measurement.backup_time_sec }}</td>
@@ -94,7 +92,6 @@
                                 <td>{{ powerMeasure.voltage }}</td>
                                 <td>{{ powerMeasure.current }}</td>
                                 <td>{{ powerMeasure.power }}</td>
-                                <td>{{ powerMeasure.energy }}</td>
                                 <td>{{ powerMeasure.pf }}</td>
                                 <td>{{ powerMeasure.frequency }}</td>
                             </tr>

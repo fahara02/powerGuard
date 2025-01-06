@@ -55,8 +55,9 @@ export default {
 
       },
       dataType: {
-        INPUT_POWER: 0,
-        OUTPUT_POWER: 1,
+        INPUT_POWER: "UPS_INPUT",
+        OUTPUT_POWER: "UPS_OUTPUT",
+        MAINS: "MAINS",
       },
     };
   },
