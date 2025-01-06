@@ -706,35 +706,6 @@
         "wires": []
     },
     {
-        "id": "e1e058a6cc151e1e",
-        "type": "inject",
-        "z": "e6613618b3405f10",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 130,
-        "y": 480,
-        "wires": [
-            [
-                "d49f8cf522c6f5bf"
-            ]
-        ]
-    },
-    {
         "id": "d49f8cf522c6f5bf",
         "type": "function",
         "z": "e6613618b3405f10",
@@ -746,8 +717,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 330,
-        "y": 480,
+        "x": 310,
+        "y": 500,
         "wires": [
             [
                 "a24532e5f01bb659"
@@ -762,8 +733,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 540,
-        "y": 480,
+        "x": 500,
+        "y": 500,
         "wires": [
             [
                 "9d8ea0b2d320a605"
@@ -782,8 +753,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 760,
-        "y": 480,
+        "x": 720,
+        "y": 500,
         "wires": [
             [
                 "d457ee3a31f8578a"
@@ -803,9 +774,99 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1040,
-        "y": 480,
+        "x": 980,
+        "y": 500,
         "wires": []
+    },
+    {
+        "id": "6d4a45e558b63a71",
+        "type": "ui-event",
+        "z": "e6613618b3405f10",
+        "ui": "6bb6879aa70631ea",
+        "name": "",
+        "x": 90,
+        "y": 440,
+        "wires": [
+            [
+                "181bd8064991c89f"
+            ]
+        ]
+    },
+    {
+        "id": "181bd8064991c89f",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "setting page visit",
+        "func": "// Extract the page object from the payload\nlet page_visited = msg.payload.page;\n\n// Add debugging information\nif (!page_visited) {\n    node.warn(\"Page object not found in msg.payload: \" + JSON.stringify(msg.payload));\n    msg.payload = false;\n    return msg;\n}\n\n// Check if the path matches \"/settings\"\nif (page_visited.path === \"/settings\") {\n    msg.payload = true;\n} else {\n    msg.payload = false;\n}\n\n// Log the result for verification\nnode.warn(\"Page path: \" + page_visited.path + \", Payload set to: \" + msg.payload);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 440,
+        "wires": [
+            [
+                "0205703cda5e76c8"
+            ]
+        ]
+    },
+    {
+        "id": "0205703cda5e76c8",
+        "type": "switch",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 470,
+        "y": 440,
+        "wires": [
+            [
+                "d49f8cf522c6f5bf"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "be1fc53cfde3c376",
+        "type": "inject",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 90,
+        "y": 500,
+        "wires": [
+            [
+                "d49f8cf522c6f5bf"
+            ]
+        ]
     },
     {
         "id": "fcaa87c16afbdfcd",
@@ -849,6 +910,25 @@
         "groupType": "default"
     },
     {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
+    },
+    {
         "id": "cb5e987bd157d173",
         "type": "ui-page",
         "name": "SETTINGS",
@@ -883,25 +963,6 @@
         "className": "",
         "visible": true,
         "disabled": false
-    },
-    {
-        "id": "6bb6879aa70631ea",
-        "type": "ui-base",
-        "name": "UPS Tester",
-        "path": "/dashboard",
-        "appIcon": "",
-        "includeClientData": true,
-        "acceptsClientConfig": [
-            "ui-notification",
-            "ui-control"
-        ],
-        "showPathInSidebar": false,
-        "showPageTitle": true,
-        "navigationStyle": "default",
-        "titleBarStyle": "default",
-        "showReconnectNotification": true,
-        "notificationDisplayTime": "1",
-        "showDisconnectNotification": true
     },
     {
         "id": "f51f9a07212ff54b",

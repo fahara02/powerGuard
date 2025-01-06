@@ -1279,7 +1279,7 @@
         "finalize": "",
         "libs": [],
         "x": 340,
-        "y": 1040,
+        "y": 1060,
         "wires": [
             [
                 "85c1484a02887632"
@@ -1294,8 +1294,8 @@
         "sqlquery": "msg.topic",
         "sql": "",
         "name": "MAIN_DB",
-        "x": 540,
-        "y": 1040,
+        "x": 520,
+        "y": 1060,
         "wires": [
             [
                 "0eab3ad53aa24584"
@@ -1324,7 +1324,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 1040,
+        "y": 1060,
         "wires": [
             [
                 "67f6e3f4cedaaf5a"
@@ -1343,8 +1343,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 740,
-        "y": 1040,
+        "x": 720,
+        "y": 1060,
         "wires": [
             [
                 "2ccaf2faaec4558b"
@@ -1364,8 +1364,86 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 940,
-        "y": 1040,
+        "x": 920,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "8b5c2b55808e6ec3",
+        "type": "ui-event",
+        "z": "4ec0a7f75863202f",
+        "ui": "6bb6879aa70631ea",
+        "name": "",
+        "x": 90,
+        "y": 1000,
+        "wires": [
+            [
+                "ef15b9404d5b3279",
+                "fac51d20c224692e"
+            ]
+        ]
+    },
+    {
+        "id": "ef15b9404d5b3279",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "setting page visit",
+        "func": "// Extract the page object from the payload\nlet page_visited = msg.payload.page;\n\n// Add debugging information\nif (!page_visited) {\n    node.warn(\"Page object not found in msg.payload: \" + JSON.stringify(msg.payload));\n    msg.payload = false;\n    return msg;\n}\n\n\nif (page_visited.path === \"/report\") {\n    msg.payload = true;\n} else {\n    msg.payload = false;\n}\n\n// Log the result for verification\nnode.warn(\"Page path: \" + page_visited.path + \", Payload set to: \" + msg.payload);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 1000,
+        "wires": [
+            [
+                "89a573e4dbc78134"
+            ]
+        ]
+    },
+    {
+        "id": "89a573e4dbc78134",
+        "type": "switch",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 470,
+        "y": 1000,
+        "wires": [
+            [
+                "67f6e3f4cedaaf5a"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "fac51d20c224692e",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "debug 11",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 960,
         "wires": []
     },
     {
@@ -1401,6 +1479,25 @@
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
+    },
+    {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
     },
     {
         "id": "7d0f53039d1540b1",
@@ -1473,25 +1570,6 @@
         "className": "",
         "visible": "true",
         "disabled": "false"
-    },
-    {
-        "id": "6bb6879aa70631ea",
-        "type": "ui-base",
-        "name": "UPS Tester",
-        "path": "/dashboard",
-        "appIcon": "",
-        "includeClientData": true,
-        "acceptsClientConfig": [
-            "ui-notification",
-            "ui-control"
-        ],
-        "showPathInSidebar": false,
-        "showPageTitle": true,
-        "navigationStyle": "default",
-        "titleBarStyle": "default",
-        "showReconnectNotification": true,
-        "notificationDisplayTime": "1",
-        "showDisconnectNotification": true
     },
     {
         "id": "f51f9a07212ff54b",

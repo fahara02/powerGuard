@@ -67,15 +67,16 @@
         "id": "af3608a7f0441bca",
         "type": "debug",
         "z": "fa6da6e95a3482ec",
-        "name": "debug 11",
+        "name": "SPEC UPDATE",
         "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "false",
+        "complete": "payload",
+        "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 940,
+        "x": 960,
         "y": 360,
         "wires": []
     },
@@ -171,8 +172,8 @@
         "name": "",
         "scope": null,
         "uncaught": false,
-        "x": 100,
-        "y": 440,
+        "x": 80,
+        "y": 540,
         "wires": [
             [
                 "32c27692.03eeaa",
@@ -192,7 +193,7 @@
         "complete": "true",
         "targetType": "full",
         "x": 290,
-        "y": 480,
+        "y": 600,
         "wires": []
     },
     {
@@ -208,7 +209,7 @@
         "finalize": "",
         "libs": [],
         "x": 300,
-        "y": 440,
+        "y": 540,
         "wires": [
             [
                 "2eac70b89e0f075c"
@@ -224,7 +225,7 @@
         "outputs": 1,
         "noerr": 0,
         "x": 370,
-        "y": 540,
+        "y": 640,
         "wires": [
             []
         ]
@@ -241,8 +242,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "str",
-        "x": 130,
-        "y": 540,
+        "x": 110,
+        "y": 620,
         "wires": [
             [
                 "e33e7ff6.a8878"
@@ -268,7 +269,7 @@
         "wrapText": false,
         "className": "",
         "x": 550,
-        "y": 440,
+        "y": 520,
         "wires": []
     },
     {
@@ -859,7 +860,7 @@
         "type": "function",
         "z": "fa6da6e95a3482ec",
         "name": "set global spec",
-        "func": "global.set(\"spec\",msg.payload);\nreturn msg;",
+        "func": "global.set(\"spec\",msg.payload);\n node.warn(`Updated spec: ${JSON.stringify(msg.payload)}`);\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -928,11 +929,72 @@
         "payload": "",
         "payloadType": "date",
         "x": 110,
-        "y": 400,
+        "y": 420,
         "wires": [
             [
                 "def410b75fcfd683"
             ]
+        ]
+    },
+    {
+        "id": "c79b3cd0290a8207",
+        "type": "ui-event",
+        "z": "fa6da6e95a3482ec",
+        "ui": "6bb6879aa70631ea",
+        "name": "",
+        "x": 90,
+        "y": 480,
+        "wires": [
+            [
+                "0ca4ec304397e4ea"
+            ]
+        ]
+    },
+    {
+        "id": "0ca4ec304397e4ea",
+        "type": "function",
+        "z": "fa6da6e95a3482ec",
+        "name": "setting page visit",
+        "func": "// Extract the page object from the payload\nlet page_visited = msg.payload.page;\n\n// Add debugging information\nif (!page_visited) {\n    node.warn(\"Page object not found in msg.payload: \" + JSON.stringify(msg.payload));\n    msg.payload = false;\n    return msg;\n}\n\n// Check if the path matches \"/settings\"\nif (page_visited.path === \"/settings\") {\n    msg.payload = true;\n} else {\n    msg.payload = false;\n}\n\n// Log the result for verification\nnode.warn(\"Page path: \" + page_visited.path + \", Payload set to: \" + msg.payload);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 270,
+        "y": 480,
+        "wires": [
+            [
+                "3790c62fbfb13d16"
+            ]
+        ]
+    },
+    {
+        "id": "3790c62fbfb13d16",
+        "type": "switch",
+        "z": "fa6da6e95a3482ec",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 450,
+        "y": 480,
+        "wires": [
+            [
+                "def410b75fcfd683"
+            ],
+            []
         ]
     },
     {
@@ -970,6 +1032,25 @@
         "groupType": "default"
     },
     {
+        "id": "6bb6879aa70631ea",
+        "type": "ui-base",
+        "name": "UPS Tester",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": "1",
+        "showDisconnectNotification": true
+    },
+    {
         "id": "cb5e987bd157d173",
         "type": "ui-page",
         "name": "SETTINGS",
@@ -1004,25 +1085,6 @@
         "className": "",
         "visible": true,
         "disabled": false
-    },
-    {
-        "id": "6bb6879aa70631ea",
-        "type": "ui-base",
-        "name": "UPS Tester",
-        "path": "/dashboard",
-        "appIcon": "",
-        "includeClientData": true,
-        "acceptsClientConfig": [
-            "ui-notification",
-            "ui-control"
-        ],
-        "showPathInSidebar": false,
-        "showPageTitle": true,
-        "navigationStyle": "default",
-        "titleBarStyle": "default",
-        "showReconnectNotification": true,
-        "notificationDisplayTime": "1",
-        "showDisconnectNotification": true
     },
     {
         "id": "f51f9a07212ff54b",
