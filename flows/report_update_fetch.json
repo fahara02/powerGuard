@@ -1267,6 +1267,108 @@
         "wires": []
     },
     {
+        "id": "67f6e3f4cedaaf5a",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "get_all_test_report_id",
+        "func": "msg.topic=\"SELECT id FROM TestReport ORDER BY id DESC LIMIT 100\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 1040,
+        "wires": [
+            [
+                "85c1484a02887632"
+            ]
+        ]
+    },
+    {
+        "id": "85c1484a02887632",
+        "type": "sqlite",
+        "z": "4ec0a7f75863202f",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 540,
+        "y": 1040,
+        "wires": [
+            [
+                "0eab3ad53aa24584"
+            ]
+        ]
+    },
+    {
+        "id": "e4471c185377d9df",
+        "type": "inject",
+        "z": "4ec0a7f75863202f",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 1040,
+        "wires": [
+            [
+                "67f6e3f4cedaaf5a"
+            ]
+        ]
+    },
+    {
+        "id": "0eab3ad53aa24584",
+        "type": "function",
+        "z": "4ec0a7f75863202f",
+        "name": "save all test report id",
+        "func": "let ids = msg.payload;\n\n// Validate that msg.payload is an array of objects with numeric \"id\" fields\nif (!Array.isArray(ids) || !ids.every(item => typeof item.id === \"number\")) {\n    node.error(\"Invalid input: msg.payload must be an array of objects with numeric 'id' fields\", msg);\n    return null;\n}\n\n// Extract the \"id\" field to create an array of integer IDs\nids = ids.map(item => item.id);\n\nlet all_test_report_id = flow.get(\"all_test_report_id\") || [];\n\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\nasync function processIds(ids, send, done) {\n    for (let id of ids) {\n        if (!all_test_report_id.includes(id)) {\n            // Add only new IDs\n            all_test_report_id.push(id);\n            flow.set(\"all_test_report_id\", all_test_report_id);\n            send([{ payload: all_test_report_id }]);\n        }\n        await delay(100); // Simulate delay if required\n    }\n    node.warn(`Updated all_test_report_id: ${JSON.stringify(all_test_report_id)}`);\n    done();\n}\n\nprocessIds(ids, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 1040,
+        "wires": [
+            [
+                "2ccaf2faaec4558b"
+            ]
+        ]
+    },
+    {
+        "id": "2ccaf2faaec4558b",
+        "type": "debug",
+        "z": "4ec0a7f75863202f",
+        "name": "test_report_id",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 940,
+        "y": 1040,
+        "wires": []
+    },
+    {
         "id": "0d4c44b815a8faab",
         "type": "sqlitedb",
         "db": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\db\\test_reports.db",
@@ -1342,7 +1444,7 @@
         "name": "TestReport",
         "ui": "6bb6879aa70631ea",
         "path": "/report",
-        "icon": "home",
+        "icon": "file-chart",
         "layout": "grid",
         "theme": "f51f9a07212ff54b",
         "breakpoints": [

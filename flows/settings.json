@@ -706,6 +706,108 @@
         "wires": []
     },
     {
+        "id": "e1e058a6cc151e1e",
+        "type": "inject",
+        "z": "e6613618b3405f10",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 480,
+        "wires": [
+            [
+                "d49f8cf522c6f5bf"
+            ]
+        ]
+    },
+    {
+        "id": "d49f8cf522c6f5bf",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "get_all_setting_id",
+        "func": "msg.topic=\"SELECT * FROM ReportSettings ORDER BY id DESC LIMIT 100\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 480,
+        "wires": [
+            [
+                "a24532e5f01bb659"
+            ]
+        ]
+    },
+    {
+        "id": "a24532e5f01bb659",
+        "type": "sqlite",
+        "z": "e6613618b3405f10",
+        "mydb": "0d4c44b815a8faab",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "MAIN_DB",
+        "x": 540,
+        "y": 480,
+        "wires": [
+            [
+                "9d8ea0b2d320a605"
+            ]
+        ]
+    },
+    {
+        "id": "9d8ea0b2d320a605",
+        "type": "function",
+        "z": "e6613618b3405f10",
+        "name": "save all settings and latest  id",
+        "func": "let saved_settings = msg.payload;\n\n// Validate that msg.payload is an array of objects with the required fields\nif (!Array.isArray(saved_settings) || !saved_settings.every(item => typeof item.id === \"number\")) {\n    node.error(\"Invalid input: msg.payload must be an array of objects with numeric 'id' fields\", msg);\n    return null;\n}\n\nlet latest_setting_id = global.get(\"latest_setting_id\") || 0;\nlet settings = global.get(\"settings\") || [];\n\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\nasync function processSettings(settings_value, send, done) {\n    for (let setting of settings_value) {\n        // Add only settings with id greater than the latest_setting_id\n        if (setting.id > latest_setting_id) {\n            settings.push(setting);\n            latest_setting_id = setting.id; // Update the latest_setting_id\n            \n        }\n        \n        // Update global settings and send the payload\n    \n\n        await delay(100); // Simulate a delay if needed\n    }\n        global.set(\"latest_setting_id\", latest_setting_id);\n        global.set(\"settings\", settings);\n        send([{ payload: settings }]);\n\n    node.warn(`Updated settings: ${JSON.stringify(settings)}`);\n    done();\n}\n\nprocessSettings(saved_settings, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 480,
+        "wires": [
+            [
+                "d457ee3a31f8578a"
+            ]
+        ]
+    },
+    {
+        "id": "d457ee3a31f8578a",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "test_report_id",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 480,
+        "wires": []
+    },
+    {
         "id": "fcaa87c16afbdfcd",
         "type": "protobuf-file",
         "protopath": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\src\\proto\\pData.proto",
@@ -777,7 +879,7 @@
                 "cols": "12"
             }
         ],
-        "order": 4,
+        "order": 2,
         "className": "",
         "visible": true,
         "disabled": false
