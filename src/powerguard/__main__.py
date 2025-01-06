@@ -2,9 +2,11 @@ import os
 import sys
 from pathlib import Path
 
+from PySide6.QtWidgets import QApplication
+
 from powerguard.bootstrap import paths
 from powerguard.data import DataManager
-from powerguard.gui import setGui
+from powerguard.gui import MainGUI, setGui
 from powerguard.report import ReportGenerator
 from powerguard.server import Server, ServerConfig
 from powerguard.UPS_Test import TestManager
@@ -29,10 +31,15 @@ test_manager = TestManager()
 def main():
     print("Hello from powerguard!")
     print("Setting up database")
-
     setGui()
-    server.start_server()
+    #server.start_server()
+    app = QApplication(sys.argv)
+    window = MainGUI(app,server)
+    window.show()
+    sys.exit(app.exec())
+ 
 
 
 if __name__ == "__main__":
     main()
+
