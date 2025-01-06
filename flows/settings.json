@@ -737,7 +737,8 @@
         "y": 500,
         "wires": [
             [
-                "9d8ea0b2d320a605"
+                "9d8ea0b2d320a605",
+                "54ea5455036162e9"
             ]
         ]
     },
@@ -746,14 +747,14 @@
         "type": "function",
         "z": "e6613618b3405f10",
         "name": "save all settings and latest  id",
-        "func": "let saved_settings = msg.payload;\n\n// Validate that msg.payload is an array of objects with the required fields\nif (!Array.isArray(saved_settings) || !saved_settings.every(item => typeof item.id === \"number\")) {\n    node.error(\"Invalid input: msg.payload must be an array of objects with numeric 'id' fields\", msg);\n    return null;\n}\n\nlet latest_setting_id = global.get(\"latest_setting_id\") || 0;\nlet settings = global.get(\"settings\") || [];\n\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\nasync function processSettings(settings_value, send, done) {\n    for (let setting of settings_value) {\n        // Add only settings with id greater than the latest_setting_id\n        if (setting.id > latest_setting_id) {\n            settings.push(setting);\n            latest_setting_id = setting.id; // Update the latest_setting_id\n            \n        }\n        \n        // Update global settings and send the payload\n    \n\n        await delay(100); // Simulate a delay if needed\n    }\n        global.set(\"latest_setting_id\", latest_setting_id);\n        global.set(\"settings\", settings);\n        send([{ payload: settings }]);\n\n    node.warn(`Updated settings: ${JSON.stringify(settings)}`);\n    done();\n}\n\nprocessSettings(saved_settings, node.send, () => node.done());\n\n// Return null as the function sends messages asynchronously\nreturn null;\n",
+        "func": "let saved_settings = msg.payload;\n\n// Validate input: Ensure msg.payload is an array of objects\nif (!Array.isArray(saved_settings) || !saved_settings.every(item => typeof item.id === \"number\")) {\n    node.error(\"Invalid input: msg.payload must be an array of objects with numeric 'id' fields\", msg);\n    return null;\n}\n\n// Load global settings and the latest setting ID\nlet settings = global.get(\"settings\") || [];\nlet latest_setting_id = global.get(\"latest_setting_id\") || 0;\n\n// Merge new settings into the existing ones\nlet existingIds = new Set(settings.map(s => s.id)); // Track existing IDs for duplicates\nlet newSettings = saved_settings.filter(setting => !existingIds.has(setting.id)); // Only add unique settings\nsettings.push(...newSettings); // Merge new settings into the existing array\n\n// Update the latest setting ID if applicable\nif (newSettings.length > 0) {\n    latest_setting_id = Math.max(latest_setting_id, ...newSettings.map(s => s.id));\n}\n\n// Save updated settings and latest_setting_id globally\nglobal.set(\"settings\", settings);\nglobal.set(\"latest_setting_id\", latest_setting_id);\n\n// Debugging logs\nnode.warn(`Updated settings: ${JSON.stringify(settings)}`);\nnode.warn(`Latest setting ID: ${latest_setting_id}`);\n\n// Output updated settings and latest setting ID\nreturn {\n    payload: {\n        settings: settings,\n        latest_setting_id: latest_setting_id\n    }\n};\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 720,
+        "x": 740,
         "y": 500,
         "wires": [
             [
@@ -774,7 +775,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 980,
+        "x": 1020,
         "y": 500,
         "wires": []
     },
@@ -869,6 +870,22 @@
         ]
     },
     {
+        "id": "54ea5455036162e9",
+        "type": "debug",
+        "z": "e6613618b3405f10",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 440,
+        "wires": []
+    },
+    {
         "id": "fcaa87c16afbdfcd",
         "type": "protobuf-file",
         "protopath": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\src\\proto\\pData.proto",
@@ -918,7 +935,8 @@
         "includeClientData": true,
         "acceptsClientConfig": [
             "ui-notification",
-            "ui-control"
+            "ui-control",
+            "ui-template"
         ],
         "showPathInSidebar": false,
         "showPageTitle": true,
