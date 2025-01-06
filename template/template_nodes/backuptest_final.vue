@@ -49,6 +49,11 @@
                 <p><strong>Test Engineer Name:</strong> {{ selectedSetting.test_engineer_name }}</p>
                 <p><strong>Test Approval Name:</strong> {{ selectedSetting.test_approval_name }}</p>
                 <p><strong>UPS SPEC ID:</strong> {{ selectedSetting.spec_id }}</p>
+                <p><strong>UPS VA :</strong> {{ selectedSpec?.rating_va || 'N/A' }}</p>
+                <p>Selected Spec: {{ selectedSpec }}</p>
+
+
+
             </div>
 
             <div class="buttons">
@@ -86,6 +91,7 @@ export default {
             latest_settings_id: 0,
             test_type: 9,
             setting: [],
+            all_spec: [],
             TestType: {
                 LIGHT_LOAD_AND_FUNCTION_TEST: 0,
                 NO_LOAD_TEST: 1,
@@ -123,6 +129,7 @@ export default {
             },
             formData: {
                 setting_id: 0,
+                spec_id: 0,
                 loadType: "LINEAR",
                 mode: "NORMAL_MODE",
                 loadPercentage: 0,
@@ -158,6 +165,12 @@ export default {
         },
         selectedSetting() {
             return this.setting.find((setting) => setting.id === this.formData.setting_id) || null;
+        },
+
+        selectedSpec() {
+            // Fetch the spec from `all_spec` using the spec_id from the selected setting
+            const specId = this.selectedSetting?.spec_id;
+            return this.all_spec.find((spec) => spec.id === specId) || null;
         },
     },
     methods: {
@@ -240,6 +253,7 @@ export default {
         createTestReport() {
             const report = {
                 settings: this.selectedSetting || {},
+                spec: this.selectedSpec || {},
                 subreport_id: this.subreport_id,
                 test_name: "BackupTest",
                 test_description: "Backup Test Report",
@@ -282,9 +296,11 @@ export default {
         updateSettingData(payload) {
             if (payload && payload.SettingData && Array.isArray(payload.SettingData.settings)) {
                 this.setting = payload.SettingData.settings;
+                this.all_spec = payload.SettingData.spec || [];
             } else {
                 console.warn("No valid settings data received in payload", payload);
                 this.setting = [];
+                this.all_spec = [];
             }
         },
 

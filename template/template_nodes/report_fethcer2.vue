@@ -33,7 +33,19 @@
                 <p><strong>Client Name:</strong> {{ currentSelectedReport.settings.client_name }}</p>
                 <p><strong>Standard:</strong> {{ currentSelectedReport.settings.standard }}</p>
                 <p><strong>UPS Model:</strong> {{ currentSelectedReport.settings.ups_model }}</p>
+                <p><strong>UPS VA:</strong> {{ currentSelectedReport.spec.rating_va || 'N/A' }}</p>
+                <p><strong>Phase:</strong> {{ currentSelectedReport.spec.phase || 'N/A' }}</p>
+                <p><strong>Rated Voltage:</strong> {{ currentSelectedReport.spec.rated_voltage || 'N/A' }} V</p>
+                <p><strong>Rated Current:</strong> {{ currentSelectedReport.spec.rated_current || 'N/A' }} A</p>
+                <p><strong>Min Input Voltage:</strong> {{ currentSelectedReport.spec.min_input_voltage || 'N/A' }} V</p>
+                <p><strong>Max Input Voltage:</strong> {{ currentSelectedReport.spec.max_input_voltage || 'N/A' }} V</p>
+                <p><strong>Power Factor (Rated Current):</strong> {{ currentSelectedReport.spec.pf_rated_current ||
+                    'N/A' }}</p>
+                <p><strong>Max Continuous Amp:</strong> {{ currentSelectedReport.spec.max_continous_amp || 'N/A' }} A
+                </p>
+                <p><strong>Overload Amp:</strong> {{ currentSelectedReport.spec.overload_amp || 'N/A' }} A</p>
             </div>
+
 
             <!-- Common Measurement Information -->
             <div class="measurement-common-info">
@@ -217,6 +229,7 @@ export default {
                     test_description: payload.test_description,
                     test_result: payload.test_result,
                     settings: payload.settings,
+                    spec: payload.spec,
                     measurements: payload.measurements,
                 };
 
@@ -281,39 +294,50 @@ export default {
             });
 
             const query = `
-                SELECT 
-                    TestReport.id AS test_report_id, -- Row ID
-                    TestReport.sub_report_id, -- Subreport ID
-                    TestReport.test_name,
-                    TestReport.test_description,
-                    TestReport.test_result,
-                    ReportSettings.client_name,
-                    ReportSettings.standard,
-                    ReportSettings.ups_model,
-                    Measurement.m_unique_id AS measurement_unique_id,
-                    Measurement.name AS measurement_name,
-                    Measurement.timestamp AS measurement_timestamp,
-                    Measurement.mode AS mode,
-                    Measurement.phase_name AS phase_name,
-                    Measurement.load_type AS load_type,
-                    Measurement.load_percentage AS load_percentage,
-                    Measurement.step_id AS step_id,
-                    Measurement.run_interval_sec AS run_interval_sec,
-                    Measurement.backup_time_sec AS backup_time_sec,
-                    PowerMeasure.type AS power_measure_type,
-                    PowerMeasure.voltage AS power_measure_voltage,
-                    PowerMeasure.current AS power_measure_current,
-                    PowerMeasure.power AS power_measure_power,
-                    PowerMeasure.energy AS power_measure_energy,
-                    PowerMeasure.pf AS power_measure_pf,
-                    PowerMeasure.frequency AS power_measure_frequency
-                FROM TestReport
-                JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
-                LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
-                LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id
-                WHERE TestReport.id = '${selectedId}'
-                ORDER BY Measurement.id, PowerMeasure.id
-            `;
+    SELECT 
+        TestReport.id AS test_report_id, -- Row ID
+        TestReport.sub_report_id, -- Subreport ID
+        TestReport.test_name,
+        TestReport.test_description,
+        TestReport.test_result,
+        ReportSettings.client_name,
+        ReportSettings.standard,
+        ReportSettings.ups_model,
+        Measurement.m_unique_id AS measurement_unique_id,
+        Measurement.name AS measurement_name,
+        Measurement.timestamp AS measurement_timestamp,
+        Measurement.mode AS mode,
+        Measurement.phase_name AS phase_name,
+        Measurement.load_type AS load_type,
+        Measurement.load_percentage AS load_percentage,
+        Measurement.step_id AS step_id,
+        Measurement.run_interval_sec AS run_interval_sec,
+        Measurement.backup_time_sec AS backup_time_sec,
+        PowerMeasure.type AS power_measure_type,
+        PowerMeasure.voltage AS power_measure_voltage,
+        PowerMeasure.current AS power_measure_current,
+        PowerMeasure.power AS power_measure_power,
+        PowerMeasure.energy AS power_measure_energy,
+        PowerMeasure.pf AS power_measure_pf,
+        PowerMeasure.frequency AS power_measure_frequency,
+        spec.phase AS phase,
+        spec.rating_va AS rating_va,
+        spec.rated_voltage AS rated_voltage,
+        spec.rated_current AS rated_current,
+        spec.min_input_voltage AS min_input_voltage,
+        spec.max_input_voltage AS max_input_voltage,
+        spec.pf_rated_current AS pf_rated_current,
+        spec.max_continous_amp AS max_continous_amp,
+        spec.overload_amp AS overload_amp
+    FROM TestReport
+    JOIN ReportSettings ON TestReport.settings_id = ReportSettings.id
+    JOIN spec ON ReportSettings.spec_id = spec.id
+    LEFT JOIN Measurement ON Measurement.test_report_id = TestReport.id
+    LEFT JOIN PowerMeasure ON PowerMeasure.measurement_id = Measurement.id
+    WHERE TestReport.id = '${selectedId}'
+    ORDER BY Measurement.id, PowerMeasure.id
+`;
+
 
             this.send({ topic: query });
 
