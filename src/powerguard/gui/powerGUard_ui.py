@@ -92,7 +92,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"UAV Designer", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"PowerGurad", None))
         self.actionNew_Project.setText(QCoreApplication.translate("MainWindow", u"New Project", None))
         self.actionOpen_Project.setText(QCoreApplication.translate("MainWindow", u"Open Project", None))
         self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))

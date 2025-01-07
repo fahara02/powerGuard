@@ -100,7 +100,7 @@ class MainGUI(QMainWindow, Ui_MainWindow):
 
         self.logger.addHandler(log_handler)
 
-    def redirect_stdout(self):
+    def  redirect_stdout(self):
         """Redirect stdout and stderr to append_log."""
         self.text_edit_logger = QTextEditLogger()
         self.text_edit_logger.message_signal.connect(self.append_log)

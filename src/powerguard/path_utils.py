@@ -22,7 +22,7 @@ def set_project_paths():
 
     # Define other paths relative to the project root
     parent_dir = project_dir.parent
-    proto_dir = project_dir / "src" / "proto"
+    proto_dir = project_dir / "proto"
     node_red_dir = project_dir / "node-red"
     flows_dir = project_dir / "flows"
     template_dir = project_dir / "template"
