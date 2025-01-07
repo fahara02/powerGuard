@@ -2,6 +2,7 @@ import json
 import os
 import platform
 import subprocess
+import threading
 import time
 from pathlib import Path
 
@@ -109,27 +110,32 @@ class NodeRedServer:
             exit(1)
 
     def start(self):
-        """Start the Node-RED server."""
-        node_red_exec = os.path.join(
-            self.node_red_dir,
-            "node_modules",
-            ".bin",
-            "node-red.cmd" if platform.system().lower() == "windows" else "node-red",
-        )
-        if os.path.exists(node_red_exec):
-            print(f"Starting Node-RED server in directory: {self.node_red_dir}")
-            try:
-                subprocess.Popen(
-                    [node_red_exec, "--userDir", self.node_red_dir],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                print(
-                    f"Node-RED started. Access it at http://{self.get_ip_address()}:1880/"
-                )
-            except Exception as e:
-                print(f"Failed to start Node-RED: {e}")
-                exit(1)
+        """Start the Node-RED server in a subprocess."""
+        def run_node_red():
+            node_red_exec = os.path.join(
+                self.node_red_dir,
+                "node_modules",
+                ".bin",
+                "node-red.cmd" if platform.system().lower() == "windows" else "node-red",
+            )
+            if os.path.exists(node_red_exec):
+                print(f"Starting Node-RED server in directory: {self.node_red_dir}")
+                try:
+                    # Start Node-RED in a subprocess and capture the process
+                    self.node_red_process = subprocess.Popen(
+                        [node_red_exec, "--userDir", self.node_red_dir],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    print(
+                        f"Node-RED started. Access it at http://{self.get_ip_address()}:1880/"
+                    )
+                except Exception as e:
+                    print(f"Failed to start Node-RED: {e}")
+                    exit(1)
+
+        node_red_thread = threading.Thread(target=run_node_red, daemon=True)
+        node_red_thread.start()
 
     def wait_until_ready(self, timeout=30):
         """Wait for Node-RED to be ready."""
@@ -172,3 +178,20 @@ class NodeRedServer:
                 print(f"Failed to import flows: {response.status_code}")
         except Exception as e:
             print(f"Error importing flows: {e}")
+            print(f"Error importing flows: {e}")
+
+    def stop(self):
+        """Stop the Node-RED server process."""
+        if self.node_red_process:
+            print("Stopping Node-RED...")
+            try:
+                self.node_red_process.terminate()  # Attempt to terminate
+                self.node_red_process.wait(timeout=5)  # Wait for clean exit
+            except subprocess.TimeoutExpired:
+                print("Node-RED did not terminate. Forcing shutdown...")
+                self.node_red_process.kill()  # Force kill if not responsive
+            finally:
+                self.node_red_process = None
+            print("Node-RED stopped.")
+        else:
+            print("Node-RED process not running.")

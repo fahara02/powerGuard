@@ -54,14 +54,24 @@
     <widget class="QPushButton" name="btnServer">
      <property name="geometry">
       <rect>
-       <x>140</x>
-       <y>250</y>
+       <x>60</x>
+       <y>340</y>
        <width>281</width>
        <height>121</height>
       </rect>
      </property>
      <property name="text">
       <string>Start Server</string>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="sysLog">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>180</y>
+       <width>411</width>
+       <height>571</height>
+      </rect>
      </property>
     </widget>
    </widget>

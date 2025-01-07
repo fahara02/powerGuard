@@ -18,7 +18,7 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
     QMenu, QMenuBar, QPushButton, QSizePolicy,
-    QStatusBar, QWidget)
+    QStatusBar, QTextEdit, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -58,7 +58,10 @@ class Ui_MainWindow(object):
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.btnServer = QPushButton(self.frame)
         self.btnServer.setObjectName(u"btnServer")
-        self.btnServer.setGeometry(QRect(140, 250, 281, 121))
+        self.btnServer.setGeometry(QRect(60, 340, 281, 121))
+        self.sysLog = QTextEdit(self.frame)
+        self.sysLog.setObjectName(u"sysLog")
+        self.sysLog.setGeometry(QRect(360, 180, 411, 571))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")

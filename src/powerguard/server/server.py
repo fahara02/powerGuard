@@ -2,6 +2,7 @@
 import os
 import platform
 import socket
+import threading
 from pathlib import Path
 from typing import Optional, Type
 
@@ -15,6 +16,7 @@ from proto.report_pb2 import TestReport
 
 # Pydantic model for Server configuration
 class ServerConfig(BaseModel):
+    
     host: str = Field(default="0.0.0.0", description="Host address")
     port: int = Field(default=12345, description="Port number")
 
@@ -45,6 +47,7 @@ class Server(BaseModel):
     flows_dir_path: Optional[Path] = None
     node_red: NodeRedServer = None
     server_socket: socket.socket = None
+    running: bool = False
 
     class Config:
         # This tells Pydantic to ignore extra fields during initialization
@@ -53,7 +56,7 @@ class Server(BaseModel):
 
     def __init__(self, config: ServerConfig, data_manager: DataManager):
         super().__init__(config=config, data_manager=data_manager)
-
+      
         # Ensure Node-RED directory is set up
         node_red_folder = paths.get("node_red_dir")
         node_red_folder.mkdir(parents=True, exist_ok=True)
@@ -99,56 +102,70 @@ class Server(BaseModel):
             print("TestReport successfully stored.")
         except Exception as e:
             print(f"Error storing TestReport: {e}")
+    def handle_client(self, client_socket):
+        try:
+            data = client_socket.recv(1024)
+            if not data:
+                return
 
+            report_data = TestReport()
+            report_data.ParseFromString(data)
+
+            print("Received data:")
+            print(f"ID: {report_data.settings.report_id}")
+            print(f"Name: {report_data.testDescription}")
+            print(f"Description: {report_data.value}")
+
+            # Store in database
+            self.process_and_store_report(report_data)
+
+        except Exception as e:
+            print(f"Error processing data: {e}")
+        finally:
+            client_socket.close()
     def start_server(self):
         """Start the server and manage communication."""
+        self.running = True
         try:
-            self.node_red.install()
-            self.node_red.install_palettes()
             self.node_red.start()
-
             if not self.node_red.wait_until_ready():
-                exit(1)
+                print("Node-RED failed to start.")
+                return
 
             self.node_red.import_flows()
-
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.config.host, self.config.port))
             self.server_socket.listen(5)
             print(f"Server listening on {self.config.host}:{self.config.port}")
 
-            while True:
-                client_socket, address = self.server_socket.accept()
-                print(f"Connection established with {address}")
-
+            while self.running:
+                self.server_socket.settimeout(1.0)  # Allow periodic checks for shutdown
                 try:
-                    data = client_socket.recv(1024)
-                    if not data:
-                        break
-
-                    report_data = TestReport()
-                    report_data.ParseFromString(data)
-
-                    print("Received data:")
-                    print(f"ID: {report_data.settings.report_id}")
-                    print(f"Name: {report_data.testDescription}")
-                    print(f"Description: {report_data.value}")
-
-                    # Store in database
-                    self.process_and_store_report(report_data)
-
-                except Exception as e:
-                    print(f"Error processing data: {e}")
-                finally:
-                    client_socket.close()
+                    client_socket, address = self.server_socket.accept()
+                    print(f"Connection established with {address}")
+                    client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
+                    client_thread.start()
+                except socket.timeout:
+                    continue
         except Exception as e:
             print(f"Server encountered an error: {e}")
         finally:
-            if self.server_socket:
-                self.server_socket.close()
-                print("Server socket closed.")
-                self.data_manager.close()
+            self.shutdown_server(None, None)
+    def shutdown_server(self, signum, frame):
+        """Shut down the server gracefully."""
+        print("Shutting down server...")
+        self.running = False
+        if self.server_socket:
+            self.server_socket.close()
+            print("Server socket closed.")
+        if self.node_red:
+            self.node_red.stop()  # Ensure Node-RED stops
+        if self.data_manager:
+            self.data_manager.close()
+        print("Server shutdown complete.")
 
+
+        
 
 if __name__ == "__main__":
     # Create a DataManager instance first
