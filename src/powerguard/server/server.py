@@ -71,7 +71,7 @@ class Server(BaseModel):
             self.flows_dir_path = flows_dir
 
         self.node_red = NodeRedServer(self.node_red_path, self.flows_dir_path)
-        self.install_node_red_if_needed()
+        #self.install_node_red_if_needed()
 
     def is_node_red_installed(self):
         """Check if Node-RED is installed."""
@@ -82,6 +82,17 @@ class Server(BaseModel):
             "node-red.cmd" if platform.system().lower() == "windows" else "node-red",
         )
         return os.path.exists(node_red_exec)
+    
+    def install_node_red(self):
+        """Just install node red."""
+        try:
+         print("Installing node red...")
+         self.node_red.install()
+         print("Installing palletes...")
+         self.node_red.install_palettes()
+        except Exception as e:
+            print(f"Error installing nodered: {e}")
+
 
     def install_node_red_if_needed(self):
         """Check if Node-RED is installed, and prompt the user to install it if not."""

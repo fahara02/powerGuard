@@ -55,7 +55,32 @@ class ServerThread(QThread):
             self.server.shutdown_server(None, None)  # Gracefully stop the server
         self.quit()  # Exit the thread loop
         self.wait()  # Ensure the thread finishes
+class NodeRedThread(QThread):
+    log_signal = Signal(str)
 
+    def __init__(self, server):
+        super().__init__()
+        self.server = server
+        self.running = True
+
+    def run(self):
+        try:
+            # Check if Node-RED is installed
+            if not self.server.is_node_red_installed():
+                self.log_signal.emit("Node-RED is not installed. Installing...")
+                self.server.install_node_red()
+
+            self.log_signal.emit("Starting Node-RED server...")
+            self.server.start_server()
+            self.log_signal.emit("Node-RED server started successfully.")
+        except Exception as e:
+            self.log_signal.emit(f"Node-RED initialization error: {e}")
+
+    def stop(self):
+        self.running = False
+        self.server.shutdown_server(None, None)
+        self.quit()
+        self.wait()
 
 
 class MainGUI(QMainWindow, Ui_MainWindow):
@@ -68,11 +93,16 @@ class MainGUI(QMainWindow, Ui_MainWindow):
         self.server_thread = ServerThread(self.server)
         self.server_thread.log_signal.connect(self.append_log)
 
+        # Node-RED thread setup
+        self.nodered_thread = NodeRedThread(self.server)
+        self.nodered_thread.log_signal.connect(self.append_log)
+
         self.setup_logging()
         self.redirect_stdout()
 
         # Button connections
         self.btnServer.clicked.connect(self.start_server)
+        self.btnNodeRedInit.clicked.connect(self.init_nodered)
 
     def __del__(self):
         sys.stdout = sys.__stdout__
@@ -82,9 +112,13 @@ class MainGUI(QMainWindow, Ui_MainWindow):
         """Handle the GUI close event."""
         if self.server_thread.isRunning():
             self.append_log("Stopping server thread...")
-            self.server_thread.stop()  # Stop the server thread
-            self.server_thread.wait()  # Wait for the thread to finish
-        self.server.shutdown_server(None, None)  # Shutdown the server gracefully
+            self.server_thread.stop()
+            self.server_thread.wait()
+        if self.nodered_thread.isRunning():
+            self.append_log("Stopping Node-RED thread...")
+            self.nodered_thread.stop()
+            self.nodered_thread.wait()
+        self.server.shutdown_server(None, None)
         super().closeEvent(event)
 
 
@@ -121,7 +155,13 @@ class MainGUI(QMainWindow, Ui_MainWindow):
                     self.append_log("Server is already running.")
             except Exception as e:
                 self.append_log(f"Failed to start server: {e}")
-
+    def init_nodered(self):
+         if not self.nodered_thread.isRunning():
+            try:
+                self.nodered_thread.start()
+                self.append_log("Node-RED initialization started...")
+            except Exception as e:
+                self.append_log(f"Failed to start Node-RED initialization: {e}")
 
 
 
