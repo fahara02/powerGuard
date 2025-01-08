@@ -1,109 +1,161 @@
 def resource_callback(policy, resource):
-    if type(resource) == "PythonModuleSource":
-        resource.add_location = "in-memory"
-    elif type(resource) in ["PythonPackageResource", "PythonPackageDistributionResource"]:
-        resource.add_location = "filesystem-relative:lib"
+    if type(resource) in ("File"):
+        if "pywin" in resource.path or "pypiwin" in resource.path:
+            resource.add_location = "filesystem-relative:lib"
+            resource.add_include = True
+    if type(resource) in ("PythonExtensionModule"):
+        if resource.name in ["_ssl", "win32.win32file", "win32.win32pipe"]:
+            resource.add_location = "filesystem-relative:lib"
+            resource.add_include = True
+    elif type(resource) in ("PythonModuleSource", "PythonPackageResource", "PythonPackageDistributionResource"):
+        if resource.name in ["pywin32_bootstrap", "pythoncom", "pypiwin32", "pywin32", "pythonwin", "win32", "win32com", "win32comext"]:
+            resource.add_location = "filesystem-relative:lib"
+            resource.add_include = True
 
 def make_exe():
-    # Create the Python distribution
     dist = default_python_distribution()
-
-    # Create packaging policy and register resource callback
     policy = dist.make_python_packaging_policy()
-    policy.register_resource_callback(resource_callback)   
-    policy.allow_files = True
-    policy.extension_module_filter = "all"
-    policy.include_distribution_sources = True
-    policy.include_distribution_resources = True
-    policy.include_file_resources = True
+    policy.allow_in_memory_shared_library_loading = True
+    policy.bytecode_optimize_level_one = True
+    policy.include_non_distribution_sources = False
     policy.include_test = False
     policy.resources_location = "in-memory"
-    policy.resources_location = "filesystem-relative:prefix"
-    # Create the Python interpreter configuration
+    policy.resources_location_fallback = "filesystem-relative:prefix"
     python_config = dist.make_python_interpreter_config()
-    python_config.run_module = "powerguard.__main__:main"  # Main entry point
-    python_config.multiprocessing_start_method = 'auto'
-    python_config.filesystem_importer = True
-    # Create the executable
+   #python_config.run_module = "powerguard.__main__:main"
+    python_config.run_module = "powerguard"
+
     exe = dist.to_python_executable(
         name="powerguard",
         packaging_policy=policy,
         config=python_config,
     )
 
-    # Include dependencies from pyproject.toml
-    exe.add_python_resources(exe.pip_install(["."]))
-
-    # Include specific project directories and resources
+    # linux, mac
+    exe.add_python_resources(exe.read_package_root(CWD, ["powerguard"]))
     exe.add_python_resources(
         exe.read_package_root(
             path="src",
-            packages=["powerguard"],
+            packages=[
+                "powerguard",
+                "powerguard.data",
+                "powerguard.gui",
+                "powerguard.report",
+                "powerguard.server",
+                "powerguard.UPS_Test",
+            ],
         )
     )
-
-    # Add additional resources directly via add_path
-    exe.add_python_resources(
-            exe.read_package_root(
-                path="src",
-                packages=["powerguard"],
-            )
-        )
-
-    # Add additional non-Python resources
-    exe.add_python_resources(
-        exe.read_package_root(
-            path="template",
-            packages=[],
-        )
-    )
-    exe.add_python_resources(
-        exe.read_package_root(
-            path="node-red",
-            packages=[],
-        )
-    )
-    exe.add_python_resources(
-        exe.read_package_root(
-            path="db",
-            packages=[],
-        )
-    )
-    exe.add_python_resources(
-        exe.read_package_root(
-            path="output",
-            packages=[],
-        )
-    )
-    exe.add_python_resources(
-        exe.read_package_root(
-            path="flows",
-            packages=[],
-        )
-    )
-
+    exe.add_python_resources(exe.pip_install([
+        "docx>=0.2.4",
+        "docxtpl>=0.19.0",
+        "lxml>=5.3.0",
+        "netifaces>=0.11.0",
+        "protobuf>=5.29.2",
+        "pydantic>=2.9.2",
+        "pyside6>=6.6.3.1",
+        "python-docx>=1.1.2",
+        "requests>=2.32.3",
+        "xmlschema>=3.4.3",
+        "pywin32"
+    ]))
     return exe
 
+def make_win_exe():
+    dist = default_python_distribution()
+    policy = dist.make_python_packaging_policy()
+
+    policy.allow_in_memory_shared_library_loading = True
+
+    policy.bytecode_optimize_level_one = True
+    policy.extension_module_filter = "all"
+    policy.include_file_resources = True
+
+    policy.include_test = False
+    policy.resources_location = "in-memory"
+    policy.resources_location_fallback = "filesystem-relative:lib"
+    policy.allow_files = True
+    policy.file_scanner_emit_files = True
+    policy.register_resource_callback(resource_callback)
+    python_config = dist.make_python_interpreter_config()
+    python_config.module_search_paths = ["$ORIGIN", "$ORIGIN/lib"]
+
+    #python_config.run_module = "powerguard.__main__:main"
+    python_config.run_command = "from powerguard.__main__ import main; main()"
+
+    exe = dist.to_python_executable(
+        name="powerguard",
+        packaging_policy=policy,
+        config=python_config,
+    )
+
+    # windows
+    exe.add_python_resources(exe.read_package_root(CWD, ["powerguard"]))
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src",
+            packages=[
+                "powerguard",
+                "powerguard.data",
+                "powerguard.gui",
+                "powerguard.report",
+                "powerguard.server",
+                "powerguard.UPS_Test",
+            ],
+        )
+    )
+    exe.add_python_resources(exe.pip_install([
+        "docx>=0.2.4",
+        "docxtpl>=0.19.0",
+        "lxml>=5.3.0",
+        "netifaces>=0.11.0",
+        "protobuf>=5.29.2",
+        "pydantic>=2.9.2",
+        "pyside6>=6.6.3.1",
+        "python-docx>=1.1.2",
+        "requests>=2.32.3",
+        "xmlschema>=3.4.3",
+        "pywin32"
+    ]))
+    exe.windows_runtime_dlls_mode = "always"
+    return exe
+
+def make_embedded_resources(exe):
+    return exe.to_embedded_resources()
+
 def make_install(exe):
-    # Create a manifest for the installable layout
-    m = FileManifest()
+    # Create an object that represents our installed application file layout.
+    files = FileManifest()
 
-    # Add the executable to the root directory
-    m.add_python_resource(".", exe)
+    # Add the generated executable to our install layout in the root directory.
+    files.add_python_resource(".", exe)
 
-    # Add additional resources using add_path
-    m.add_path("src", strip_prefix="src/")
-    m.add_path("template", strip_prefix="template/")
-    m.add_path("db", strip_prefix="db/")
-    m.add_path("node-red", strip_prefix="node-red/")
-    m.add_path("output", strip_prefix="output/")
-    m.add_path("flows", strip_prefix="flows/")
+    return files
 
-    return m
+def make_msi(exe):
+    # See the full docs for more. But this will convert your Python executable
+    # into a `WiXMSIBuilder` Starlark type, which will be converted to a Windows
+    # .msi installer when it is built.
+    return exe.to_wix_msi_builder(
+        # Simple identifier of your app.
+        "powerguard",
+        # The name of your application.
+        "Automated UPS testing System",
+        # The version of your application.
+        "1.0",
+        # The author/manufacturer of your application.
+        "FHR"
+    )
 
-# Register targets for building
+
+# Tell PyOxidizer about the build targets defined above.
 register_target("exe", make_exe)
+register_target("winexe", make_win_exe)
+register_target("resources", make_embedded_resources, depends=["exe"], default_build_script=True)
+register_target("wininstall", make_install, depends=["winexe"], default=True)
 register_target("install", make_install, depends=["exe"], default=True)
+register_target("msi_installer", make_msi, depends=["winexe"])
 
-# Resolve build targets
+# Resolve whatever targets the invoker of this configuration file is requesting
+# be resolved.
 resolve_targets()

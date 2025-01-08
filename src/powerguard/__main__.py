@@ -21,8 +21,8 @@ data_manager = DataManager()
 server_config = ServerConfig(
     host="0.0.0.0",
     port=12345,
-    node_red_folder="node-red",
-    flows_folder="flows",
+    node_red_folder="node_red_dir",
+    flows_folder="flows_dir",
 )
 server = Server(server_config, data_manager)
 report_generator = ReportGenerator(data_manager=data_manager)

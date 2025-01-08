@@ -58,13 +58,13 @@ class Server(BaseModel):
         super().__init__(config=config, data_manager=data_manager)
       
         # Ensure Node-RED directory is set up
-        node_red_folder = paths.get("node_red_dir")
+        node_red_folder = paths["node_red_dir"]
         node_red_folder.mkdir(parents=True, exist_ok=True)
         # Set the Node-RED path if not provided
         if not self.node_red_path:
             self.node_red_path = node_red_folder
 
-        flows_dir = paths.get("flows_dir")
+        flows_dir = paths["flows_dir"]
 
         # Set the flows file path if not provided
         if not self.flows_dir_path:

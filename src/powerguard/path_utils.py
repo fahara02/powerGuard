@@ -1,4 +1,3 @@
-
 import os
 import sys
 from pathlib import Path
@@ -6,8 +5,13 @@ from pathlib import Path
 
 def set_project_paths():
     """Set up the necessary project paths globally, resolving the project root directory."""
-    # Get the absolute path of the script
-    current_dir = Path(__file__).resolve().parent
+    # Check if running in a frozen environment
+    if getattr(sys, "frozen", False):
+        # In a PyOxidizer frozen environment, use sys._MEIPASS
+        current_dir = Path(sys._MEIPASS).resolve()
+    else:
+        # Get the absolute path of the script
+        current_dir = Path(__file__).resolve().parent
 
     # Traverse up to the project root directory by looking for .git or another indicator
     while not (current_dir / ".git").exists():

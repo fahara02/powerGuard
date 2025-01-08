@@ -40,7 +40,7 @@ class DataManager(BaseModel):
         """Initialize the database and ensure all tables are created."""
         super().__init__(**kwargs)
 
-        db_folder = paths.get("db_dir")
+        db_folder = paths["db_dir"]
         db_folder.mkdir(parents=True, exist_ok=True)
 
         # Set the db_path if it's not provided
@@ -517,6 +517,20 @@ class DataManager(BaseModel):
             logging.error(f"Unexpected error during database cleanup: {e}")
             raise Exception(f"Unexpected error during database cleanup: {e}")
 
+
+
+
+# Example Usage
+if __name__ == "__main__":
+    data_manager = DataManager()
+    report = data_manager.generate_mock_data(31192311,9031192311, "walton", "maxgreen", "fhr")
+
+    report_id = data_manager.insert_test_report(report)
+    unique_id = report.settings.report_id
+    print(
+        f"check newly inserted test report with id {report_id} for unique id {unique_id} "
+    )
+    data_manager.close()
     def generate_mock_data(self, report_id,subreportid, client_name, brand_name, engineer_name):
         now = datetime.now(tz=timezone.utc)
         timestamp_proto = Timestamp()
@@ -814,16 +828,3 @@ class DataManager(BaseModel):
 
         print(f"Generated mock report for client: {client_name}")
         return test_report
-
-
-# Example Usage
-if __name__ == "__main__":
-    data_manager = DataManager()
-    report = data_manager.generate_mock_data(31192311,9031192311, "walton", "maxgreen", "fhr")
-
-    report_id = data_manager.insert_test_report(report)
-    unique_id = report.settings.report_id
-    print(
-        f"check newly inserted test report with id {report_id} for unique id {unique_id} "
-    )
-    data_manager.close()

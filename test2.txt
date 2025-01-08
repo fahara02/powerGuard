@@ -1,0 +1,146 @@
+def resource_callback(policy, resource):
+    if type(resource) == "PythonModuleSource":
+        resource.add_location = "in-memory"
+    elif type(resource) in ["PythonPackageResource", "PythonPackageDistributionResource"]:
+        resource.add_location = "filesystem-relative:lib"
+
+def make_exe():
+    # Create the Python distribution
+    dist = default_python_distribution()
+
+    # Create packaging policy and register resource callback
+    policy = dist.make_python_packaging_policy()
+    policy.register_resource_callback(resource_callback)   
+    policy.set_resource_handling_mode("files")
+    policy.resources_location_fallback = "filesystem-relative:lib"
+    policy.allow_files = True
+    policy.extension_module_filter = "all"
+    policy.include_distribution_sources = True
+    policy.include_distribution_resources = True
+    policy.include_file_resources = True
+    policy.include_test = False
+    policy.resources_location = "in-memory"
+    policy.resources_location = "filesystem-relative:prefix"
+
+    # Create the Python interpreter configuration
+    python_config = dist.make_python_interpreter_config()
+    python_config.run_module = "powerguard.__main__:main"  # Main entry point
+    python_config.multiprocessing_start_method = 'auto'
+    python_config.filesystem_importer = True
+
+    # Create the executable
+    exe = dist.to_python_executable(
+        name="powerguard",
+        packaging_policy=policy,
+        config=python_config,
+    )
+
+    # Include dependencies from pyproject.toml
+    exe.add_python_resources(exe.pip_install(["."]))
+
+    # Include specific project directories and resources
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src",
+            packages=["powerguard"],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src/powerguard/",
+            packages=["powerguard"],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src/powerguard/data/",
+            packages=["powerguard"],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src/powerguard/gui",
+            packages=["powerguard"],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src/powerguard/report/",
+            packages=["powerguard"],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src/powerguard/server/",
+            packages=["powerguard"],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="src/powerguard/UPS_Test/",
+            packages=["powerguard"],
+        )
+    )
+    # Add additional non-Python resources
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="template",
+            packages=[],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="node-red",
+            packages=[],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="db",
+            packages=[],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="output",
+            packages=[],
+        )
+    )
+    exe.add_python_resources(
+        exe.read_package_root(
+            path="flows",
+            packages=[],
+        )
+    )
+
+    return exe
+
+def make_install(exe):
+    # Create a manifest for the installable layout
+    m = FileManifest()
+
+    # Add the executable to the root directory
+    m.add_python_resource(".", exe)
+
+    # Add additional resources using add_path
+    m.add_path("src", strip_prefix="src/")
+    m.add_path("src/powerguard/", strip_prefix="src/powerguard/")
+    m.add_path("src/powerguard/data/", strip_prefix="src/powerguard/data/")
+    m.add_path("src/powerguard/gui/", strip_prefix="src/powerguard/gui/")
+    m.add_path("src/powerguard/report/", strip_prefix="src/powerguard/report/")
+    m.add_path("src/powerguard/server/", strip_prefix="src/powerguard/server/")
+    m.add_path("src/powerguard/UPS_Test/", strip_prefix="src/powerguard/UPS_Test/")
+    m.add_path("template", strip_prefix="template/")
+    m.add_path("db", strip_prefix="db/")
+    m.add_path("node-red", strip_prefix="node-red/")
+    m.add_path("output", strip_prefix="output/")
+    m.add_path("flows", strip_prefix="flows/")
+
+    return m
+
+# Register targets for building
+register_target("exe", make_exe)
+register_target("install", make_install, depends=["exe"], default=True)
+
+# Resolve build targets
+resolve_targets()

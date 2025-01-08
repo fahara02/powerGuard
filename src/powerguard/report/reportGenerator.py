@@ -31,7 +31,7 @@ class ReportGenerator(BaseModel):
     data_manager: DataManager
     template_path: Path = Field(default="Report_Template.docx")
     schema_path: Path = Field(default="schema.xsd")
-    output_path: Path = Field(default=paths.get("output_dir"))
+    output_path: Path = Field(default=paths["output_dir"])
     xml_schema_file: str = Field(default="general_schema")
 
     @field_validator("template_path")
@@ -40,7 +40,7 @@ class ReportGenerator(BaseModel):
         Ensure the template path exists and is a file.
         """
 
-        template_folder = paths.get("template_dir")
+        template_folder = paths["template_dir"]
 
         template_folder.mkdir(parents=True, exist_ok=True)
 
@@ -62,7 +62,7 @@ class ReportGenerator(BaseModel):
         Ensure the schema path exists and is a file.
         """
 
-        template_folder = paths.get("template_dir")
+        template_folder = paths["template_dir"]
 
         template_folder.mkdir(parents=True, exist_ok=True)
 
@@ -84,7 +84,7 @@ class ReportGenerator(BaseModel):
         Ensure the template path exists and is a file.
         """
 
-        output_folder = paths.get("output_dir")
+        output_folder = paths["output_dir"]
 
         output_folder.mkdir(parents=True, exist_ok=True)
 
