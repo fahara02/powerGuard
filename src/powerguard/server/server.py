@@ -162,6 +162,10 @@ class Server(BaseModel):
             print(f"Server encountered an error: {e}")
         finally:
             self.shutdown_server(None, None)
+
+    def get_ip_address(self):
+        return self.node_red.get_ip_address()
+
     def shutdown_server(self, signum, frame):
         """Shut down the server gracefully."""
         print("Shutting down server...")

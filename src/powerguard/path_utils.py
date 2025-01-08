@@ -5,9 +5,9 @@ from pathlib import Path
 
 def set_project_paths():
     """Set up the necessary project paths globally, resolving the project root directory."""
-    # Check if running in a frozen environment
+    
     if getattr(sys, "frozen", False):
-        # In a PyOxidizer frozen environment, use sys._MEIPASS
+        
         current_dir = Path(sys._MEIPASS).resolve()
     else:
         # Get the absolute path of the script

@@ -16,9 +16,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
+from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
     QMenu, QMenuBar, QPushButton, QSizePolicy,
-    QStatusBar, QTextEdit, QWidget)
+    QStackedWidget, QStatusBar, QTextEdit, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -48,23 +49,39 @@ class Ui_MainWindow(object):
         self.frame.setGeometry(QRect(0, 0, 1101, 831))
         self.frame.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame.setFrameShadow(QFrame.Shadow.Raised)
-        self.label = QLabel(self.frame)
+        self.stackedWidget = QStackedWidget(self.frame)
+        self.stackedWidget.setObjectName(u"stackedWidget")
+        self.stackedWidget.setGeometry(QRect(0, 0, 1101, 811))
+        self.main_page = QWidget()
+        self.main_page.setObjectName(u"main_page")
+        self.sysLog = QTextEdit(self.main_page)
+        self.sysLog.setObjectName(u"sysLog")
+        self.sysLog.setGeometry(QRect(430, 160, 411, 601))
+        self.label = QLabel(self.main_page)
         self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(330, 50, 391, 161))
+        self.label.setGeometry(QRect(440, -10, 391, 161))
         font = QFont()
         font.setPointSize(36)
         font.setBold(True)
         self.label.setFont(font)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.btnServer = QPushButton(self.frame)
-        self.btnServer.setObjectName(u"btnServer")
-        self.btnServer.setGeometry(QRect(70, 370, 281, 121))
-        self.sysLog = QTextEdit(self.frame)
-        self.sysLog.setObjectName(u"sysLog")
-        self.sysLog.setGeometry(QRect(360, 180, 411, 571))
-        self.btnNodeRedInit = QPushButton(self.frame)
+        self.btnNodeRedInit = QPushButton(self.main_page)
         self.btnNodeRedInit.setObjectName(u"btnNodeRedInit")
-        self.btnNodeRedInit.setGeometry(QRect(70, 210, 281, 121))
+        self.btnNodeRedInit.setGeometry(QRect(70, 240, 281, 121))
+        self.btnServer = QPushButton(self.main_page)
+        self.btnServer.setObjectName(u"btnServer")
+        self.btnServer.setGeometry(QRect(70, 410, 281, 121))
+        self.btnBrowser = QPushButton(self.main_page)
+        self.btnBrowser.setObjectName(u"btnBrowser")
+        self.btnBrowser.setGeometry(QRect(70, 590, 281, 121))
+        self.stackedWidget.addWidget(self.main_page)
+        self.browser_page = QWidget()
+        self.browser_page.setObjectName(u"browser_page")
+        self.webEngineView = QWebEngineView(self.browser_page)
+        self.webEngineView.setObjectName(u"webEngineView")
+        self.webEngineView.setGeometry(QRect(0, 0, 1101, 801))
+        self.webEngineView.setUrl(QUrl(u"about:blank"))
+        self.stackedWidget.addWidget(self.browser_page)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -91,6 +108,9 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
+        self.stackedWidget.setCurrentIndex(1)
+
+
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
 
@@ -105,8 +125,9 @@ class Ui_MainWindow(object):
         self.actionNew_Requirement.setText(QCoreApplication.translate("MainWindow", u"New Requirement", None))
         self.actionPreferences.setText(QCoreApplication.translate("MainWindow", u"Preferences", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Power Guard", None))
-        self.btnServer.setText(QCoreApplication.translate("MainWindow", u"Start Server", None))
         self.btnNodeRedInit.setText(QCoreApplication.translate("MainWindow", u"NodeRed", None))
+        self.btnServer.setText(QCoreApplication.translate("MainWindow", u"Start Server", None))
+        self.btnBrowser.setText(QCoreApplication.translate("MainWindow", u"DashBoard", None))
         self.menuProject.setTitle(QCoreApplication.translate("MainWindow", u"Project", None))
         self.menuRequirement.setTitle(QCoreApplication.translate("MainWindow", u"Requirement", None))
     # retranslateUi

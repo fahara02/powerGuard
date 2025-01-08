@@ -92,7 +92,7 @@ class MainGUI(QMainWindow, Ui_MainWindow):
 
         self.server_thread = ServerThread(self.server)
         self.server_thread.log_signal.connect(self.append_log)
-
+        self.stackedWidget.setCurrentWidget(self.main_page) 
         # Node-RED thread setup
         self.nodered_thread = NodeRedThread(self.server)
         self.nodered_thread.log_signal.connect(self.append_log)
@@ -103,6 +103,7 @@ class MainGUI(QMainWindow, Ui_MainWindow):
         # Button connections
         self.btnServer.clicked.connect(self.start_server)
         self.btnNodeRedInit.clicked.connect(self.init_nodered)
+        self.btnBrowser.clicked.connect(self.redirect_to_browser_page)
 
     def __del__(self):
         sys.stdout = sys.__stdout__
@@ -140,6 +141,19 @@ class MainGUI(QMainWindow, Ui_MainWindow):
         self.text_edit_logger.message_signal.connect(self.append_log)
         sys.stdout = self.text_edit_logger
         sys.stderr = self.text_edit_logger
+
+    def redirect_to_browser_page(self):
+        """
+        Switch to the browser page and load the Node-RED URL.
+        """
+        try:
+            ip_address = self.server.get_ip_address()
+            node_red_url = f"http://{ip_address}:1880/"
+            self.stackedWidget.setCurrentWidget(self.browser_page)  # Switch to browser_page
+            self.webEngineView.setUrl(node_red_url)  # Set the URL in QWebEngineView
+            self.append_log(f"Redirecting to Node-RED page: {node_red_url}")
+        except Exception as e:
+            self.append_log(f"Error redirecting to browser page: {e}")
 
     def append_log(self, message: str):
         self.sysLog.append(message.strip())
