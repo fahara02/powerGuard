@@ -14,125 +14,166 @@
    <string>PowerGurad</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QFrame" name="frame">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>1101</width>
-      <height>831</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Shape::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Shadow::Raised</enum>
-    </property>
-    <widget class="QStackedWidget" name="stackedWidget">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>1101</width>
-       <height>811</height>
-      </rect>
-     </property>
-     <property name="currentIndex">
-      <number>1</number>
-     </property>
-     <widget class="QWidget" name="main_page">
-      <widget class="QTextEdit" name="sysLog">
-       <property name="geometry">
-        <rect>
-         <x>430</x>
-         <y>160</y>
-         <width>411</width>
-         <height>601</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>440</x>
-         <y>-10</y>
-         <width>391</width>
-         <height>161</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>36</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Power Guard</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="btnNodeRedInit">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>240</y>
-         <width>281</width>
-         <height>121</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>NodeRed</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="btnServer">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>410</y>
-         <width>281</width>
-         <height>121</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Start Server</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="btnBrowser">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>590</y>
-         <width>281</width>
-         <height>121</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>DashBoard</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="browser_page">
-      <widget class="QWebEngineView" name="webEngineView">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <widget class="QFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <widget class="QStackedWidget" name="stackedWidget">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
          <width>1101</width>
-         <height>801</height>
+         <height>821</height>
         </rect>
        </property>
-       <property name="url">
-        <url>
-         <string>about:blank</string>
-        </url>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <widget class="QWidget" name="main_page">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <widget class="QTextEdit" name="sysLog">
+         <property name="geometry">
+          <rect>
+           <x>450</x>
+           <y>130</y>
+           <width>411</width>
+           <height>601</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btnNodeRedInit">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>130</y>
+           <width>281</width>
+           <height>121</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>NodeRed</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btnServer">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>350</y>
+           <width>281</width>
+           <height>121</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Start Server</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btnBrowser">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>580</y>
+           <width>281</width>
+           <height>121</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>DashBoard</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label">
+         <property name="geometry">
+          <rect>
+           <x>450</x>
+           <y>0</y>
+           <width>391</width>
+           <height>161</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>36</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Power Guard</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="browser_page">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <widget class="QWidget" name="verticalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>-10</x>
+           <y>0</y>
+           <width>1121</width>
+           <height>821</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SizeConstraint::SetNoConstraint</enum>
+          </property>
+          <item>
+           <widget class="QWebEngineView" name="webEngineView">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="url">
+             <url>
+              <string>about:blank</string>
+             </url>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
       </widget>
      </widget>
-    </widget>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
