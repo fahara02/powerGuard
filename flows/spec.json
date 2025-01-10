@@ -807,7 +807,7 @@
         "id": "cd699073d00f603e",
         "type": "link in",
         "z": "fa6da6e95a3482ec",
-        "name": "link in 3",
+        "name": "get_all_spec_in",
         "links": [
             "738c7b20e44dc65c"
         ],

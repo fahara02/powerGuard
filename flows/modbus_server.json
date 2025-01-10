@@ -11,7 +11,7 @@
         "id": "5b96693662133869",
         "type": "link in",
         "z": "f63587bd397db4fd",
-        "name": "link in 1",
+        "name": "cL_voltage_in",
         "links": [
             "99bfe34bc8c82356"
         ],
@@ -27,7 +27,7 @@
         "id": "13005baaeec5db7e",
         "type": "link in",
         "z": "f63587bd397db4fd",
-        "name": "link in 2",
+        "name": "cl_current_in",
         "links": [
             "5759539c31815e27"
         ],
@@ -877,7 +877,7 @@
         "id": "5a1b8ba847967e01",
         "type": "link in",
         "z": "f63587bd397db4fd",
-        "name": "link in 6",
+        "name": "parse_di_in",
         "links": [
             "2257c2f003378a36"
         ],
@@ -1034,7 +1034,7 @@
         "id": "92d189154b131b50",
         "type": "link in",
         "z": "f63587bd397db4fd",
-        "name": "link in 5",
+        "name": "save_power_in",
         "links": [
             "545ec6cdd6a71676"
         ],
@@ -1763,13 +1763,13 @@
     {
         "id": "ac18f679c10f1fd0",
         "type": "ui-group",
-        "name": "UPS_STATUS",
+        "name": "TEST_CONTROL",
         "page": "7d0f53039d1540b1",
         "width": 3,
         "height": "1",
         "order": 1,
         "showTitle": true,
-        "className": "",
+        "className": "test_control",
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
@@ -1907,7 +1907,7 @@
                 "cols": "12"
             }
         ],
-        "order": 5,
+        "order": 6,
         "className": "",
         "visible": "true",
         "disabled": "false"
@@ -1979,8 +1979,8 @@
                 "cols": "12"
             }
         ],
-        "order": 3,
-        "className": "",
+        "order": 4,
+        "className": "backup_test",
         "visible": "true",
         "disabled": "false"
     },

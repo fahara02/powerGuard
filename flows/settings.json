@@ -247,7 +247,7 @@
         "id": "53fd82b76f9712fb",
         "type": "link in",
         "z": "e6613618b3405f10",
-        "name": "link in 10",
+        "name": "fecth_global_in",
         "links": [],
         "x": 65,
         "y": 160,
@@ -935,8 +935,7 @@
         "includeClientData": true,
         "acceptsClientConfig": [
             "ui-notification",
-            "ui-control",
-            "ui-template"
+            "ui-control"
         ],
         "showPathInSidebar": false,
         "showPageTitle": true,

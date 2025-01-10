@@ -694,9 +694,11 @@
         "id": "0408a72eb20db0cb",
         "type": "link out",
         "z": "6906193139893272",
-        "name": "link out 3",
+        "name": "FC05_out",
         "mode": "link",
-        "links": [],
+        "links": [
+            "aef111f737a8e51c"
+        ],
         "x": 1125,
         "y": 240,
         "wires": []

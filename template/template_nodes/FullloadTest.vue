@@ -17,9 +17,18 @@
                         {{ key }}
                     </option>
                 </select>
-
+                <label for="load-type">Load Type:</label>
+                <select v-model="formData.loadType" id="load-type" required>
+                    <option v-for="(value, key) in loadTypes" :key="key" :value="value">
+                        {{ key }}
+                    </option>
+                </select>
             </div>
-
+            <div>
+                <label for="load-percentage">Load percentage:</label>
+                <input type="number" v-model.number="formData.loadPercentage" id="load-percentage" required min="0"
+                    max="100" />
+            </div>
 
             <div>
                 <label for="step-id">Step ID:</label>
@@ -43,9 +52,9 @@
 
             </div>
             <div class="buttons">
-                <button type="button" @click="startNoLoadTest" :disabled="noLoadTestRunning">Start Test</button>
-                <button type="button" @click="stopNoLoadTest" :disabled="!noLoadTestRunning">Stop Test</button>
-                <button type="button" @click="captureMeasurement" :disabled="!noLoadTestRunning">Capture</button>
+                <button type="button" @click="startFullLoadTest" :disabled="fullLoadTestRunning">Start Test</button>
+                <button type="button" @click="stopFullLoadTest" :disabled="!fullLoadTestRunning">Stop Test</button>
+                <button type="button" @click="captureMeasurement" :disabled="!fullLoadTestRunning">Capture</button>
             </div>
         </div>
 
@@ -130,14 +139,14 @@ export default {
                 runInterval: 0,
                 stepId: 0,
             },
-            noLoadTestRunning: false,
+            fullLoadTestRunning: false,
             measurements: [],
 
 
             TestCMDS: {
                 cmd_mains_input: 1,
                 alarm_status: 0,
-                noLoadTestRunning: false,
+                fullLoadTestRunning: false,
             },
 
             TestData: {
@@ -179,8 +188,8 @@ export default {
             return {
                 alarm_status: this.TestCMDS.alarm_status,
                 cmd_mains_input: this.TestCMDS.cmd_mains_input,
-                noLoadTestRunning: this.noLoadTestRunning,
-                noLoadTestRunning: this.TestCMDS.noLoadTestRunning,
+                fullLoadTestRunning: this.fullLoadTestRunning,
+                fullLoadTestRunning: this.TestCMDS.fullLoadTestRunning,
 
                 additionalData: {
                     setting_id: this.formData.setting_id,
@@ -217,10 +226,10 @@ export default {
             };
         },
         captureMeasurement() {
-            if (this.noLoadTestRunning) {
+            if (this.fullLoadTestRunning) {
                 this.snap_shot = true;
                 const mainReportId = this.selectedSetting?.report_id || 10000000;
-                const measurement = this.generateMeasurement(1, mainReportId);
+                const measurement = this.generateMeasurement(2, mainReportId);
                 this.measurements.push(measurement);
                 console.log("Measurement captured:", measurement);
                 this.send({ topic: "info", payload: "Measurement captured" });
@@ -238,7 +247,7 @@ export default {
                 settings: this.selectedSetting || {},
                 spec: this.selectedSpec || {},
                 subreport_id: this.subreport_id,
-                test_name: "NO_LOAD_TEST",
+                test_name: "FULL_LOAD_TEST",
                 test_description: "NoLoad test in various load",
                 measurements: this.measurements,
                 test_result: "USER_OBSERVATION",
@@ -248,7 +257,7 @@ export default {
             console.log("Generated Test Report:", report);
             return report;
         },
-        async startNoLoadTest() {
+        async startFullLoadTest() {
 
             // Reset test state before starting
             this.resetTestState();
@@ -281,7 +290,7 @@ export default {
                     if (retryCount > maxRetries) {
                         throw new Error("Timeout: sense_ups_output did not change to 1");
                     }
-                    if (!this.noLoadTestRunning) throw new Error("Test stopped");
+                    if (!this.fullLoadTestRunning) throw new Error("Test stopped");
                 }
                 this.send({
                     topic: "info",
@@ -292,15 +301,15 @@ export default {
                 this.send({
                     topic: 'reset', payload: false
                 });
-                this.noLoadTestRunning = true;
+                this.fullLoadTestRunning = true;
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
-                        noLoadTestRunning: true,
+                        fullLoadTestRunning: true,
                     })
                 });
 
 
-                while (this.noLoadTestRunning) {
+                while (this.fullLoadTestRunning) {
                     console.log("No Load Test is running...");
                     await this.delay(1000); // Simulate running test logic
                     this.test_duration++;
@@ -318,11 +327,11 @@ export default {
             }
         },
 
-        stopNoLoadTest() {
+        stopFullLoadTest() {
             this.noLoadTestRunning = false;
             this.send({
                 topic: "info",
-                payload: "Stopping No Load Test",
+                payload: "Stopping Full Load Test",
             });
 
             this.testReport = this.createTestReport();

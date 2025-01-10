@@ -13,7 +13,8 @@
         "z": "4ec0a7f75863202f",
         "name": "REPORT_IN",
         "links": [
-            "bb5af27275e2ee33"
+            "bb5af27275e2ee33",
+            "2fb8ea0b84355da6"
         ],
         "x": 35,
         "y": 120,
@@ -1455,13 +1456,13 @@
     {
         "id": "ac18f679c10f1fd0",
         "type": "ui-group",
-        "name": "UPS_STATUS",
+        "name": "TEST_CONTROL",
         "page": "7d0f53039d1540b1",
         "width": 3,
         "height": "1",
         "order": 1,
         "showTitle": true,
-        "className": "",
+        "className": "test_control",
         "visible": "true",
         "disabled": "false",
         "groupType": "default"
@@ -1530,8 +1531,8 @@
                 "cols": "12"
             }
         ],
-        "order": 3,
-        "className": "",
+        "order": 4,
+        "className": "backup_test",
         "visible": "true",
         "disabled": "false"
     },
@@ -1566,7 +1567,7 @@
                 "cols": "12"
             }
         ],
-        "order": 4,
+        "order": 5,
         "className": "",
         "visible": "true",
         "disabled": "false"
