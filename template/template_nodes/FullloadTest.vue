@@ -213,16 +213,26 @@ export default {
         generateMeasurement(testType, mainReportId) {
             const uniqueId = this.generateMeasurementId(testType, mainReportId);
             const timestamp = new Date();
+
             return {
                 m_unique_id: uniqueId,
                 time_stamp: timestamp.getTime(),
-                name: "No Load Test Measurement",
+                name: "Measurement Fullload test",
                 mode: this.formData.mode,
+                phase_name: "Phase A",
                 load_type: this.formData.loadType,
-                load_percentage: this.formData.loadPercentage,
                 step_id: this.formData.stepId,
+                load_percentage: this.formData.loadPercentage,
+                power_measures: [this.TestData.inputPdata, this.TestData.outputPdata],
+                steady_state_voltage_tol: 0,
+                voltage_dc_component: 0,
+                load_pf_deviation: 0,
+                switch_time_ms: 0,
                 run_interval_sec: this.formData.runInterval,
-                // Additional fields...
+                backup_time_sec: 0,
+                overload_time_sec: 0,
+                temperature_1: 0,
+                temperature_2: 0,
             };
         },
         captureMeasurement() {
@@ -248,7 +258,7 @@ export default {
                 spec: this.selectedSpec || {},
                 subreport_id: this.subreport_id,
                 test_name: "FULL_LOAD_TEST",
-                test_description: "NoLoad test in various load",
+                test_description: "FullLoad test in various load",
                 measurements: this.measurements,
                 test_result: "USER_OBSERVATION",
             };
@@ -262,7 +272,7 @@ export default {
             // Reset test state before starting
             this.resetTestState();
             const mainReportId = this.selectedSetting?.report_id || 10000000; // Ensure fallback is valid
-            this.subreport_id = this.generateMeasurementId(1, mainReportId);
+            this.subreport_id = this.generateMeasurementId(2, mainReportId);
             try {
                 this.TestCMDS.alarm_status = 1;
                 this.send({
@@ -323,12 +333,12 @@ export default {
             } catch (error) {
                 console.error("Error during No Load Test:", error.message);
             } finally {
-                this.stopNoLoadTest();
+                this.stopfullLoadTest();
             }
         },
 
         stopFullLoadTest() {
-            this.noLoadTestRunning = false;
+            this.fullLoadTestRunning = false;
             this.send({
                 topic: "info",
                 payload: "Stopping Full Load Test",
@@ -365,7 +375,7 @@ export default {
         },
 
         updateTestData(payload) {
-            if (payload && payload.BackUpTestData) {
+            if (payload && payload.TestData) {
                 const { TestData } = payload;
                 this.TestData = {
 

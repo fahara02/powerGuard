@@ -204,22 +204,32 @@ export default {
         generateMeasurement(testType, mainReportId) {
             const uniqueId = this.generateMeasurementId(testType, mainReportId);
             const timestamp = new Date();
+
             return {
                 m_unique_id: uniqueId,
                 time_stamp: timestamp.getTime(),
-                name: "No Load Test Measurement",
+                name: "Measurement Noload test",
                 mode: this.formData.mode,
+                phase_name: "Phase A",
                 load_type: this.formData.loadType,
-                load_percentage: this.formData.loadPercentage,
                 step_id: this.formData.stepId,
+                load_percentage: this.formData.loadPercentage,
+                power_measures: [this.TestData.inputPdata, this.TestData.outputPdata],
+                steady_state_voltage_tol: 0,
+                voltage_dc_component: 0,
+                load_pf_deviation: 0,
+                switch_time_ms: 0,
                 run_interval_sec: this.formData.runInterval,
-                // Additional fields...
+                backup_time_sec: 0,
+                overload_time_sec: 0,
+                temperature_1: 0,
+                temperature_2: 0,
             };
         },
         captureMeasurement() {
             if (this.noLoadTestRunning) {
                 this.snap_shot = true;
-                const mainReportId = this.selectedSetting?.report_id || 10000000;
+                const mainReportId = this.selectedSetting.report_id || 10000000;;
                 const measurement = this.generateMeasurement(1, mainReportId);
                 this.measurements.push(measurement);
                 console.log("Measurement captured:", measurement);
@@ -356,14 +366,14 @@ export default {
         },
 
         updateTestData(payload) {
-            if (payload && payload.BackUpTestData) {
+            if (payload && payload.TestData) {
                 const { TestData } = payload;
                 this.TestData = {
 
                     inputPdata: TestData.inputPdata || {},
                     outputPdata: TestData.outputPdata || {},
                 };
-                console.log("Updated BackUpTestData:", this.TestData);
+                console.log("Updated TestData:", this.TestData);
             } else {
                 console.warn("Invalid payload or missing TestData:", payload);
             }
