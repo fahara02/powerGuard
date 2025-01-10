@@ -45,7 +45,11 @@
             <div class="buttons">
                 <button type="button" @click="startNoLoadTest" :disabled="noLoadTestRunning">Start Test</button>
                 <button type="button" @click="stopNoLoadTest" :disabled="!noLoadTestRunning">Stop Test</button>
-                <button type="button" @click="captureMeasurement" :disabled="!noLoadTestRunning">Capture</button>
+                <button type="button" @click="captureMeasurement"
+                    :disabled="isCapturing || !noLoadTestRunning">Capture</button>
+                <div v-if="!isCapturing && noLoadTestRunning" class="snapshot-feedback">
+                    <p>Ready For Capture...</p>
+                </div>
             </div>
         </div>
 
@@ -53,6 +57,7 @@
             <p>Noload Test running... Waiting for capture command.</p>
             <p>Test Duration: {{ test_duration }} seconds</p>
         </div>
+
         <div v-if="snap_shot && noLoadTestRunning" class="snapshot-feedback">
             <p>Snapshot Captured! Displaying Latest Measurement...</p>
             <h2>Measurement Snapshot</h2>
@@ -76,6 +81,8 @@
 export default {
     data() {
         return {
+            captureDebounceTimeout: null,
+            isCapturing: false,
             test_duration: 0,
             measurementIdCounter: 0,
             subreport_id: 0,
@@ -226,23 +233,33 @@ export default {
                 temperature_2: 0,
             };
         },
-        captureMeasurement() {
-            if (this.noLoadTestRunning) {
+
+        async captureMeasurement() {
+            if (this.isCapturing) return;
+            this.isCapturing = true;
+
+            try {
+                if (!this.noLoadTestRunning) {
+                    console.warn("No Load Test is not running.");
+                    return;
+                }
                 this.snap_shot = true;
-                const mainReportId = this.selectedSetting.report_id || 10000000;;
+
+                const mainReportId = this.selectedSetting.report_id || 10000000;
                 const measurement = this.generateMeasurement(1, mainReportId);
                 this.measurements.push(measurement);
                 console.log("Measurement captured:", measurement);
-                this.send({ topic: "info", payload: "Measurement captured" });
 
-                // Automatically reset the snapshot flag after a short delay
-                setTimeout(() => {
-                    this.snap_shot = false;
-                }, 2000); // Adjust the duration for how long the snapshot appears
-            } else {
-                console.warn("No Load Test is not running. Cannot capture measurement.");
+                await this.delay(2000); // Delay for snapshot reset
+                this.snap_shot = false;
+            } catch (error) {
+                console.error("Error during measurement capture:", error);
+            } finally {
+                await this.delay(1000); // Debounce delay
+                this.isCapturing = false;
             }
         },
+
         createTestReport() {
             const report = {
                 settings: this.selectedSetting || {},
@@ -261,9 +278,13 @@ export default {
         async startNoLoadTest() {
 
             // Reset test state before starting
+            this.noLoadTestRunning = true;
             this.resetTestState();
             const mainReportId = this.selectedSetting?.report_id || 10000000; // Ensure fallback is valid
             this.subreport_id = this.generateMeasurementId(1, mainReportId);
+            this.send({
+                topic: 'reset', payload: false
+            });
             try {
                 this.TestCMDS.alarm_status = 1;
                 this.send({
@@ -299,10 +320,8 @@ export default {
                 });
 
 
-                this.send({
-                    topic: 'reset', payload: false
-                });
-                this.noLoadTestRunning = true;
+
+
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         noLoadTestRunning: true,

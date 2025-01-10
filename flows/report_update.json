@@ -1488,7 +1488,7 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_db2_measurement",
         "links": [
-            "247e87f43cab5fe6"
+            "ec2d11c2a7f5cd13"
         ],
         "x": 525,
         "y": 780,
@@ -1504,7 +1504,7 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_db2_report",
         "links": [
-            "247e87f43cab5fe6"
+            "ec2d11c2a7f5cd13"
         ],
         "x": 1285,
         "y": 580,
@@ -1584,7 +1584,7 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_data_processed",
         "links": [
-            "247e87f43cab5fe6"
+            "ec2d11c2a7f5cd13"
         ],
         "x": 985,
         "y": 260,
@@ -1632,7 +1632,7 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_db2_report",
         "links": [
-            "247e87f43cab5fe6"
+            "ec2d11c2a7f5cd13"
         ],
         "x": 1205,
         "y": 1040,
@@ -1688,6 +1688,7 @@
             "ui-control"
         ],
         "showPathInSidebar": false,
+        "headerContent": "page",
         "navigationStyle": "default",
         "titleBarStyle": "default",
         "showReconnectNotification": true,
@@ -1699,7 +1700,7 @@
         "type": "ui-group",
         "name": "TestControl",
         "page": "6d19e780d01ee96e",
-        "width": 3,
+        "width": 6,
         "height": 1,
         "order": 1,
         "showTitle": true,
@@ -1783,7 +1784,7 @@
     {
         "id": "6d19e780d01ee96e",
         "type": "ui-page",
-        "name": "Noloadtest",
+        "name": "NoLoad Test",
         "ui": "6bb6879aa70631ea",
         "path": "/noload_test",
         "icon": "home",
