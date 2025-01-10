@@ -214,32 +214,10 @@ export default {
         },
         async startNoLoadTest() {
 
-
             // Reset test state before starting
             this.resetTestState();
-            this.noLoadTestRunning = true;
-
-
             const mainReportId = this.selectedSetting?.report_id || 10000000; // Ensure fallback is valid
             this.subreport_id = this.generateMeasurementId(1, mainReportId);
-            this.send({
-                topic: "info",
-                payload: "Starting No Load Test...",
-            });
-            this.send({
-                topic: 'commands', payload: this.createRunCmds()
-            });
-
-            this.send({
-                topic: 'reset', payload: false
-            });
-            this.send({
-                topic: 'commands', payload: this.createRunCmds({
-                    noLoadTestRunning: true,
-                })
-            });
-
-
             try {
                 this.TestCMDS.alarm_status = 1;
                 this.send({
@@ -255,6 +233,10 @@ export default {
                     })
                 });
                 await this.delay(2000);
+                this.send({
+                    topic: 'commands', payload: this.createRunCmds()
+                });
+
                 const maxRetries = 100;
                 let retryCount = 0;
                 while (this.TestSense.sense_ups_output !== 1) {
@@ -265,6 +247,22 @@ export default {
                     }
                     if (!this.noLoadTestRunning) throw new Error("Test stopped");
                 }
+                this.send({
+                    topic: "info",
+                    payload: "Starting No Load Test...",
+                });
+
+
+                this.send({
+                    topic: 'reset', payload: false
+                });
+                this.noLoadTestRunning = true;
+                this.send({
+                    topic: 'commands', payload: this.createRunCmds({
+                        noLoadTestRunning: true,
+                    })
+                });
+
 
                 while (this.noLoadTestRunning) {
                     console.log("No Load Test is running...");
@@ -309,7 +307,7 @@ export default {
         },
         updateTestSense(payload) {
             if (payload && payload.TestSense) {
-                const { BackUpTestSense } = payload;
+                const { TestSense } = payload;
                 this.TestSense = {
                     sense_mains_input: TestSense.sense_mains_input ?? 1,
                     sense_ups_output: TestSense.sense_ups_output ?? 0,
