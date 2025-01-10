@@ -13,8 +13,7 @@
         "z": "4ec0a7f75863202f",
         "name": "REPORT_IN",
         "links": [
-            "bb5af27275e2ee33",
-            "2fb8ea0b84355da6"
+            "bb5af27275e2ee33"
         ],
         "x": 35,
         "y": 120,
@@ -31,7 +30,7 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "SIMULATE REPORT",
-        "func": "// Creating the payload based on the provided structure\nlet payload = {\n    \"settings\": {\n        \"id\": 4,\n        \"report_id\": 34300381,\n        \"standard\": \"IEC_62040_1\",\n        \"ups_model\": \"UVA-123\",\n        \"client_name\": \"Walton\",\n        \"brand_name\": \"Walton\",\n        \"test_engineer_name\": \"Engr Atik\",\n        \"test_approval_name\": \"Engr Jhon\",\n        \"spec_id\": 4\n    },\n    \"test_name\": \"BackupTest\",\n    \"test_description\": \"Backup Test Report\",\n    \"subreport_id\": 3430038190,\n    \"measurements\": [\n        {\n            \"m_unique_id\": 6804338082,\n            \"time_stamp\": 1735741904962,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": \"NORMAL_MODE\",\n            \"phase_name\": \"Phase A\",\n            \"load_type\": \"LINEAR\",\n            \"step_id\": 0,\n            \"load_percentage\": 6,\n            \"power_measures\": [\n                {\n                    \"type\": \"UPS_INPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                },\n                {\n                    \"type\": \"UPS_OUTPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                }\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 7908496175,\n            \"time_stamp\": 1735741923950,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": \"NORMAL_MODE\",\n            \"phase_name\": \"Phase A\",\n            \"load_type\": \"LINEAR\",\n            \"step_id\": 0,\n            \"load_percentage\": 6,\n            \"power_measures\": [\n                {\n                    \"type\": \"UPS_INPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                },\n                {\n                    \"type\": \"UPS_OUTPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                }\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        }\n    ],\n    \"test_result\": \"USER_OBSERVATION\"\n};\n\n// Output the payload for the next node in the flow\nmsg.payload = payload;\nreturn msg;\n",
+        "func": "// Creating the payload based on the provided structure\nlet payload = {\n    \"settings\": {\n        \"id\": 4,\n        \"report_id\": 34300381,\n        \"standard\": \"IEC_62040_1\",\n        \"ups_model\": \"UVA-123\",\n        \"client_name\": \"Walton\",\n        \"brand_name\": \"Walton\",\n        \"test_engineer_name\": \"Engr Atik\",\n        \"test_approval_name\": \"Engr Jhon\",\n        \"spec_id\": 4\n    },\n    \"test_name\": \"BackupTest\",\n    \"test_description\": \"Backup Test Report\",\n    \n    \"measurements\": [\n        {\n            \"m_unique_id\": 6804338082,\n            \"time_stamp\": 1735741904962,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": \"NORMAL_MODE\",\n            \"phase_name\": \"Phase A\",\n            \"load_type\": \"LINEAR\",\n            \"step_id\": 0,\n            \"load_percentage\": 6,\n            \"power_measures\": [\n                {\n                    \"type\": \"UPS_INPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                },\n                {\n                    \"type\": \"UPS_OUTPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                }\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        },\n        {\n            \"m_unique_id\": 7908496175,\n            \"time_stamp\": 1735741923950,\n            \"name\": \"Measurement Backup test\",\n            \"mode\": \"NORMAL_MODE\",\n            \"phase_name\": \"Phase A\",\n            \"load_type\": \"LINEAR\",\n            \"step_id\": 0,\n            \"load_percentage\": 6,\n            \"power_measures\": [\n                {\n                    \"type\": \"UPS_INPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                },\n                {\n                    \"type\": \"UPS_OUTPUT\",\n                    \"voltage\": 0,\n                    \"current\": 0,\n                    \"power\": 0,\n                    \"energy\": 0,\n                    \"pf\": 0,\n                    \"frequency\": 0\n                }\n            ],\n            \"steady_state_voltage_tol\": 0,\n            \"voltage_dc_component\": 0,\n            \"load_pf_deviation\": 0,\n            \"switch_time_ms\": 0,\n            \"run_interval_sec\": 10,\n            \"backup_time_sec\": 0,\n            \"overload_time_sec\": 0,\n            \"temperature_1\": 0,\n            \"temperature_2\": 0\n        }\n    ],\n    \"test_result\": \"USER_OBSERVATION\"\n};\n\n// Output the payload for the next node in the flow\nmsg.payload = payload;\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -53,7 +52,7 @@
         "type": "function",
         "z": "4ec0a7f75863202f",
         "name": "SORT_REPORT",
-        "func": "let payload = msg.payload;\nlet all_subtest_report=flow.get(\"all_subtest_report\")||[];\n// Extract Measurements Array\nlet measurements = payload.measurements;\n\n// Extract Remaining Data and Combine Settings with Other Data\nlet { settings, measurements: _, ...otherData } = payload;\nlet rest_report = { settings, ...otherData };\n\n// Extract all measurement IDs\nlet measurement_ids = measurements.map(measurement => measurement.m_unique_id);\n\n// Store the measurement_ids array in flow context\nflow.set(\"measurement_ids\", measurement_ids);\nall_subtest_report.push(payload);\nflow.set(\"all_subtest_report\", all_subtest_report);\n\n// Prepare Outputs\nconst output = [\n    { payload: measurements }, // Output 1: Measurements Array\n    { payload: rest_report }   // Output 2: Combined Rest Report\n];\n\n// Send Result\nreturn output;\n\n\n",
+        "func": "// let payload = msg.payload;\n// let all_subtest_report=flow.get(\"all_subtest_report\")||[];\n// // Extract Measurements Array\n// let measurements = payload.measurements;\n\n// // Extract Remaining Data and Combine Settings with Other Data\n// let { settings, measurements: _, ...otherData } = payload;\n// let rest_report = { settings, ...otherData };\n\n// // Extract all measurement IDs\n// let measurement_ids = measurements.map(measurement => measurement.m_unique_id);\n\n// // Store the measurement_ids array in flow context\n// flow.set(\"measurement_ids\", measurement_ids);\n// all_subtest_report.push(payload);\n// flow.set(\"all_subtest_report\", all_subtest_report);\n\n// // Prepare Outputs\n// const output = [\n//     { payload: measurements }, // Output 1: Measurements Array\n//     { payload: rest_report }   // Output 2: Combined Rest Report\n// ];\n\n// // Send Result\n// return output;\ntry {\n    let payload = msg.payload;\n    let all_subtest_report = flow.get(\"all_subtest_report\") || [];\n    \n    if (!payload || typeof payload !== 'object' || !Array.isArray(payload.measurements)) {\n        node.warn(\"Invalid payload structure\");\n        return null;\n    }\n    \n    let { settings, measurements, ...otherData } = payload;\n    \n    if (!Array.isArray(measurements)) {\n        node.warn(\"Measurements must be an array\");\n        return null;\n    }\n    \n    let measurement_ids = measurements.map(measurement => {\n        if (!measurement || typeof measurement.m_unique_id === 'undefined') {\n            node.warn(\"Invalid measurement object\");\n            return null;\n        }\n        return measurement.m_unique_id;\n    });\n    \n    flow.set(\"measurement_ids\", measurement_ids);\n    all_subtest_report.push(payload);\n    flow.set(\"all_subtest_report\", all_subtest_report);\n    \n    const output = [\n        { payload: measurements },\n        { payload: { settings, ...otherData } }\n    ];\n    \n    return output;\n} catch (error) {\n    node.warn(error.message);\n    return null;\n}\n\n\n\n",
         "outputs": 2,
         "timeout": 0,
         "noerr": 0,
@@ -122,7 +121,8 @@
             ],
             [
                 "bc8e9479fde69e7d",
-                "934392df93190d41"
+                "934392df93190d41",
+                "78bd9cdc68073677"
             ]
         ]
     },
@@ -285,7 +285,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1110,
+        "x": 610,
         "y": 300,
         "wires": [
             []
@@ -558,7 +558,8 @@
         "wires": [
             [
                 "9e2edbf349151202",
-                "59c3b5b515ebf47b"
+                "59c3b5b515ebf47b",
+                "bbd43d8158fe3776"
             ]
         ]
     },
@@ -631,7 +632,8 @@
         "wires": [
             [
                 "c7407683108bb297",
-                "66805343908213ee"
+                "66805343908213ee",
+                "de0fa882954c9371"
             ]
         ]
     },
@@ -1114,7 +1116,8 @@
         "y": 420,
         "wires": [
             [
-                "9e8152aa906f4172"
+                "9e8152aa906f4172",
+                "e326bfb74c6a91cb"
             ]
         ]
     },
@@ -1448,6 +1451,198 @@
         "wires": []
     },
     {
+        "id": "bbd43d8158fe3776",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB Measurement2",
+        "group": "0a246b3f387997ba",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "DB Measurement",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 730,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "8404efc7933ff794",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "reset_in_db2_measurement",
+        "links": [
+            "247e87f43cab5fe6"
+        ],
+        "x": 525,
+        "y": 780,
+        "wires": [
+            [
+                "bbd43d8158fe3776"
+            ]
+        ]
+    },
+    {
+        "id": "154a9e7273570182",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "reset_in_db2_report",
+        "links": [
+            "247e87f43cab5fe6"
+        ],
+        "x": 1285,
+        "y": 580,
+        "wires": [
+            [
+                "e326bfb74c6a91cb"
+            ]
+        ]
+    },
+    {
+        "id": "e326bfb74c6a91cb",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB Report2",
+        "group": "0a246b3f387997ba",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Blank Report",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1430,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "78bd9cdc68073677",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DataProcessed 2",
+        "group": "0a246b3f387997ba",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "label": "Data Processed",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1170,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "ea792d71cc9d2d37",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "reset_in_data_processed",
+        "links": [
+            "247e87f43cab5fe6"
+        ],
+        "x": 985,
+        "y": 260,
+        "wires": [
+            [
+                "78bd9cdc68073677"
+            ]
+        ]
+    },
+    {
+        "id": "de0fa882954c9371",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB Power",
+        "group": "0a246b3f387997ba",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "DB Power",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#ff0000"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1380,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "39faf8c62253ca23",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "reset_in_db2_report",
+        "links": [
+            "247e87f43cab5fe6"
+        ],
+        "x": 1205,
+        "y": 1040,
+        "wires": [
+            [
+                "de0fa882954c9371"
+            ]
+        ]
+    },
+    {
         "id": "0d4c44b815a8faab",
         "type": "sqlitedb",
         "db": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\db\\test_reports.db",
@@ -1493,12 +1688,25 @@
             "ui-control"
         ],
         "showPathInSidebar": false,
-        "showPageTitle": true,
         "navigationStyle": "default",
         "titleBarStyle": "default",
         "showReconnectNotification": true,
         "notificationDisplayTime": "1",
         "showDisconnectNotification": true
+    },
+    {
+        "id": "0a246b3f387997ba",
+        "type": "ui-group",
+        "name": "TestControl",
+        "page": "6d19e780d01ee96e",
+        "width": 3,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
     },
     {
         "id": "7d0f53039d1540b1",
@@ -1568,6 +1776,42 @@
             }
         ],
         "order": 5,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6d19e780d01ee96e",
+        "type": "ui-page",
+        "name": "Noloadtest",
+        "ui": "6bb6879aa70631ea",
+        "path": "/noload_test",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 3,
         "className": "",
         "visible": "true",
         "disabled": "false"

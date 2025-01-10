@@ -1043,7 +1043,6 @@
             "ui-control"
         ],
         "showPathInSidebar": false,
-        "showPageTitle": true,
         "navigationStyle": "default",
         "titleBarStyle": "default",
         "showReconnectNotification": true,

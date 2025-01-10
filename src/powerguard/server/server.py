@@ -142,6 +142,7 @@ class Server(BaseModel):
             if not self.node_red.wait_until_ready():
                 print("Node-RED failed to start.")
                 return
+            self.node_red.start_watchdog()
 
             self.node_red.import_flows()
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -174,6 +175,7 @@ class Server(BaseModel):
             self.server_socket.close()
             print("Server socket closed.")
         if self.node_red:
+            self.node_red.stop_watchdog()
             self.node_red.stop()  # Ensure Node-RED stops
         if self.data_manager:
             self.data_manager.close()

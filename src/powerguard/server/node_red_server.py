@@ -21,6 +21,9 @@ class NodeRedServer:
         """
         self.node_red_dir = node_red_dir
         self.flows_dir= flows_dir
+        self.node_red_process = None
+        self._watchdog_thread = None
+        self._stop_watchdog = threading.Event()
 
         # Ensure the directory and file paths are valid
         self._validate_paths()
@@ -34,6 +37,38 @@ class NodeRedServer:
 
         if not self.flows_dir.exists():
             raise FileNotFoundError(f"Flows file not found: {self.flows_dir}")
+    def _is_server_running(self):
+        """Check if the Node-RED server is running and responsive."""
+        node_red_url = f"http://{self.get_ip_address()}:1880"
+        try:
+            response = requests.get(node_red_url, timeout=5)
+            return response.status_code == 200
+        except requests.ConnectionError:
+            return False
+    def start_watchdog(self):
+        """Start a watchdog to monitor and restart the Node-RED server."""
+        if self._watchdog_thread and self._watchdog_thread.is_alive():
+            print("Watchdog is already running.")
+            return
+
+        def watchdog():
+            while not self._stop_watchdog.is_set():
+                if not self._is_server_running():
+                    print("Node-RED server is not responsive. Restarting...")
+                    self.stop()
+                    self.start()
+                time.sleep(10)  # Check every 10 seconds
+
+        self._watchdog_thread = threading.Thread(target=watchdog, daemon=True)
+        self._stop_watchdog.clear()
+        self._watchdog_thread.start()
+        print("Watchdog started.") 
+    def stop_watchdog(self):
+        """Stop the watchdog process."""
+        if self._watchdog_thread and self._watchdog_thread.is_alive():
+            self._stop_watchdog.set()
+            self._watchdog_thread.join()
+            print("Watchdog stopped.")       
 
     def get_ip_address(self):
         """Fetch the local IP address of the machine (non-loopback)."""
@@ -134,6 +169,9 @@ class NodeRedServer:
                     print(f"Failed to start Node-RED: {e}")
                     exit(1)
 
+        if self.node_red_process and self.node_red_process.poll() is None:
+            print("Node-RED is already running.")
+            return
         node_red_thread = threading.Thread(target=run_node_red, daemon=True)
         node_red_thread.start()
 
