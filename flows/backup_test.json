@@ -8,217 +8,6 @@
         "env": []
     },
     {
-        "id": "c56a55c172434941",
-        "type": "inject",
-        "z": "46413099658d8708",
-        "name": "Load ON",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": "",
-        "topic": "",
-        "payload": "1",
-        "payloadType": "num",
-        "x": 200,
-        "y": 180,
-        "wires": [
-            [
-                "e21eabdbd2089aec"
-            ]
-        ]
-    },
-    {
-        "id": "a778c08c14117d94",
-        "type": "inject",
-        "z": "46413099658d8708",
-        "name": "Load OFF",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": "",
-        "topic": "",
-        "payload": "0",
-        "payloadType": "num",
-        "x": 200,
-        "y": 230,
-        "wires": [
-            [
-                "e21eabdbd2089aec"
-            ]
-        ]
-    },
-    {
-        "id": "e21eabdbd2089aec",
-        "type": "switch",
-        "z": "46413099658d8708",
-        "name": "ON/OFF Switch",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "1",
-                "vt": "num"
-            },
-            {
-                "t": "eq",
-                "v": "0",
-                "vt": "num"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 400,
-        "y": 205,
-        "wires": [
-            [
-                "f8627685fb8c49fc"
-            ],
-            [
-                "24f979030a0c8b2f"
-            ]
-        ]
-    },
-    {
-        "id": "f8627685fb8c49fc",
-        "type": "function",
-        "z": "46413099658d8708",
-        "name": "Start Timer",
-        "func": "const isRunning=true;\nflow.set('isRunning', isRunning);\n\nflow.set('startTime', new Date());\nif(isRunning){\nnode.status({ fill: 'green', shape: 'dot', text: 'Timer started...' });\n}\n\nreturn null;",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 600,
-        "y": 180,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "24f979030a0c8b2f",
-        "type": "function",
-        "z": "46413099658d8708",
-        "name": "Stop Timer",
-        "func": "flow.set('isRunning', false);\nflow.set('startTime', null);\n\nreturn null;",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 600,
-        "y": 230,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "4f85d1f669cb7fe3",
-        "type": "inject",
-        "z": "46413099658d8708",
-        "name": "1 Second Interval",
-        "props": [],
-        "repeat": "1",
-        "crontab": "",
-        "once": true,
-        "onceDelay": 0.1,
-        "topic": "",
-        "x": 200,
-        "y": 280,
-        "wires": [
-            [
-                "f852a80f22bfea7d"
-            ]
-        ]
-    },
-    {
-        "id": "f852a80f22bfea7d",
-        "type": "function",
-        "z": "46413099658d8708",
-        "name": "Update Timer",
-        "func": "// Read context values\nconst isRunning = flow.get('isRunning') === true;\nconst startTime = flow.get('startTime'); // Expect an ISO string or timestamp\n\nif (isRunning && startTime) {\n    // Parse startTime into a Date object\n    const start = new Date(startTime);\n    if (isNaN(start.getTime())) {\n        // Handle invalid startTime\n        node.status({ fill: 'red', shape: 'ring', text: 'Invalid start time' });\n        return null;\n    }\n\n    // Calculate elapsed time\n    const now = new Date();\n    const elapsedMs = now.getTime() - start.getTime();\n\n    // Convert elapsed time to hours, minutes, and seconds\n    const totalSeconds = Math.floor(elapsedMs / 1000);\n    const hours = Math.floor(totalSeconds / 3600);\n    const minutes = Math.floor((totalSeconds % 3600) / 60);\n    const seconds = totalSeconds % 60;\n\n    // Format as HH:MM:SS\n    const formattedTime = [\n        hours.toString().padStart(2, '0'),\n        minutes.toString().padStart(2, '0'),\n        seconds.toString().padStart(2, '0'),\n    ].join(':');\n\n    // Update payload and node status\n    msg.payload = formattedTime;\n    node.status({ fill: 'green', shape: 'dot', text: formattedTime });\n    return msg;\n} else if (!isRunning) {\n    // Timer is stopped\n    node.status({ fill: 'red', shape: 'ring', text: 'Timer Stopped' });\n    return null;\n} else {\n    // Handle edge case: startTime is missing\n    node.status({ fill: 'red', shape: 'ring', text: 'Missing start time' });\n    return null;\n}\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 400,
-        "y": 280,
-        "wires": [
-            [
-                "7af965e537ef84fa"
-            ]
-        ]
-    },
-    {
-        "id": "7af965e537ef84fa",
-        "type": "debug",
-        "z": "46413099658d8708",
-        "name": "Elapsed Time",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "x": 600,
-        "y": 280,
-        "wires": []
-    },
-    {
-        "id": "861182f42f524856",
-        "type": "function",
-        "z": "46413099658d8708",
-        "name": "BUFFER",
-        "func": "let previousValue = flow.get('previousValue') || 0;\n\nif (msg.payload === 1 && previousValue !== 1) {\n    // First 1 received; send it\n    flow.set('previousValue', 1);\n    return msg; // Forward the message\n} else if (msg.payload === 0 && previousValue !== 0) {\n    // First 0 received; send it\n    flow.set('previousValue', 0);\n    return msg; // Forward the message\n} else {\n    // Repeated 1s or 0s, do nothing\n    return null;\n}\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 220,
-        "y": 120,
-        "wires": [
-            [
-                "e21eabdbd2089aec"
-            ]
-        ]
-    },
-    {
-        "id": "518691ee2b8704be",
-        "type": "function",
-        "z": "46413099658d8708",
-        "name": "BACKUP_TEST",
-        "func": "// Helper function for delay\nfunction delay(ms) {\n    return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// Main async function\n(async () => {\n    if (msg.payload === true) {\n        // Set a flag to indicate the backup test is running\n        global.set('backupTestRunning', true);\n        node.warn('Backup test started');\n\n        try {\n            // Step 1: Trigger start alarm\n            global.set('alarm_status', 1);\n            node.warn('Start alarm triggered');\n            await delay(2000); // 2 seconds delay\n            if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n            global.set('alarm_status', 0);\n            node.warn('Start alarm stopped');\n\n            // Step 2: Turn off mains input\n            global.set('cmd_mains_input', 0);\n            node.warn('Turning off mains input...');\n\n            // Step 3: Wait for mains input to be confirmed as off\n            while (global.get('sense_mains_input') !== 0) {\n                if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n                node.warn('Waiting for sense_mains_input to confirm 0...');\n                await delay(100); // Check every 100ms\n            }\n            node.warn('Mains input confirmed off');\n\n            // Step 4: Wait for UPS output to be detected as 1\n            while (global.get('sense_ups_output') !== 1) {\n                if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n                node.warn('Waiting for sense_ups_output to confirm 1...');\n                await delay(100); // Check every 100ms\n            }\n            node.warn('UPS output detected as 1');\n\n            // Step 5: Start the backup timer\n            let backupTime = 0;\n            const interval = 1000; // 1-second interval\n\n            node.warn('Measuring backup time...');\n            while (global.get('sense_ups_output') === 1) {\n                if (!global.get('backupTestRunning')) throw new Error('Backup test stopped');\n                await delay(interval); // Wait 1 second\n                backupTime++; // Increment backup timer\n                global.set('BackupTime', backupTime);\n                node.warn(`Backup time: ${backupTime} seconds`);\n            }\n\n            // Step 6: Stop backup test and log results\n            node.warn('UPS output dropped to 0. Backup test stopped');\n            global.set('BackupTime', backupTime);\n            node.warn(`Total backup time: ${backupTime} seconds`);\n\n        } catch (error) {\n            // Handle process stop\n            node.warn(error.message);\n        } finally {\n            // Reset backupTestRunning flag\n            global.set('backupTestRunning', false);\n            node.warn('Backup test process ended');\n        }\n\n    } else if (msg.payload === false) {\n        // Stop the backup test\n        node.warn('Stopping backup test...');\n        global.set('backupTestRunning', false);\n        global.set('alarm_status', 0);\n        global.set('cmd_mains_input', 1); // Assuming 1 is the default or safe state\n        node.warn('Backup test stopped and reset');\n    }\n\n    return null;\n})();\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 420,
-        "y": 40,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "28a534038cc22b3c",
         "type": "inject",
         "z": "46413099658d8708",
@@ -239,8 +28,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 130,
-        "y": 1040,
+        "x": 190,
+        "y": 720,
         "wires": [
             [
                 "c909ad4f0537c120"
@@ -266,8 +55,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 380,
-        "y": 960,
+        "x": 440,
+        "y": 640,
         "wires": [
             []
         ]
@@ -290,8 +79,8 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 660,
-        "y": 780,
+        "x": 720,
+        "y": 460,
         "wires": [
             [
                 "9feae0311f0771f8"
@@ -303,19 +92,17 @@
         "type": "function",
         "z": "46413099658d8708",
         "name": "random_input_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n  \n        type: \"UPS_INPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    \n};\n\nglobal.set(\"inputPdata\",msg.payload);\n\n\n\nreturn msg;\n",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n  \n        type: \"UPS_INPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    \n};\n\n//global.set(\"inputPdata\",msg.payload);\n\n\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 300,
-        "y": 720,
+        "x": 360,
+        "y": 400,
         "wires": [
-            [
-                "ddde2940ca2fe7fe"
-            ]
+            []
         ]
     },
     {
@@ -339,8 +126,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 70,
-        "y": 820,
+        "x": 130,
+        "y": 500,
         "wires": [
             [
                 "75fa05daa403b11c",
@@ -355,19 +142,17 @@
         "type": "function",
         "z": "46413099658d8708",
         "name": "random_outout_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n   \n        type: \"UPS_OUTPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n   \n};\nglobal.set(\"outputPdata\",msg.payload);\n\nreturn msg;\n",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n   \n        type: \"UPS_OUTPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n   \n};\n//global.set(\"outputPdata\",msg.payload);\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 300,
-        "y": 920,
+        "x": 360,
+        "y": 600,
         "wires": [
-            [
-                "9de60c78c8758b1e"
-            ]
+            []
         ]
     },
     {
@@ -388,8 +173,8 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 670,
-        "y": 880,
+        "x": 730,
+        "y": 560,
         "wires": [
             []
         ]
@@ -412,8 +197,8 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 540,
-        "y": 360,
+        "x": 560,
+        "y": 80,
         "wires": [
             [
                 "c95fb50fa1487318",
@@ -433,8 +218,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 330,
-        "y": 460,
+        "x": 310,
+        "y": 80,
         "wires": [
             [
                 "149fdb7b24b4b6ac",
@@ -463,8 +248,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 130,
-        "y": 460,
+        "x": 110,
+        "y": 80,
         "wires": [
             [
                 "ca1b9390bd705a46"
@@ -483,8 +268,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1140,
-        "y": 260,
+        "x": 1220,
+        "y": 40,
         "wires": [
             []
         ]
@@ -502,8 +287,8 @@
         "targetType": "msg",
         "statusVal": "payload",
         "statusType": "auto",
-        "x": 1170,
-        "y": 200,
+        "x": 990,
+        "y": 40,
         "wires": []
     },
     {
@@ -538,8 +323,8 @@
         "checkall": "true",
         "repair": false,
         "outputs": 4,
-        "x": 710,
-        "y": 360,
+        "x": 770,
+        "y": 100,
         "wires": [
             [
                 "f3556767d993e1de",
@@ -571,8 +356,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1120,
-        "y": 320,
+        "x": 1020,
+        "y": 100,
         "wires": []
     },
     {
@@ -595,8 +380,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 300,
-        "y": 780,
+        "x": 360,
+        "y": 460,
         "wires": [
             [
                 "ddde2940ca2fe7fe"
@@ -616,7 +401,7 @@
         "property": "payload.BackUpTestData",
         "topi": "topic",
         "x": 690,
-        "y": 520,
+        "y": 260,
         "wires": [
             []
         ]
@@ -634,8 +419,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1110,
-        "y": 360,
+        "x": 990,
+        "y": 140,
         "wires": []
     },
     {
@@ -666,7 +451,7 @@
         "repair": false,
         "outputs": 3,
         "x": 530,
-        "y": 540,
+        "y": 260,
         "wires": [
             [
                 "d7ed4a435952fd08"
@@ -692,7 +477,7 @@
         "property": "payload.BackUpTestSense",
         "topi": "topic",
         "x": 690,
-        "y": 560,
+        "y": 300,
         "wires": [
             [
                 "246b8d99b59e648a"
@@ -712,8 +497,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 850,
-        "y": 560,
+        "x": 870,
+        "y": 300,
         "wires": []
     },
     {
@@ -729,7 +514,7 @@
         "property": "payload.SettingData",
         "topi": "topic",
         "x": 690,
-        "y": 600,
+        "y": 340,
         "wires": [
             [
                 "641d81440b890efe"
@@ -749,8 +534,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 840,
-        "y": 600,
+        "x": 880,
+        "y": 340,
         "wires": []
     },
     {
@@ -772,7 +557,7 @@
         "wrapText": false,
         "className": "",
         "x": 1130,
-        "y": 460,
+        "y": 140,
         "wires": []
     },
     {
@@ -795,8 +580,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 300,
-        "y": 880,
+        "x": 360,
+        "y": 560,
         "wires": [
             [
                 "9de60c78c8758b1e"
@@ -812,8 +597,8 @@
         "links": [
             "b89c21b9c5642159"
         ],
-        "x": 1335,
-        "y": 340,
+        "x": 1145,
+        "y": 100,
         "wires": []
     },
     {
@@ -828,8 +613,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 700,
-        "y": 440,
+        "x": 720,
+        "y": 200,
         "wires": []
     },
     {
@@ -843,8 +628,8 @@
             "2498d1acf7fb0c00",
             "3bb33a88dfacf747"
         ],
-        "x": 875,
-        "y": 440,
+        "x": 965,
+        "y": 180,
         "wires": []
     },
     {
@@ -903,8 +688,8 @@
         "height": 10,
         "className": "",
         "interpolation": "linear",
-        "x": 980,
-        "y": 780,
+        "x": 1040,
+        "y": 460,
         "wires": [
             []
         ]

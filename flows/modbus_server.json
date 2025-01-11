@@ -219,7 +219,7 @@
             {
                 "value": "false",
                 "valueType": "bool",
-                "color": "#fbf4f4"
+                "color": "#3125d4"
             },
             {
                 "value": "true",
@@ -251,7 +251,7 @@
             {
                 "value": "false",
                 "valueType": "bool",
-                "color": "#f5f0f0"
+                "color": "#2d16df"
             },
             {
                 "value": "true",
@@ -283,7 +283,7 @@
             {
                 "value": "false",
                 "valueType": "bool",
-                "color": "#302c2c"
+                "color": "#1b46de"
             },
             {
                 "value": "true",
@@ -315,7 +315,7 @@
             {
                 "value": "false",
                 "valueType": "bool",
-                "color": "#f7eeee"
+                "color": "#131fc9"
             },
             {
                 "value": "true",
@@ -347,7 +347,7 @@
             {
                 "value": "0",
                 "valueType": "num",
-                "color": "#f9f1f1"
+                "color": "#2228d3"
             },
             {
                 "value": "1",
@@ -379,7 +379,7 @@
             {
                 "value": "0",
                 "valueType": "num",
-                "color": "#f6f4f4"
+                "color": "#2623c7"
             },
             {
                 "value": "1",
@@ -411,7 +411,7 @@
             {
                 "value": "0",
                 "valueType": "num",
-                "color": "#f8f7f7"
+                "color": "#5324c2"
             },
             {
                 "value": "1",
@@ -670,14 +670,14 @@
         "labelAlignment": "flex-start",
         "states": [
             {
-                "value": "false",
-                "valueType": "bool",
-                "color": "#ff0000"
+                "value": "0",
+                "valueType": "num",
+                "color": "#441adb"
             },
             {
-                "value": "true",
-                "valueType": "bool",
-                "color": "#00ff00"
+                "value": "1",
+                "valueType": "num",
+                "color": "#d72347"
             }
         ],
         "allowColorForValueInMessage": false,
@@ -789,7 +789,7 @@
         "type": "function",
         "z": "f63587bd397db4fd",
         "name": "read Inputs",
-        "func": "var id =1;\nvar fc = 2;\nvar sa = 0;\nvar addresses = 4;\nvar slave_ip = msg.payload.slave_ip;\nmsg.slave_ip = \"192.168.0.160\";\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': sa, 'quantity': addresses };\nreturn msg;",
+        "func": "var id =4;\nvar fc = 2;\nvar sa = 0;\nvar addresses = 4;\nvar slave_ip = msg.payload.slave_ip;\nmsg.slave_ip = \"192.168.0.160\";\nmsg.payload = { value: msg.payload, 'fc': fc, 'unitid': id, 'address': sa, 'quantity': addresses };\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -823,7 +823,7 @@
         "showErrors": true,
         "showWarnings": true,
         "logIOActivities": false,
-        "server": "684c0f89cf9c160f",
+        "server": "1b9a4f1511420284",
         "useIOFile": false,
         "ioFile": "",
         "useIOForPayload": false,
@@ -1813,36 +1813,6 @@
         "clientTimeout": 2000,
         "reconnectOnTimeout": true,
         "reconnectTimeout": 2000,
-        "parallelUnitIdsAllowed": true,
-        "showErrors": false,
-        "showWarnings": true,
-        "showLogs": true
-    },
-    {
-        "id": "684c0f89cf9c160f",
-        "type": "modbus-client",
-        "name": "INPUT_SERVER_160",
-        "clienttype": "tcp",
-        "bufferCommands": true,
-        "stateLogEnabled": false,
-        "queueLogEnabled": false,
-        "failureLogEnabled": true,
-        "tcpHost": "192.168.0.160",
-        "tcpPort": "502",
-        "tcpType": "DEFAULT",
-        "serialPort": "/dev/ttyUSB",
-        "serialType": "RTU-BUFFERD",
-        "serialBaudrate": "9600",
-        "serialDatabits": "8",
-        "serialStopbits": "1",
-        "serialParity": "none",
-        "serialConnectionDelay": "100",
-        "serialAsciiResponseStartDelimiter": "0x3A",
-        "unit_id": "1",
-        "commandDelay": "1",
-        "clientTimeout": "2000",
-        "reconnectOnTimeout": true,
-        "reconnectTimeout": "2000",
         "parallelUnitIdsAllowed": true,
         "showErrors": false,
         "showWarnings": true,

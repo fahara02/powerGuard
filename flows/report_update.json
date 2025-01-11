@@ -1688,7 +1688,6 @@
             "ui-control"
         ],
         "showPathInSidebar": false,
-        "headerContent": "page",
         "navigationStyle": "default",
         "titleBarStyle": "default",
         "showReconnectNotification": true,

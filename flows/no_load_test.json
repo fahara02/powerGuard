@@ -167,7 +167,7 @@
         "type": "function",
         "z": "6fb42d469e5f0e86",
         "name": "random_input_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n  \n        type: \"UPS_INPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    \n};\n\nglobal.set(\"inputPdata\",msg.payload);\n\n\n\nreturn msg;\n",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n  \n        type: \"UPS_INPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    \n};\n\n//global.set(\"inputPdata\",msg.payload);\n\n\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -177,9 +177,7 @@
         "x": 400,
         "y": 120,
         "wires": [
-            [
-                "99ddf5fcab5245c9"
-            ]
+            []
         ]
     },
     {
@@ -243,7 +241,7 @@
         "type": "function",
         "z": "6fb42d469e5f0e86",
         "name": "random_outout_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n   \n        type: \"UPS_OUTPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n   \n};\nglobal.set(\"outputPdata\",msg.payload);\n\nreturn msg;\n",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n   \n        type: \"UPS_OUTPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n   \n};\n//global.set(\"outputPdata\",msg.payload);\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -253,9 +251,7 @@
         "x": 400,
         "y": 320,
         "wires": [
-            [
-                "f4c8b9748f6d2ae3"
-            ]
+            []
         ]
     },
     {
@@ -483,7 +479,6 @@
             "ui-control"
         ],
         "showPathInSidebar": false,
-        "headerContent": "page",
         "navigationStyle": "default",
         "titleBarStyle": "default",
         "showReconnectNotification": true,

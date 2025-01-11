@@ -8,74 +8,6 @@
         "env": []
     },
     {
-        "id": "b06b941286798352",
-        "type": "inject",
-        "z": "e6613618b3405f10",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 200,
-        "y": 60,
-        "wires": [
-            [
-                "5d58a652fc68e02d"
-            ]
-        ]
-    },
-    {
-        "id": "5d58a652fc68e02d",
-        "type": "fs-file-lister",
-        "z": "e6613618b3405f10",
-        "name": "PROTO",
-        "start": "src/proto",
-        "pattern": "*.proto*",
-        "folders": "*",
-        "hidden": true,
-        "lstype": "files",
-        "path": true,
-        "single": false,
-        "depth": 0,
-        "stat": false,
-        "showWarnings": true,
-        "x": 360,
-        "y": 60,
-        "wires": [
-            [
-                "df71034f668f9cb5"
-            ]
-        ]
-    },
-    {
-        "id": "df71034f668f9cb5",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 520,
-        "y": 60,
-        "wires": []
-    },
-    {
         "id": "f8ea56e6ef8f2e3f",
         "type": "encode",
         "z": "e6613618b3405f10",
@@ -171,33 +103,6 @@
         ]
     },
     {
-        "id": "922ac39b3aa31a7c",
-        "type": "inject",
-        "z": "e6613618b3405f10",
-        "name": "show RECORDS",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "",
-        "topic": "SELECT * FROM PowerMeasure ORDER BY id DESC LIMIT 100",
-        "payload": "",
-        "payloadType": "date",
-        "x": 130,
-        "y": 620,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "2ee26788bce0c2dd",
         "type": "ui-template",
         "z": "e6613618b3405f10",
@@ -256,94 +161,6 @@
                 "03f0d8cdc2f1b6d1"
             ]
         ]
-    },
-    {
-        "id": "ea17e8f7b8f6af97",
-        "type": "inject",
-        "z": "e6613618b3405f10",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 200,
-        "y": 120,
-        "wires": [
-            [
-                "e9f332661740ef76"
-            ]
-        ]
-    },
-    {
-        "id": "e9f332661740ef76",
-        "type": "fs-file-lister",
-        "z": "e6613618b3405f10",
-        "name": "DB",
-        "start": "db",
-        "pattern": "*.*",
-        "folders": "*",
-        "hidden": true,
-        "lstype": "files",
-        "path": true,
-        "single": false,
-        "depth": 0,
-        "stat": false,
-        "showWarnings": true,
-        "x": 370,
-        "y": 120,
-        "wires": [
-            [
-                "17b9394803e27c56"
-            ]
-        ]
-    },
-    {
-        "id": "17b9394803e27c56",
-        "type": "function",
-        "z": "e6613618b3405f10",
-        "name": "setGlobalpath",
-        "func": "global.set(\"db_path\",msg.payload);\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 640,
-        "y": 120,
-        "wires": [
-            [
-                "6e2658e72d337141"
-            ]
-        ]
-    },
-    {
-        "id": "6e2658e72d337141",
-        "type": "debug",
-        "z": "e6613618b3405f10",
-        "name": "debug 5",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 840,
-        "y": 120,
-        "wires": []
     },
     {
         "id": "b41defef826bea8e",
