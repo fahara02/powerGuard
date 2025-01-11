@@ -14,8 +14,7 @@ from powerguard.data.fetcher import Fetcher
 from powerguard.data.inserter import Inserter
 from powerguard.data.validator import Validator
 from proto.pData_pb2 import PowerMeasure, PowerMeasureType
-from proto.report_pb2 import (Measurement, ReportSettings, TestReport,
-                              TestStandard)
+from proto.report_pb2 import Measurement, ReportSettings, TestReport, TestStandard
 from proto.ups_defines_pb2 import LOAD, MODE, OverLoad, Phase, spec
 from proto.ups_test_pb2 import TestResult, TestType
 
@@ -517,20 +516,6 @@ class DataManager(BaseModel):
             logging.error(f"Unexpected error during database cleanup: {e}")
             raise Exception(f"Unexpected error during database cleanup: {e}")
 
-
-
-
-# Example Usage
-if __name__ == "__main__":
-    data_manager = DataManager()
-    report = data_manager.generate_mock_data(31192311,9031192311, "walton", "maxgreen", "fhr")
-
-    report_id = data_manager.insert_test_report(report)
-    unique_id = report.settings.report_id
-    print(
-        f"check newly inserted test report with id {report_id} for unique id {unique_id} "
-    )
-    data_manager.close()
     def generate_mock_data(self, report_id,subreportid, client_name, brand_name, engineer_name):
         now = datetime.now(tz=timezone.utc)
         timestamp_proto = Timestamp()
@@ -828,3 +813,16 @@ if __name__ == "__main__":
 
         print(f"Generated mock report for client: {client_name}")
         return test_report
+
+
+# Example Usage
+if __name__ == "__main__":
+    data_manager = DataManager()
+    report = data_manager.generate_mock_data(31192311,9031192311, "walton", "maxgreen", "fhr")
+
+    report_id = data_manager.insert_test_report(report)
+    unique_id = report.settings.report_id
+    print(
+        f"check newly inserted test report with id {report_id} for unique id {unique_id} "
+    )
+    data_manager.close()
