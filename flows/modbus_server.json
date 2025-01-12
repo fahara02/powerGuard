@@ -1748,13 +1748,13 @@
         "labelAlignment": "left",
         "states": [
             {
-                "value": "0",
-                "valueType": "num",
+                "value": "false",
+                "valueType": "bool",
                 "color": "#1429c8"
             },
             {
-                "value": "1",
-                "valueType": "num",
+                "value": "true",
+                "valueType": "bool",
                 "color": "#cd1861"
             }
         ],
@@ -1780,13 +1780,13 @@
         "labelAlignment": "left",
         "states": [
             {
-                "value": "0",
-                "valueType": "num",
+                "value": "false",
+                "valueType": "bool",
                 "color": "#1429c8"
             },
             {
-                "value": "1",
-                "valueType": "num",
+                "value": "true",
+                "valueType": "bool",
                 "color": "#cd1861"
             }
         ],
