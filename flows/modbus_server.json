@@ -159,12 +159,14 @@
             [
                 "351e4b854e13256b",
                 "2a2e4e31ebf2ce53",
-                "99bb121fd4486c8f"
+                "99bb121fd4486c8f",
+                "fd65cc962c5199e7"
             ],
             [
                 "5117120efa5b1764",
                 "b9b46ac75acb9df4",
-                "b2b74b0e76d6d841"
+                "b2b74b0e76d6d841",
+                "f4bd39e55674f852"
             ],
             [],
             []
@@ -295,7 +297,7 @@
         "shape": "circle",
         "showBorder": true,
         "showGlow": true,
-        "x": 740,
+        "x": 600,
         "y": 880,
         "wires": []
     },
@@ -1733,6 +1735,70 @@
         ]
     },
     {
+        "id": "fd65cc962c5199e7",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "MainsInput",
+        "group": "67b3248f1dce1323",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Mains Input",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "0",
+                "valueType": "num",
+                "color": "#1429c8"
+            },
+            {
+                "value": "1",
+                "valueType": "num",
+                "color": "#cd1861"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 770,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "f4bd39e55674f852",
+        "type": "ui-led",
+        "z": "f63587bd397db4fd",
+        "name": "UPS OUTPUT",
+        "group": "67b3248f1dce1323",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "UPS OUTPUT",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "0",
+                "valueType": "num",
+                "color": "#1429c8"
+            },
+            {
+                "value": "1",
+                "valueType": "num",
+                "color": "#cd1861"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 920,
+        "y": 920,
+        "wires": []
+    },
+    {
         "id": "0282c4d64488b8ca",
         "type": "ui-group",
         "name": "CALIBRATION",
@@ -1847,6 +1913,20 @@
         "groupType": "default"
     },
     {
+        "id": "67b3248f1dce1323",
+        "type": "ui-group",
+        "name": "TestControl",
+        "page": "c394cd44c5dedb03",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
         "id": "e09b1870023f93f6",
         "type": "ui-page",
         "name": "CALIBRATION",
@@ -1877,7 +1957,7 @@
                 "cols": "12"
             }
         ],
-        "order": 6,
+        "order": 7,
         "className": "",
         "visible": "true",
         "disabled": "false"
@@ -1949,8 +2029,44 @@
                 "cols": "12"
             }
         ],
-        "order": 4,
+        "order": 5,
         "className": "backup_test",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "c394cd44c5dedb03",
+        "type": "ui-page",
+        "name": "Full Load Test",
+        "ui": "6bb6879aa70631ea",
+        "path": "/full_load_test",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 4,
+        "className": "",
         "visible": "true",
         "disabled": "false"
     },

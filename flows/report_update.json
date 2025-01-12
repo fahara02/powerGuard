@@ -13,7 +13,8 @@
         "z": "4ec0a7f75863202f",
         "name": "REPORT_IN",
         "links": [
-            "bb5af27275e2ee33"
+            "bb5af27275e2ee33",
+            "374cb9bd20d8c2a7"
         ],
         "x": 35,
         "y": 120,
@@ -122,7 +123,8 @@
             [
                 "bc8e9479fde69e7d",
                 "934392df93190d41",
-                "78bd9cdc68073677"
+                "78bd9cdc68073677",
+                "c2a08e562ba25ef9"
             ]
         ]
     },
@@ -559,7 +561,8 @@
             [
                 "9e2edbf349151202",
                 "59c3b5b515ebf47b",
-                "bbd43d8158fe3776"
+                "bbd43d8158fe3776",
+                "7b8e75b101b31826"
             ]
         ]
     },
@@ -591,8 +594,8 @@
         "shape": "circle",
         "showBorder": true,
         "showGlow": true,
-        "x": 690,
-        "y": 680,
+        "x": 730,
+        "y": 700,
         "wires": []
     },
     {
@@ -633,7 +636,8 @@
             [
                 "c7407683108bb297",
                 "66805343908213ee",
-                "de0fa882954c9371"
+                "de0fa882954c9371",
+                "e4cd8154bc84fcaa"
             ]
         ]
     },
@@ -666,7 +670,7 @@
         "showBorder": true,
         "showGlow": true,
         "x": 1380,
-        "y": 900,
+        "y": 1000,
         "wires": []
     },
     {
@@ -1117,7 +1121,8 @@
         "wires": [
             [
                 "9e8152aa906f4172",
-                "e326bfb74c6a91cb"
+                "e326bfb74c6a91cb",
+                "6be127ff0ae3de75"
             ]
         ]
     },
@@ -1161,8 +1166,8 @@
         "links": [
             "62eb936d918d3302"
         ],
-        "x": 1285,
-        "y": 540,
+        "x": 1255,
+        "y": 460,
         "wires": [
             [
                 "9e8152aa906f4172"
@@ -1489,7 +1494,8 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_db2_measurement",
         "links": [
-            "ec2d11c2a7f5cd13"
+            "ec2d11c2a7f5cd13",
+            "4caf1c1d5401e861"
         ],
         "x": 525,
         "y": 780,
@@ -1505,10 +1511,11 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_db2_report",
         "links": [
-            "ec2d11c2a7f5cd13"
+            "ec2d11c2a7f5cd13",
+            "4caf1c1d5401e861"
         ],
-        "x": 1285,
-        "y": 580,
+        "x": 1265,
+        "y": 500,
         "wires": [
             [
                 "e326bfb74c6a91cb"
@@ -1544,7 +1551,7 @@
         "showBorder": true,
         "showGlow": true,
         "x": 1430,
-        "y": 580,
+        "y": 520,
         "wires": []
     },
     {
@@ -1585,7 +1592,8 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_data_processed",
         "links": [
-            "ec2d11c2a7f5cd13"
+            "ec2d11c2a7f5cd13",
+            "4caf1c1d5401e861"
         ],
         "x": 985,
         "y": 260,
@@ -1633,7 +1641,8 @@
         "z": "4ec0a7f75863202f",
         "name": "reset_in_db2_report",
         "links": [
-            "ec2d11c2a7f5cd13"
+            "ec2d11c2a7f5cd13",
+            "4caf1c1d5401e861"
         ],
         "x": 1205,
         "y": 1040,
@@ -1658,6 +1667,198 @@
         "x": 680,
         "y": 1100,
         "wires": []
+    },
+    {
+        "id": "7b8e75b101b31826",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB3 Measurement",
+        "group": "67b3248f1dce1323",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "label": "DB Measurement",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#1334d8"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 930,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "27a97f9bb4338baa",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "db3_measurement_reset_in",
+        "links": [
+            "3f4b253dbb497ba6"
+        ],
+        "x": 785,
+        "y": 780,
+        "wires": [
+            [
+                "7b8e75b101b31826"
+            ]
+        ]
+    },
+    {
+        "id": "6be127ff0ae3de75",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB3 Report",
+        "group": "67b3248f1dce1323",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "Blank Report",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#1334d8"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1430,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "ce7ffddad5c409f5",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "DB3_report_reset_in",
+        "links": [
+            "3f4b253dbb497ba6"
+        ],
+        "x": 1285,
+        "y": 560,
+        "wires": [
+            [
+                "6be127ff0ae3de75"
+            ]
+        ]
+    },
+    {
+        "id": "c2a08e562ba25ef9",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB3 Data",
+        "group": "67b3248f1dce1323",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "label": "Data Processed",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#1334d8"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1140,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "b89864c7cc7d4b8e",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "Db3_Data_reset_in",
+        "links": [
+            "3f4b253dbb497ba6"
+        ],
+        "x": 1005,
+        "y": 220,
+        "wires": [
+            [
+                "c2a08e562ba25ef9"
+            ]
+        ]
+    },
+    {
+        "id": "e4cd8154bc84fcaa",
+        "type": "ui-led",
+        "z": "4ec0a7f75863202f",
+        "name": "DB3 Power",
+        "group": "67b3248f1dce1323",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "label": "DB Power",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "states": [
+            {
+                "value": "false",
+                "valueType": "bool",
+                "color": "#1334d8"
+            },
+            {
+                "value": "true",
+                "valueType": "bool",
+                "color": "#00ff00"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showBorder": true,
+        "showGlow": true,
+        "x": 1390,
+        "y": 1080,
+        "wires": []
+    },
+    {
+        "id": "cc11ed535e59ff0b",
+        "type": "link in",
+        "z": "4ec0a7f75863202f",
+        "name": "DB3_power_reset_in",
+        "links": [
+            "3f4b253dbb497ba6"
+        ],
+        "x": 1185,
+        "y": 1100,
+        "wires": [
+            [
+                "e4cd8154bc84fcaa"
+            ]
+        ]
     },
     {
         "id": "0d4c44b815a8faab",
@@ -1726,6 +1927,20 @@
         "groupType": "default"
     },
     {
+        "id": "67b3248f1dce1323",
+        "type": "ui-group",
+        "name": "TestControl",
+        "page": "c394cd44c5dedb03",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
         "id": "7d0f53039d1540b1",
         "type": "ui-page",
         "name": "BACKUP_TEST",
@@ -1756,7 +1971,7 @@
                 "cols": "12"
             }
         ],
-        "order": 4,
+        "order": 5,
         "className": "backup_test",
         "visible": "true",
         "disabled": "false"
@@ -1792,7 +2007,7 @@
                 "cols": "12"
             }
         ],
-        "order": 5,
+        "order": 6,
         "className": "",
         "visible": "true",
         "disabled": "false"
@@ -1829,6 +2044,42 @@
             }
         ],
         "order": 3,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "c394cd44c5dedb03",
+        "type": "ui-page",
+        "name": "Full Load Test",
+        "ui": "6bb6879aa70631ea",
+        "path": "/full_load_test",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "f51f9a07212ff54b",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 4,
         "className": "",
         "visible": "true",
         "disabled": "false"

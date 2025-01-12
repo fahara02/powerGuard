@@ -1,6 +1,6 @@
 <template>
-    <div class="noload-test-ui">
-        <h1>No Load Test</h1>
+    <div class="fullload-test-ui">
+        <h1>Full Load Test</h1>
         <div>
             <div>
                 <!-- Setting ID Dropdown -->
@@ -54,15 +54,19 @@
             <div class="buttons">
                 <button type="button" @click="startFullLoadTest" :disabled="fullLoadTestRunning">Start Test</button>
                 <button type="button" @click="stopFullLoadTest" :disabled="!fullLoadTestRunning">Stop Test</button>
-                <button type="button" @click="captureMeasurement" :disabled="!fullLoadTestRunning">Capture</button>
+                <button type="button" @click="captureMeasurement"
+                    :disabled="isCapturing || !fullLoadTestRunning">Capture</button>
+                <div v-if="!isCapturing && fullLoadTestRunning" class="snapshot-feedback">
+                    <p>Ready For Capture...</p>
+                </div>
             </div>
         </div>
 
-        <div v-if="noLoadTestRunning" class="test-status">
-            <p>Noload Test running... Waiting for capture command.</p>
+        <div v-if="fullLoadTestRunning" class="test-status">
+            <p>Fullload Test running... Waiting for capture command.</p>
             <p>Test Duration: {{ test_duration }} seconds</p>
         </div>
-        <div v-if="snap_shot && noLoadTestRunning" class="snapshot-feedback">
+        <div v-if="snap_shot && fullLoadTestRunning" class="snapshot-feedback">
             <p>Snapshot Captured! Displaying Latest Measurement...</p>
             <h2>Measurement Snapshot</h2>
             <ul>
@@ -71,7 +75,21 @@
                 </li>
             </ul>
         </div>
-        <div v-if="!noLoadTestRunning && measurements.length > 0" class="test-result">
+        <div v-if="fullLoadTestRunning" class="test-status">
+            <p>Full load Test running... Waiting for capture command.</p>
+            <p>Test Duration: {{ test_duration }} seconds</p>
+        </div>
+
+        <div v-if="snap_shot && fullLoadTestRunning" class="snapshot-feedback">
+            <p>Snapshot Captured! Displaying Latest Measurement...</p>
+            <h2>Measurement Snapshot</h2>
+            <ul>
+                <li v-if="latestMeasurement">
+                    voltage: {{ latestMeasurement }}
+                </li>
+            </ul>
+        </div>
+        <div v-if="!fullLoadTestRunning && measurements.length > 0" class="test-result">
             <h2>Captured Measurements</h2>
             <ul>
                 <li v-for="(measurement, index) in measurements" :key="index">
@@ -85,6 +103,8 @@
 export default {
     data() {
         return {
+            captureDebounceTimeout: null,
+            isCapturing: false,
             test_duration: 0,
             measurementIdCounter: 0,
             subreport_id: 0,
@@ -235,23 +255,32 @@ export default {
                 temperature_2: 0,
             };
         },
-        captureMeasurement() {
-            if (this.fullLoadTestRunning) {
+        async captureMeasurement() {
+            if (this.isCapturing) return;
+            this.isCapturing = true;
+
+            try {
+                if (!this.fullLoadTestRunning) {
+                    console.warn("No Load Test is not running.");
+                    return;
+                }
                 this.snap_shot = true;
-                const mainReportId = this.selectedSetting?.report_id || 10000000;
+
+                const mainReportId = this.selectedSetting.report_id || 10000000;
                 const measurement = this.generateMeasurement(2, mainReportId);
                 this.measurements.push(measurement);
                 console.log("Measurement captured:", measurement);
-                this.send({ topic: "info", payload: "Measurement captured" });
 
-                // Automatically reset the snapshot flag after a short delay
-                setTimeout(() => {
-                    this.snap_shot = false;
-                }, 2000); // Adjust the duration for how long the snapshot appears
-            } else {
-                console.warn("No Load Test is not running. Cannot capture measurement.");
+                await this.delay(2000); // Delay for snapshot reset
+                this.snap_shot = false;
+            } catch (error) {
+                console.error("Error during measurement capture:", error);
+            } finally {
+                await this.delay(1000); // Debounce delay
+                this.isCapturing = false;
             }
         },
+
         createTestReport() {
             const report = {
                 settings: this.selectedSetting || {},
@@ -270,9 +299,13 @@ export default {
         async startFullLoadTest() {
 
             // Reset test state before starting
+            this.fullLoadTestRunning = true;
             this.resetTestState();
             const mainReportId = this.selectedSetting?.report_id || 10000000; // Ensure fallback is valid
             this.subreport_id = this.generateMeasurementId(2, mainReportId);
+            this.send({
+                topic: 'reset', payload: false
+            });
             try {
                 this.TestCMDS.alarm_status = 1;
                 this.send({
@@ -304,14 +337,12 @@ export default {
                 }
                 this.send({
                     topic: "info",
-                    payload: "Starting No Load Test...",
+                    payload: "Starting Full Load Test...",
                 });
 
 
-                this.send({
-                    topic: 'reset', payload: false
-                });
-                this.fullLoadTestRunning = true;
+
+
                 this.send({
                     topic: 'commands', payload: this.createRunCmds({
                         fullLoadTestRunning: true,
@@ -320,7 +351,7 @@ export default {
 
 
                 while (this.fullLoadTestRunning) {
-                    console.log("No Load Test is running...");
+                    console.log("Full Load Test is running...");
                     await this.delay(1000); // Simulate running test logic
                     this.test_duration++;
                     if (this.snap_shot) {
@@ -333,9 +364,10 @@ export default {
             } catch (error) {
                 console.error("Error during No Load Test:", error.message);
             } finally {
-                this.stopfullLoadTest();
+                this.stopFullLoadTest();
             }
         },
+
 
         stopFullLoadTest() {
             this.fullLoadTestRunning = false;
@@ -382,7 +414,7 @@ export default {
                     inputPdata: TestData.inputPdata || {},
                     outputPdata: TestData.outputPdata || {},
                 };
-                console.log("Updated BackUpTestData:", this.TestData);
+                console.log("Updated TestData:", this.TestData);
             } else {
                 console.warn("Invalid payload or missing TestData:", payload);
             }
@@ -401,7 +433,7 @@ export default {
 </script>
 
 <style scoped>
-.noload-test-ui {
+.fullload-test-ui {
     max-width: 450px;
     margin: 30px auto;
     font-family: 'Arial', sans-serif;

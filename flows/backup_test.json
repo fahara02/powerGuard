@@ -1,16 +1,61 @@
 [
     {
-        "id": "46413099658d8708",
-        "type": "tab",
-        "label": "BACKUP_TEST",
-        "disabled": false,
+        "id": "0c49f84a4c425031",
+        "type": "subflow",
+        "name": "GetPowers",
         "info": "",
-        "env": []
+        "category": "",
+        "in": [],
+        "out": [
+            {
+                "x": 640,
+                "y": 180,
+                "wires": [
+                    {
+                        "id": "c0cdc61cfda7f36f",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 640,
+                "y": 220,
+                "wires": [
+                    {
+                        "id": "75fa05daa403b11c",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 640,
+                "y": 340,
+                "wires": [
+                    {
+                        "id": "839f402a185e885f",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 640,
+                "y": 380,
+                "wires": [
+                    {
+                        "id": "47585c468c9ebe2f",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
     },
     {
-        "id": "28a534038cc22b3c",
+        "id": "ed6919bf01d28de8",
         "type": "inject",
-        "z": "46413099658d8708",
+        "z": "0c49f84a4c425031",
         "name": "",
         "props": [
             {
@@ -21,33 +66,55 @@
                 "vt": "str"
             }
         ],
-        "repeat": "0.1",
+        "repeat": "1",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 190,
-        "y": 720,
+        "x": 210,
+        "y": 280,
         "wires": [
             [
-                "c909ad4f0537c120"
+                "75fa05daa403b11c",
+                "839f402a185e885f",
+                "47585c468c9ebe2f",
+                "c0cdc61cfda7f36f"
             ]
         ]
     },
     {
-        "id": "c909ad4f0537c120",
+        "id": "c0cdc61cfda7f36f",
+        "type": "function",
+        "z": "0c49f84a4c425031",
+        "name": "random_input_power",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n  \n        type: \"UPS_INPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    \n};\n\nglobal.set(\"inputPdata\",msg.payload);\n\n\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "75fa05daa403b11c",
         "type": "change",
-        "z": "46413099658d8708",
+        "z": "0c49f84a4c425031",
         "name": "",
         "rules": [
             {
                 "t": "set",
                 "p": "payload",
                 "pt": "msg",
-                "to": "BackupTime",
-                "tot": "global"
+                "to": "inputPdata",
+                "tot": "global",
+                "dc": true
             }
         ],
         "action": "",
@@ -56,10 +123,62 @@
         "to": "",
         "reg": false,
         "x": 440,
-        "y": 640,
+        "y": 240,
         "wires": [
             []
         ]
+    },
+    {
+        "id": "839f402a185e885f",
+        "type": "change",
+        "z": "0c49f84a4c425031",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "outputPdata",
+                "tot": "global",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 440,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "47585c468c9ebe2f",
+        "type": "function",
+        "z": "0c49f84a4c425031",
+        "name": "random_outout_power",
+        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n   \n        type: \"UPS_OUTPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n   \n};\nglobal.set(\"outputPdata\",msg.payload);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "46413099658d8708",
+        "type": "tab",
+        "label": "BACKUP_TEST",
+        "disabled": false,
+        "info": "",
+        "env": []
     },
     {
         "id": "ddde2940ca2fe7fe",
@@ -79,80 +198,12 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 720,
-        "y": 460,
+        "x": 340,
+        "y": 400,
         "wires": [
             [
                 "9feae0311f0771f8"
             ]
-        ]
-    },
-    {
-        "id": "c0cdc61cfda7f36f",
-        "type": "function",
-        "z": "46413099658d8708",
-        "name": "random_input_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n  \n        type: \"UPS_INPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n    \n};\n\n//global.set(\"inputPdata\",msg.payload);\n\n\n\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 400,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "ed6919bf01d28de8",
-        "type": "inject",
-        "z": "46413099658d8708",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 130,
-        "y": 500,
-        "wires": [
-            [
-                "75fa05daa403b11c",
-                "839f402a185e885f",
-                "47585c468c9ebe2f",
-                "c0cdc61cfda7f36f"
-            ]
-        ]
-    },
-    {
-        "id": "47585c468c9ebe2f",
-        "type": "function",
-        "z": "46413099658d8708",
-        "name": "random_outout_power",
-        "func": "// Function node to generate random power data and assign to msg.payload.data\nmsg.payload = {\n   \n        type: \"UPS_OUTPUT\", // Randomly assign type 0 (INPUT_POWER) or 1 (OUTPUT_POWER)\n        voltage: (Math.random() * 50 + 200).toFixed(2), // Random voltage between 200V and 250V\n        current: (Math.random() * 10 + 1).toFixed(2),   // Random current between 1A and 10A\n        power: (Math.random() * 1000 + 100).toFixed(2), // Random power between 100W and 1100W\n        energy: (Math.random() * 10 + 0.5).toFixed(2),  // Random energy between 0.5kWh and 10.5kWh\n        pf: (Math.random() * 0.5 + 0.5).toFixed(2),     // Random power factor between 0.5 and 1.0\n        frequency: (Math.random() * 5 + 45).toFixed(2)  // Random frequency between 45Hz and 50Hz\n   \n};\n//global.set(\"outputPdata\",msg.payload);\n\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 600,
-        "wires": [
-            []
         ]
     },
     {
@@ -173,8 +224,8 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 730,
-        "y": 560,
+        "x": 350,
+        "y": 440,
         "wires": [
             []
         ]
@@ -361,34 +412,6 @@
         "wires": []
     },
     {
-        "id": "75fa05daa403b11c",
-        "type": "change",
-        "z": "46413099658d8708",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "inputPdata",
-                "tot": "global",
-                "dc": true
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 360,
-        "y": 460,
-        "wires": [
-            [
-                "ddde2940ca2fe7fe"
-            ]
-        ]
-    },
-    {
         "id": "d7ed4a435952fd08",
         "type": "rbe",
         "z": "46413099658d8708",
@@ -561,34 +584,6 @@
         "wires": []
     },
     {
-        "id": "839f402a185e885f",
-        "type": "change",
-        "z": "46413099658d8708",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "outputPdata",
-                "tot": "global",
-                "dc": true
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 360,
-        "y": 560,
-        "wires": [
-            [
-                "9de60c78c8758b1e"
-            ]
-        ]
-    },
-    {
         "id": "bb5af27275e2ee33",
         "type": "link out",
         "z": "46413099658d8708",
@@ -688,9 +683,27 @@
         "height": 10,
         "className": "",
         "interpolation": "linear",
-        "x": 1040,
-        "y": 460,
+        "x": 600,
+        "y": 400,
         "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ba0d59ffb969402f",
+        "type": "subflow:0c49f84a4c425031",
+        "z": "46413099658d8708",
+        "name": "",
+        "x": 100,
+        "y": 420,
+        "wires": [
+            [],
+            [
+                "ddde2940ca2fe7fe"
+            ],
+            [
+                "9de60c78c8758b1e"
+            ],
             []
         ]
     },
@@ -753,7 +766,7 @@
                 "cols": "12"
             }
         ],
-        "order": 4,
+        "order": 5,
         "className": "backup_test",
         "visible": "true",
         "disabled": "false"
