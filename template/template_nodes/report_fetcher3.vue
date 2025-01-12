@@ -11,10 +11,10 @@
             </select>
         </div>
 
-
         <div class="print-button-container">
             <button @click="printReport">Print Report</button>
         </div>
+
         <!-- Loading State -->
         <div v-if="isLoading" class="loading-container">
             Loading report data...
@@ -48,18 +48,17 @@
                 <p><strong>Overload Amp:</strong> {{ currentSelectedReport.spec.overload_amp || 'N/A' }} A</p>
             </div>
 
-
-            <!-- Common Measurement Information -->
-            <div class="measurement-common-info">
+            <!-- Conditional Measurement Information -->
+            <div v-if="showMeasurementOverview" class="measurement-common-info">
                 <h3>Measurement Overview</h3>
-                <p><strong>Load Type:</strong> {{ measurementCommonData.load_type || "N/A" }}</p>
-                <p><strong>Load Percentage:</strong> {{ measurementCommonData.load_percentage || 0 }}</p>
+                <p v-if="showLoadType"><strong>Load Type:</strong> {{ measurementCommonData.load_type || "N/A" }}</p>
+                <p v-if="showLoadPercentage"><strong>Load Percentage:</strong> {{ measurementCommonData.load_percentage
+                    || 0 }}</p>
                 <p><strong>Run Interval (s):</strong> {{ measurementCommonData.run_interval_sec || 0 }}</p>
                 <p><strong>Phase Name:</strong> {{ measurementCommonData.phase_name || "Unknown" }}</p>
                 <p><strong>Step ID:</strong> {{ measurementCommonData.step_id || "N/A" }}</p>
             </div>
 
-            <!-- Measurement Table -->
             <!-- Measurement Table -->
             <div class="measurement-table-container"
                 v-if="currentSelectedReport && currentSelectedReport.measurements.length">
@@ -69,37 +68,43 @@
                         <tr>
                             <th>#</th>
                             <th>Measurement Name</th>
+                            <th>Phase Name</th>
                             <th>Type</th>
+
                             <th>Voltage (V)</th>
                             <th>Current (A)</th>
                             <th>Power (W)</th>
                             <th>Power Factor</th>
                             <th>Frequency (Hz)</th>
-                            <th>Backup Time (s)</th>
-                            <th>Load Percentage</th>
-                            <th>Phase Name</th>
-                            <th>Step ID</th>
+                            <th v-if="showBackupTime">Backup Time (s)</th>
+                            <th v-if="showLoadPercentage">Load Percentage</th>
+
+                            <th v-if="showStep">Step V</th>
                         </tr>
                     </thead>
                     <tbody>
                         <template v-for="(measurement, index) in currentSelectedReport.measurements"
                             :key="measurement.m_unique_id">
                             <tr>
-                                <!-- Display the first power measure -->
                                 <td :rowspan="measurement.power_measures.length">{{ index + 1 }}</td>
                                 <td :rowspan="measurement.power_measures.length">{{ measurement.name }}</td>
+                                <td :rowspan="measurement.power_measures.length">{{ measurement.phase_name }}</td>
                                 <td>{{ measurement.power_measures[0].type }}</td>
                                 <td>{{ measurement.power_measures[0].voltage }}</td>
                                 <td>{{ measurement.power_measures[0].current }}</td>
                                 <td>{{ measurement.power_measures[0].power }}</td>
                                 <td>{{ measurement.power_measures[0].pf }}</td>
                                 <td>{{ measurement.power_measures[0].frequency }}</td>
-                                <td :rowspan="measurement.power_measures.length">{{ measurement.backup_time_sec }}</td>
-                                <td :rowspan="measurement.power_measures.length">{{ measurement.load_percentage }}</td>
-                                <td :rowspan="measurement.power_measures.length">{{ measurement.phase_name }}</td>
-                                <td :rowspan="measurement.power_measures.length">{{ measurement.step_id }}</td>
+                                <td v-if="showBackupTime" :rowspan="measurement.power_measures.length">
+                                    {{ measurement.backup_time_sec }}
+                                </td>
+                                <td v-if="showLoadPercentage" :rowspan="measurement.power_measures.length">
+                                    {{ measurement.load_percentage }}
+                                </td>
+
+                                <td v-if="showStep" :rowspan="measurement.power_measures.length">{{ measurement.step_id
+                                    }}</td>
                             </tr>
-                            <!-- Additional rows for remaining power measures -->
                             <tr v-for="(powerMeasure, pmIndex) in measurement.power_measures.slice(1)"
                                 :key="measurement.m_unique_id + '-' + pmIndex">
                                 <td>{{ powerMeasure.type }}</td>
@@ -118,11 +123,10 @@
             <div v-else class="error-container">
                 <p>No measurements available for the selected report.</p>
             </div>
-
-
         </div>
     </div>
 </template>
+
 
 
 <script>
@@ -169,6 +173,21 @@ export default {
         };
     },
     computed: {
+        showStep() {
+            return this.currentSelectedReport?.test_name !== 'BackupTest';
+        },
+        showLoadType() {
+            return ['FULL_LOAD_TEST', 'BackupTest'].includes(this.currentSelectedReport?.test_name);
+        },
+        showLoadPercentage() {
+            return ['FULL_LOAD_TEST', 'BackupTest'].includes(this.currentSelectedReport?.test_name);
+        },
+        showBackupTime() {
+            return this.currentSelectedReport?.test_name === 'BackupTest';
+        },
+        showMeasurementOverview() {
+            return this.currentSelectedReport?.test_name !== 'AC_INPUT_RETURN';
+        },
         // Dropdown options (based on DB row IDs)
         reportOptions() {
             return this.reportMaps || []; // Return empty array if `reportMaps` is undefined
