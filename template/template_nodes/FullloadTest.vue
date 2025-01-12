@@ -75,20 +75,7 @@
                 </li>
             </ul>
         </div>
-        <div v-if="fullLoadTestRunning" class="test-status">
-            <p>Full load Test running... Waiting for capture command.</p>
-            <p>Test Duration: {{ test_duration }} seconds</p>
-        </div>
 
-        <div v-if="snap_shot && fullLoadTestRunning" class="snapshot-feedback">
-            <p>Snapshot Captured! Displaying Latest Measurement...</p>
-            <h2>Measurement Snapshot</h2>
-            <ul>
-                <li v-if="latestMeasurement">
-                    voltage: {{ latestMeasurement }}
-                </li>
-            </ul>
-        </div>
         <div v-if="!fullLoadTestRunning && measurements.length > 0" class="test-result">
             <h2>Captured Measurements</h2>
             <ul>
