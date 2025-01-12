@@ -5,11 +5,13 @@
             <label for="report-id">Select Report:</label>
             <select id="report-id" v-model="formData.report.id" @change="onReportChange">
                 <option value="" disabled>Select a Report</option>
-                <option v-for="id in reportOptions" :key="id" :value="id">
-                    Report {{ id }}
+                <option v-for="report in reportOptions" :key="report.id" :value="report.id">
+                    {{ report.test_name }} (ID: {{ report.id }})
                 </option>
             </select>
         </div>
+
+
         <div class="print-button-container">
             <button @click="printReport">Print Report</button>
         </div>
@@ -123,23 +125,24 @@
 </template>
 
 
-
 <script>
 export default {
     props: {
         selectedReport: {
             type: Object,
-            required: false, // Optional, now handled via computed property
+            required: false, // Optional, as `selectedReport` may not always be provided
+
         },
     },
     data: function () {
         return {
             reports: [], // Holds full report data
-            reportIDs: [], // Holds the list of report IDs (DB row IDs)
+            reportMaps: [], // Holds the list of report IDs (DB row IDs)
 
             formData: {
                 report: {
                     id: null, // Selected report ID (DB row ID)
+
                 },
             },
             isLoading: false,
@@ -149,15 +152,15 @@ export default {
     computed: {
         // Dropdown options (based on DB row IDs)
         reportOptions() {
-            return this.reportIDs.sort((a, b) => a - b); // Sort IDs numerically
+            return this.reportMaps || []; // Return empty array if `reportMaps` is undefined
         },
-
 
         currentSelectedReport() {
             return this.reports.find(
                 (report) => report.id === this.formData.report.id
             ) || null;
         },
+
         measurementCommonData() {
             if (!this.currentSelectedReport || !this.currentSelectedReport.measurements.length) {
                 return {};
@@ -210,12 +213,14 @@ export default {
         },
 
 
+
         // Update all report IDs from incoming data
-        updateAllReportID(payload) {
+        updateAllReportMaps(payload) {
             if (Array.isArray(payload)) {
-                this.reportIDs = payload; // Populate the dropdown with DB row IDs
+                this.reportMaps = payload;
+
             } else {
-                console.error("Invalid payload format for report IDs. Expected an array.");
+                console.error("Invalid payload format for report maps. Expected an array.");
             }
         },
 
@@ -223,8 +228,7 @@ export default {
         updateAllReport(payload) {
             if (payload && payload.test_report_id) {
                 const report = {
-                    id: payload.test_report_id, // Use the DB row ID as `id`
-                    subreport_id: payload.sub_report_id, // Keep subreport_id separate
+                    id: payload.test_report_id,
                     test_name: payload.test_name,
                     test_description: payload.test_description,
                     test_result: payload.test_result,
@@ -233,27 +237,18 @@ export default {
                     measurements: payload.measurements,
                 };
 
-                // Find index of the report with the same DB row ID
                 const index = this.reports.findIndex((r) => r.id === report.id);
                 if (index >= 0) {
-                    this.$set(this.reports, index, report); // Update existing report
+                    this.$set(this.reports, index, report);
                 } else {
-                    this.reports.push(report); // Add new report
+                    this.reports.push(report);
                 }
-
-                // Log update
-                this.send({
-                    topic: "info",
-                    payload: `Report updated: ${report.id}`,
-                });
             } else {
                 console.error("Invalid payload format for reports.");
-                this.send({
-                    topic: "error",
-                    payload: "Invalid payload format for reports.",
-                });
             }
         },
+
+
 
         // Wait for the database response
         waitForResponse() {
@@ -266,6 +261,10 @@ export default {
                     "msg",
                     function (newMsg) {
                         if (newMsg && newMsg.topic === "db_reply") {
+                            this.send({
+                                topic: "info",
+                                payload: `Fetched test report : ${newMsg.payload}`,
+                            });
                             clearTimeout(timeout);
                             resolve(newMsg);
                         }
@@ -367,7 +366,7 @@ export default {
             function (newMsg) {
                 if (newMsg && newMsg.payload) {
                     if (Array.isArray(newMsg.payload)) {
-                        this.updateAllReportID(newMsg.payload); // Update report IDs
+                        this.updateAllReportMaps(newMsg.payload); // Update report IDs
                     }
                 }
             },
