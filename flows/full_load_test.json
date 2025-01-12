@@ -471,7 +471,7 @@
         "name": "Full Load Test",
         "ui": "6bb6879aa70631ea",
         "path": "/full_load_test",
-        "icon": "home",
+        "icon": "printer-3d-nozzle-alert",
         "layout": "grid",
         "theme": "f51f9a07212ff54b",
         "breakpoints": [

@@ -518,7 +518,7 @@
         "name": "NoLoad Test",
         "ui": "6bb6879aa70631ea",
         "path": "/noload_test",
-        "icon": "home",
+        "icon": "printer-3d-nozzle-off",
         "layout": "grid",
         "theme": "f51f9a07212ff54b",
         "breakpoints": [
