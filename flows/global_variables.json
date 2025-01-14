@@ -16,7 +16,7 @@
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
-        "initialize": "// // Code added here will be run once\n// // whenever the node is started.\n// const cmd_mains_input = 0;\n// const sense_mains_input = 0;\n// const sense_ups_output = 0;\n\n// const cmd_load1_connect = 0;\n// const cmd_load2_connect = 0;\n// const cmd_load3_connect = 0;\n// const alarm_status = 0;\n// const BackupTime = 0;\n\n// // Input and output power data\n// const input_voltage = 0;\n// const input_current = 0;\n// const input_power = 0;\n// const input_energy = 0;\n// const input_pf = 0;\n// const input_frequency = 0;\n\n// const output_voltage = 0;\n// const output_current = 0;\n// const output_power = 0;\n// const output_energy = 0;\n// const output_pf = 0;\n// const output_frequency = 0;\n// let dataType= {\n//     UPS_INPUT: 0,\n//     UPS_OUTPUT: 1,\n//     MAINS:2,\n// };\n// let inputPdata={\n//     type:0,\n//     voltage:0,\n//     current:0,\n//     power:0,\n//     energy:0,\n//     pf:0,\n//     frequency:0\n// }\n// let outputPdata = {\n//     type:1,\n//     voltage: 0,\n//     current: 0,\n//     power: 0,\n//     energy: 0,\n//     pf: 0,\n//     frequency: 0\n// }\n// global.set('inputPdata', inputPdata);\n// global.set('outputPdata', outputPdata);\n// // Set global variables\n// global.set('cmd_mains_input', cmd_mains_input);\n// global.set('sense_mains_input', sense_mains_input);\n// global.set('sense_ups_output', sense_ups_output);\n// global.set('cmd_load1_connect', cmd_load1_connect);\n// global.set('cmd_load2_connect', cmd_load2_connect);\n// global.set('cmd_load3_connect', cmd_load3_connect);\n// global.set('alarm_status', alarm_status);\n// global.set('BackupTime', BackupTime);\n// global.set('backupTestRunning', false);\n\n// // Set global variables for input power data\n// global.set('input_voltage', input_voltage);\n// global.set('input_current', input_current);\n// global.set('input_power', input_power);\n// global.set('input_energy', input_energy);\n// global.set('input_pf', input_pf);\n// global.set('input_frequency', input_frequency);\n\n// // Set global variables for output power data\n// global.set('output_voltage', output_voltage);\n// global.set('output_current', output_current);\n// global.set('output_power', output_power);\n// global.set('output_energy', output_energy);\n// global.set('output_pf', output_pf);\n// global.set('output_frequency', output_frequency);\n\n\n// Code added here will be run once whenever the node is started.\n\n// Enum for data types\nconst dataType = {\n    UPS_INPUT: \"UPS_INPUT\",\n    UPS_OUTPUT: \"UPS_OUTPUT\",\n    MAINS: \"MAINS\",\n};\n\n// Default input and output power data\nconst defaultPowerData = {\n    voltage: 0,\n    current: 0,\n    power: 0,\n    energy: 0,\n    pf: 0,\n    frequency: 0,\n};\n\n// Input power data\nlet inputPdata = {\n    type: dataType.UPS_INPUT, // Use the enum for type\n    ...defaultPowerData,\n};\n\n// Output power data\nlet outputPdata = {\n    type: dataType.UPS_OUTPUT, // Use the enum for type\n    ...defaultPowerData,\n};\n\n// Set global variables\nglobal.set('inputPdata', inputPdata);\nglobal.set('outputPdata', outputPdata);\n\nglobal.set('cmd_mains_input', 0);\nglobal.set('sense_mains_input', 0);\nglobal.set('sense_ups_output', 0);\n\nglobal.set('cmd_load1_connect', 0);\nglobal.set('cmd_load2_connect', 0);\nglobal.set('cmd_load3_connect', 0);\nglobal.set('alarm_status', 0);\nglobal.set('BackupTime', 0);\nglobal.set('backupTestRunning', false);\n\n// Set global variables for input power data\nObject.keys(defaultPowerData).forEach((key) => {\n    global.set(`input_${key}`, inputPdata[key]);\n});\n\n// Set global variables for output power data\nObject.keys(defaultPowerData).forEach((key) => {\n    global.set(`output_${key}`, outputPdata[key]);\n});\n",
+        "initialize": "\n\n// Enum for data types\nconst dataType = {\n    UPS_INPUT: \"UPS_INPUT\",\n    UPS_OUTPUT: \"UPS_OUTPUT\",\n    MAINS: \"MAINS\",\n};\n\n// Default input and output power data\nconst defaultPowerData = {\n    voltage: 0,\n    current: 0,\n    power: 0,\n    energy: 0,\n    pf: 0,\n    frequency: 0,\n};\n\n// Input power data\nlet inputPdata = {\n    type: dataType.UPS_INPUT, // Use the enum for type\n    ...defaultPowerData,\n};\n\n// Output power data\nlet outputPdata = {\n    type: dataType.UPS_OUTPUT, // Use the enum for type\n    ...defaultPowerData,\n};\n\n// Set global variables\nglobal.set('inputPdata', inputPdata);\nglobal.set('outputPdata', outputPdata);\n\nglobal.set('cmd_mains_input', 0);\nglobal.set('sense_mains_input', 0);\nglobal.set('sense_ups_output', 0);\n\nglobal.set('cmd_load1_connect', 0);\nglobal.set('cmd_load2_connect', 0);\nglobal.set('cmd_load3_connect', 0);\nglobal.set('alarm_status', 0);\nglobal.set('BackupTime', 0);\nglobal.set('backupTestRunning', false);\n\n// Set global variables for input power data\nObject.keys(defaultPowerData).forEach((key) => {\n    global.set(`input_${key}`, inputPdata[key]);\n});\n\n// Set global variables for output power data\nObject.keys(defaultPowerData).forEach((key) => {\n    global.set(`output_${key}`, outputPdata[key]);\n});\n",
         "finalize": "",
         "libs": [],
         "x": 320,
@@ -51,176 +51,6 @@
         "wires": [
             [
                 "e74de8334138f510"
-            ]
-        ]
-    },
-    {
-        "id": "09e9c95529e223b1",
-        "type": "function",
-        "z": "6906193139893272",
-        "name": "SET_MAINS_IN",
-        "func": "let value=msg.payload;\n\nglobal.set('cmd_mains_input', value);\nmsg.payload=value;\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 260,
-        "y": 100,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "054dad1c6f423385",
-        "type": "function",
-        "z": "6906193139893272",
-        "name": "SET_LOAD1",
-        "func": "let value=msg.payload;\n\nglobal.set('cmd_load1_connect', value);\nmsg.payload=value;\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 250,
-        "y": 140,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "0dcca1ca9bdc21cd",
-        "type": "link in",
-        "z": "6906193139893272",
-        "name": "SET_MAINS_INPUT",
-        "links": [
-            "10142d9d3cc8d80a"
-        ],
-        "x": 125,
-        "y": 100,
-        "wires": [
-            [
-                "09e9c95529e223b1"
-            ]
-        ]
-    },
-    {
-        "id": "5e4b35fd3cd43ff4",
-        "type": "link in",
-        "z": "6906193139893272",
-        "name": "SET_LOAD1",
-        "links": [
-            "935e37cdfae7fe48"
-        ],
-        "x": 125,
-        "y": 140,
-        "wires": [
-            [
-                "054dad1c6f423385"
-            ]
-        ]
-    },
-    {
-        "id": "a4bdfff88de16c02",
-        "type": "function",
-        "z": "6906193139893272",
-        "name": "SET_LOAD2",
-        "func": "let value=msg.payload;\n\nglobal.set('cmd_load2_connect', value);\nmsg.payload=value;\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 250,
-        "y": 180,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "1215662ccc8745ad",
-        "type": "link in",
-        "z": "6906193139893272",
-        "name": "SET_LOAD2",
-        "links": [
-            "aa2f0b5d403b73be"
-        ],
-        "x": 125,
-        "y": 180,
-        "wires": [
-            [
-                "a4bdfff88de16c02"
-            ]
-        ]
-    },
-    {
-        "id": "f3583acd7152b8d1",
-        "type": "function",
-        "z": "6906193139893272",
-        "name": "SET_LOAD3",
-        "func": "let value=msg.payload;\n\nglobal.set('cmd_load3_connect', value);\nmsg.payload=value;\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 250,
-        "y": 220,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "2ad22c35e0d0df01",
-        "type": "function",
-        "z": "6906193139893272",
-        "name": "SET_ALARM",
-        "func": "let value = msg.payload;\n\nglobal.set('alarm_status', value);\nmsg.payload = value;\nreturn msg;\n\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 250,
-        "y": 260,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "8b72759a15471fc6",
-        "type": "link in",
-        "z": "6906193139893272",
-        "name": "SET_LOAD3",
-        "links": [
-            "27f54e557290e626"
-        ],
-        "x": 125,
-        "y": 220,
-        "wires": [
-            [
-                "f3583acd7152b8d1"
-            ]
-        ]
-    },
-    {
-        "id": "354c6544dce4f77e",
-        "type": "link in",
-        "z": "6906193139893272",
-        "name": "SET_ALARM_STATUS",
-        "links": [
-            "706e406ae479f458"
-        ],
-        "x": 125,
-        "y": 260,
-        "wires": [
-            [
-                "2ad22c35e0d0df01"
             ]
         ]
     },
@@ -465,7 +295,7 @@
         "property": "payload",
         "topi": "topic",
         "x": 610,
-        "y": 280,
+        "y": 320,
         "wires": [
             [
                 "10468a2ed19505e8"
@@ -485,7 +315,7 @@
         "property": "payload",
         "topi": "topic",
         "x": 610,
-        "y": 320,
+        "y": 380,
         "wires": [
             [
                 "2bc70b4e0652cc67"
@@ -564,8 +394,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 790,
-        "y": 280,
+        "x": 750,
+        "y": 320,
         "wires": [
             [
                 "81b114ab45452817"
@@ -584,8 +414,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 790,
-        "y": 320,
+        "x": 750,
+        "y": 380,
         "wires": [
             [
                 "81b114ab45452817"
@@ -715,8 +545,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 570,
-        "y": 80,
+        "x": 1270,
+        "y": 60,
         "wires": [
             []
         ]
@@ -733,8 +563,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 570,
-        "y": 120,
+        "x": 1250,
+        "y": 100,
         "wires": [
             []
         ]
@@ -747,8 +577,8 @@
         "links": [
             "c9275b65a66fa577"
         ],
-        "x": 425,
-        "y": 80,
+        "x": 1105,
+        "y": 60,
         "wires": [
             [
                 "d3bc04bcfec75ab8"
@@ -763,8 +593,8 @@
         "links": [
             "fbc1a67f8088a4d9"
         ],
-        "x": 425,
-        "y": 120,
+        "x": 1115,
+        "y": 100,
         "wires": [
             [
                 "e6eb508467f378fa"
@@ -792,8 +622,8 @@
         "topic": "",
         "payload": "1",
         "payloadType": "num",
-        "x": 430,
-        "y": 240,
+        "x": 1090,
+        "y": 180,
         "wires": [
             [
                 "e6eb508467f378fa"
@@ -821,12 +651,447 @@
         "topic": "",
         "payload": "0",
         "payloadType": "num",
-        "x": 430,
-        "y": 300,
+        "x": 1090,
+        "y": 140,
         "wires": [
             [
                 "e6eb508467f378fa"
             ]
         ]
+    },
+    {
+        "id": "d0adcf3ad37cd2d5",
+        "type": "inject",
+        "z": "6906193139893272",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 190,
+        "y": 860,
+        "wires": [
+            [
+                "58d66212ef8cebd3",
+                "f17d1c07eceb28d6",
+                "ec89c844e0839d4d",
+                "33711ee21d27111e",
+                "c8810b9b7aae3407"
+            ]
+        ]
+    },
+    {
+        "id": "c8810b9b7aae3407",
+        "type": "persist out",
+        "z": "6906193139893272",
+        "name": "alarm_status",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 490,
+        "y": 1040,
+        "wires": [
+            [
+                "2ad22c35e0d0df01"
+            ]
+        ]
+    },
+    {
+        "id": "33711ee21d27111e",
+        "type": "persist out",
+        "z": "6906193139893272",
+        "name": "loadbank_3",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 490,
+        "y": 980,
+        "wires": [
+            [
+                "f3583acd7152b8d1"
+            ]
+        ]
+    },
+    {
+        "id": "ec89c844e0839d4d",
+        "type": "persist out",
+        "z": "6906193139893272",
+        "name": "loadbank_2",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 570,
+        "y": 860,
+        "wires": [
+            [
+                "a4bdfff88de16c02"
+            ]
+        ]
+    },
+    {
+        "id": "f17d1c07eceb28d6",
+        "type": "persist out",
+        "z": "6906193139893272",
+        "name": "loadbank_1",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 510,
+        "y": 740,
+        "wires": [
+            [
+                "054dad1c6f423385"
+            ]
+        ]
+    },
+    {
+        "id": "58d66212ef8cebd3",
+        "type": "persist out",
+        "z": "6906193139893272",
+        "name": "cmd_mains",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 510,
+        "y": 700,
+        "wires": [
+            [
+                "09e9c95529e223b1"
+            ]
+        ]
+    },
+    {
+        "id": "09e9c95529e223b1",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_MAINS_IN",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_mains_input', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 800,
+        "wires": [
+            [
+                "47a2da54529240c8"
+            ]
+        ]
+    },
+    {
+        "id": "054dad1c6f423385",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_LOAD1",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_load1_connect', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 840,
+        "wires": [
+            [
+                "dfa83bf74849e242"
+            ]
+        ]
+    },
+    {
+        "id": "0dcca1ca9bdc21cd",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_MAINS_INPUT",
+        "links": [
+            "10142d9d3cc8d80a"
+        ],
+        "x": 725,
+        "y": 800,
+        "wires": [
+            [
+                "09e9c95529e223b1"
+            ]
+        ]
+    },
+    {
+        "id": "5e4b35fd3cd43ff4",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_LOAD1",
+        "links": [
+            "935e37cdfae7fe48"
+        ],
+        "x": 725,
+        "y": 840,
+        "wires": [
+            [
+                "054dad1c6f423385"
+            ]
+        ]
+    },
+    {
+        "id": "a4bdfff88de16c02",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_LOAD2",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_load2_connect', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 880,
+        "wires": [
+            [
+                "4bde8d0f9c73e805"
+            ]
+        ]
+    },
+    {
+        "id": "1215662ccc8745ad",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_LOAD2",
+        "links": [
+            "aa2f0b5d403b73be"
+        ],
+        "x": 725,
+        "y": 880,
+        "wires": [
+            [
+                "a4bdfff88de16c02"
+            ]
+        ]
+    },
+    {
+        "id": "f3583acd7152b8d1",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_LOAD3",
+        "func": "let value=msg.payload;\n\nglobal.set('cmd_load3_connect', value);\nmsg.payload=value;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 920,
+        "wires": [
+            [
+                "d69d5b6cce1c9c2a"
+            ]
+        ]
+    },
+    {
+        "id": "2ad22c35e0d0df01",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "SET_ALARM",
+        "func": "let value = msg.payload;\n\nglobal.set('alarm_status', value);\nmsg.payload = value;\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 960,
+        "wires": [
+            [
+                "2aaa6c8f261719fc"
+            ]
+        ]
+    },
+    {
+        "id": "8b72759a15471fc6",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_LOAD3",
+        "links": [
+            "27f54e557290e626"
+        ],
+        "x": 725,
+        "y": 920,
+        "wires": [
+            [
+                "f3583acd7152b8d1"
+            ]
+        ]
+    },
+    {
+        "id": "354c6544dce4f77e",
+        "type": "link in",
+        "z": "6906193139893272",
+        "name": "SET_ALARM_STATUS",
+        "links": [
+            "706e406ae479f458"
+        ],
+        "x": 725,
+        "y": 960,
+        "wires": [
+            [
+                "2ad22c35e0d0df01"
+            ]
+        ]
+    },
+    {
+        "id": "47a2da54529240c8",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "set persistant",
+        "func": "\nmsg.topic=\"cmd_mains_input\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 800,
+        "wires": [
+            [
+                "ce05b29d72b3d66e"
+            ]
+        ]
+    },
+    {
+        "id": "ce05b29d72b3d66e",
+        "type": "persist in",
+        "z": "6906193139893272",
+        "name": "cmd_mains",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 1190,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "dfa83bf74849e242",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "set persistant",
+        "func": "\nmsg.topic=\"cmd_load1_connect\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 840,
+        "wires": [
+            [
+                "37fbcf4fc751185b"
+            ]
+        ]
+    },
+    {
+        "id": "37fbcf4fc751185b",
+        "type": "persist in",
+        "z": "6906193139893272",
+        "name": "loadbank_1",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 1190,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "4bde8d0f9c73e805",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "set persistant",
+        "func": "\nmsg.topic=\"cmd_load2_connect\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 880,
+        "wires": [
+            [
+                "2778ff2462cb46c4"
+            ]
+        ]
+    },
+    {
+        "id": "2778ff2462cb46c4",
+        "type": "persist in",
+        "z": "6906193139893272",
+        "name": "loadbank_2",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 1190,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "d69d5b6cce1c9c2a",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "set persistant",
+        "func": "\nmsg.topic=\"cmd_load3_connect\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 920,
+        "wires": [
+            [
+                "31313674e60f9cb3"
+            ]
+        ]
+    },
+    {
+        "id": "31313674e60f9cb3",
+        "type": "persist in",
+        "z": "6906193139893272",
+        "name": "loadbank_3",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 1190,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "2aaa6c8f261719fc",
+        "type": "function",
+        "z": "6906193139893272",
+        "name": "set persistant",
+        "func": "\nmsg.topic=\"alarm_status\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 960,
+        "wires": [
+            [
+                "245b940aade8d78d"
+            ]
+        ]
+    },
+    {
+        "id": "245b940aade8d78d",
+        "type": "persist in",
+        "z": "6906193139893272",
+        "name": "alarm_status",
+        "storageNode": "42dd5cc5.694f1c",
+        "x": 1190,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "42dd5cc5.694f1c",
+        "type": "persist-store",
+        "filename": "D:\\_0_DEV_SOFTWARE\\PIO_ESPIDF\\UPS_TESTER_PROJECT\\powerGuard\\template\\context\\usercmd.json",
+        "interval": "30"
     }
 ]

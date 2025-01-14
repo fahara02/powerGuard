@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import platform
@@ -79,6 +80,53 @@ class NodeRedServer:
                     if addr["addr"] != "127.0.0.1":  # Skip localhost
                         return addr["addr"]
         return "127.0.0.1"
+    def configure_context_persistence(self):
+        """Inject contextStorage configuration at a specific line in settings.js."""
+        settings_file = self.node_red_dir / "settings.js"
+        persistence_config = """
+            contextStorage: {
+                default: {
+                    module: "localfilesystem",
+                },
+            },
+        """
+
+        if not settings_file.exists():
+            raise FileNotFoundError(f"settings.js not found at {settings_file}")
+
+        # Read the entire file content
+        with open(settings_file, "r") as file:
+            lines = file.readlines()
+
+        # Define the target line number for insertion (e.g., 345)
+        target_line_number = 345
+        if len(lines) < target_line_number:
+            raise ValueError(
+                f"settings.js does not have enough lines. Expected at least {target_line_number}, found {len(lines)}."
+            )
+
+        # Insert the persistence configuration at the specified line
+        lines.insert(target_line_number - 1, persistence_config.strip() + "\n")
+
+        # Create a unique backup filename
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        backup_file = settings_file.with_suffix(f".backup_{timestamp}.js")
+
+        # Rename the original settings.js to a backup file
+        try:
+            settings_file.rename(backup_file)
+            print(f"Backed up existing settings.js to {backup_file}")
+        except FileExistsError:
+            print(f"Backup already exists for settings.js. Skipping backup.")
+
+        # Write the modified content back to settings.js
+        with open(settings_file, "w") as file:
+            file.writelines(lines)
+
+        print(f"Successfully injected contextStorage configuration at line {target_line_number} in settings.js.")
+
+
+
 
     def install(self):
         """Install Node-RED locally."""
@@ -123,6 +171,7 @@ class NodeRedServer:
             "node-red-contrib-modbus",
             "@flowfuse/node-red-dashboard-2-ui-led",
             "@colinl/node-red-dashboard-2-ui-gauge-classic",
+            "node-red-contrib-persist",
             "node-red-contrib-protobuf",
             "node-red-contrib-fs",
             "node-red-node-sqlite",

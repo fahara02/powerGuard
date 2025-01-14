@@ -88,8 +88,10 @@ class Server(BaseModel):
         try:
          print("Installing node red...")
          self.node_red.install()
+        
          print("Installing palletes...")
          self.node_red.install_palettes()
+         
         except Exception as e:
             print(f"Error installing nodered: {e}")
 
@@ -145,6 +147,8 @@ class Server(BaseModel):
             self.node_red.start_watchdog()
 
             self.node_red.import_flows()
+            print("Updating settings...")
+            self.node_red.configure_context_persistence()
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.config.host, self.config.port))
             self.server_socket.listen(5)
